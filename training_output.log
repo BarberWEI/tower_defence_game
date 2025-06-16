@@ -1,0 +1,477 @@
+Intel MKL WARNING: Support of Intel(R) Streaming SIMD Extensions 4.2 (Intel(R) SSE4.2) enabled only processors has been deprecated. Intel oneAPI Math Kernel Library 2025.0 will require Intel(R) Advanced Vector Extensions (Intel(R) AVX) instructions.
+Intel MKL WARNING: Support of Intel(R) Streaming SIMD Extensions 4.2 (Intel(R) SSE4.2) enabled only processors has been deprecated. Intel oneAPI Math Kernel Library 2025.0 will require Intel(R) Advanced Vector Extensions (Intel(R) AVX) instructions.
+/Users/shawnwei/Documents/GitHub/tower_defence_game/ai/trainer.py:41: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/_temp/anaconda/conda-bld/pytorch_1711403209812/work/torch/csrc/utils/tensor_new.cpp:278.)
+  states = torch.FloatTensor(states).to(self.device)
+pygame 2.6.1 (SDL 2.28.4, Python 3.9.23)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+🚀 Starting Enhanced Tower Defense Training!
+Episodes: 2000, Max Steps: 300
+Improvements: Action filtering, strategic rewards, better exploration
+[DQNTrainer] Step 100, Loss: 0.001064
+[DQNTrainer] Step 200, Loss: 0.000081
+Episode    1: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.950
+[DQNTrainer] Step 300, Loss: 0.000661
+[DQNTrainer] Step 400, Loss: 0.000559
+[DQNTrainer] Step 500, Loss: 0.000095
+Episode    2: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.950
+[DQNTrainer] Step 600, Loss: 0.000078
+[DQNTrainer] Step 700, Loss: 0.000046
+[DQNTrainer] Step 800, Loss: 0.001171
+Episode    3: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.949
+[DQNTrainer] Step 900, Loss: 0.001099
+[DQNTrainer] Step 1000, Loss: 0.000621
+[DQNTrainer] Step 1100, Loss: 0.000324
+Episode    4: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.949
+[DQNTrainer] Step 1200, Loss: 0.000588
+[DQNTrainer] Step 1300, Loss: 0.000041
+[DQNTrainer] Step 1400, Loss: 0.001193
+Episode    5: 💀 Reward=-27.967 | Lives:13 | Towers: 2 | Waves:1/3 | ε:0.948
+[DQNTrainer] Step 1500, Loss: 0.000551
+[DQNTrainer] Step 1600, Loss: 0.000565
+[DQNTrainer] Step 1700, Loss: 0.000096
+Episode    6: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.948
+[DQNTrainer] Step 1800, Loss: 0.000706
+[DQNTrainer] Step 1900, Loss: 0.000523
+[DQNTrainer] Step 2000, Loss: 0.001171
+Episode    7: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.947
+[DQNTrainer] Step 2100, Loss: 0.000378
+[DQNTrainer] Step 2200, Loss: 0.000588
+[DQNTrainer] Step 2300, Loss: 0.001719
+Episode    8: 💀 Reward=-27.167 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.947
+[DQNTrainer] Step 2400, Loss: 0.001198
+[DQNTrainer] Step 2500, Loss: 0.000050
+[DQNTrainer] Step 2600, Loss: 0.003868
+Episode    9: 💀 Reward=-26.467 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.947
+[DQNTrainer] Step 2700, Loss: 0.001333
+[DQNTrainer] Step 2800, Loss: 0.001152
+[DQNTrainer] Step 2900, Loss: 0.000659
+Episode   10: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.946
+[DQNTrainer] Step 3000, Loss: 0.000485
+[DQNTrainer] Step 3100, Loss: 0.001230
+[DQNTrainer] Step 3200, Loss: 0.001721
+Episode   11: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.946
+[DQNTrainer] Step 3300, Loss: 0.000505
+[DQNTrainer] Step 3400, Loss: 0.000602
+[DQNTrainer] Step 3500, Loss: 0.000033
+Episode   12: 💀 Reward=-26.487 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.945
+[DQNTrainer] Step 3600, Loss: 0.000611
+[DQNTrainer] Step 3700, Loss: 0.001150
+[DQNTrainer] Step 3800, Loss: 0.001169
+Episode   13: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.945
+[DQNTrainer] Step 3900, Loss: 0.000646
+[DQNTrainer] Step 4000, Loss: 0.000019
+[DQNTrainer] Step 4100, Loss: 0.000931
+Episode   14: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.944
+[DQNTrainer] Step 4200, Loss: 0.000035
+[DQNTrainer] Step 4300, Loss: 0.000735
+[DQNTrainer] Step 4400, Loss: 0.000056
+Episode   15: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.944
+[DQNTrainer] Step 4500, Loss: 0.000105
+[DQNTrainer] Step 4600, Loss: 0.000011
+[DQNTrainer] Step 4700, Loss: 0.000024
+Episode   16: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.944
+[DQNTrainer] Step 4800, Loss: 0.000612
+[DQNTrainer] Step 4900, Loss: 0.000032
+[DQNTrainer] Step 5000, Loss: 0.001613
+Episode   17: 💀 Reward=-28.087 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.943
+[DQNTrainer] Step 5100, Loss: 0.000679
+[DQNTrainer] Step 5200, Loss: 0.000060
+[DQNTrainer] Step 5300, Loss: 0.000046
+Episode   18: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.943
+[DQNTrainer] Step 5400, Loss: 0.000028
+[DQNTrainer] Step 5500, Loss: 0.001110
+[DQNTrainer] Step 5600, Loss: 0.000539
+Episode   19: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.942
+[DQNTrainer] Step 5700, Loss: 0.001740
+[DQNTrainer] Step 5800, Loss: 0.000057
+[DQNTrainer] Step 5900, Loss: 0.000538
+Episode   20: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.942
+[DQNTrainer] Step 6000, Loss: 0.000062
+[DQNTrainer] Step 6100, Loss: 0.000086
+[DQNTrainer] Step 6200, Loss: 0.001163
+Episode   21: 💀 Reward=-26.487 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.942
+[DQNTrainer] Step 6300, Loss: 0.001100
+[DQNTrainer] Step 6400, Loss: 0.000534
+[DQNTrainer] Step 6500, Loss: 0.000723
+Episode   22: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.941
+[DQNTrainer] Step 6600, Loss: 0.000815
+[DQNTrainer] Step 6700, Loss: 0.000096
+[DQNTrainer] Step 6800, Loss: 0.000625
+Episode   23: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.941
+[DQNTrainer] Step 6900, Loss: 0.000597
+[DQNTrainer] Step 7000, Loss: 0.000096
+[DQNTrainer] Step 7100, Loss: 0.000131
+Episode   24: 💀 Reward=-27.567 | Lives:13 | Towers: 2 | Waves:1/3 | ε:0.940
+[DQNTrainer] Step 7200, Loss: 0.001692
+[DQNTrainer] Step 7300, Loss: 0.000687
+[DQNTrainer] Step 7400, Loss: 0.001743
+Episode   25: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.940
+[DQNTrainer] Step 7500, Loss: 0.001119
+[DQNTrainer] Step 7600, Loss: 0.000606
+[DQNTrainer] Step 7700, Loss: 0.002251
+Episode   26: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.939
+[DQNTrainer] Step 7800, Loss: 0.000619
+[DQNTrainer] Step 7900, Loss: 0.003613
+[DQNTrainer] Step 8000, Loss: 0.000707
+Episode   27: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.939
+[DQNTrainer] Step 8100, Loss: 0.000102
+[DQNTrainer] Step 8200, Loss: 0.000061
+[DQNTrainer] Step 8300, Loss: 0.001278
+Episode   28: 💀 Reward=-28.087 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.939
+[DQNTrainer] Step 8400, Loss: 0.000091
+[DQNTrainer] Step 8500, Loss: 0.001161
+[DQNTrainer] Step 8600, Loss: 0.000053
+Episode   29: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.938
+[DQNTrainer] Step 8700, Loss: 0.000111
+[DQNTrainer] Step 8800, Loss: 0.000588
+[DQNTrainer] Step 8900, Loss: 0.001169
+Episode   30: 💀 Reward=-27.567 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.938
+[DQNTrainer] Step 9000, Loss: 0.000159
+[DQNTrainer] Step 9100, Loss: 0.000060
+[DQNTrainer] Step 9200, Loss: 0.001155
+Episode   31: 💀 Reward=-28.087 | Lives:13 | Towers: 1 | Waves:1/3 | ε:0.937
+[DQNTrainer] Step 9300, Loss: 0.001281
+[DQNTrainer] Step 9400, Loss: 0.000691
+[DQNTrainer] Step 9500, Loss: 0.000033
+Episode   32: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.937
+[DQNTrainer] Step 9600, Loss: 0.000684
+[DQNTrainer] Step 9700, Loss: 0.000055
+[DQNTrainer] Step 9800, Loss: 0.001367
+Episode   33: 💀 Reward=-26.467 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.936
+[DQNTrainer] Step 9900, Loss: 0.000061
+[DQNTrainer] Step 10000, Loss: 0.001151
+[DQNTrainer] Step 10100, Loss: 0.000097
+Episode   34: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.936
+[DQNTrainer] Step 10200, Loss: 0.000084
+[DQNTrainer] Step 10300, Loss: 0.001919
+[DQNTrainer] Step 10400, Loss: 0.000126
+Episode   35: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.936
+[DQNTrainer] Step 10500, Loss: 0.001892
+[DQNTrainer] Step 10600, Loss: 0.000513
+[DQNTrainer] Step 10700, Loss: 0.002021
+Episode   36: 💀 Reward=-27.167 | Lives:13 | Towers: 2 | Waves:1/3 | ε:0.935
+[DQNTrainer] Step 10800, Loss: 0.001378
+[DQNTrainer] Step 10900, Loss: 0.000025
+[DQNTrainer] Step 11000, Loss: 0.000775
+Episode   37: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.935
+[DQNTrainer] Step 11100, Loss: 0.000674
+[DQNTrainer] Step 11200, Loss: 0.000026
+[DQNTrainer] Step 11300, Loss: 0.000620
+Episode   38: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.934
+[DQNTrainer] Step 11400, Loss: 0.001231
+[DQNTrainer] Step 11500, Loss: 0.000636
+[DQNTrainer] Step 11600, Loss: 0.000546
+Episode   39: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.934
+[DQNTrainer] Step 11700, Loss: 0.000083
+[DQNTrainer] Step 11800, Loss: 0.000129
+[DQNTrainer] Step 11900, Loss: 0.000187
+Episode   40: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.933
+[DQNTrainer] Step 12000, Loss: 0.000580
+[DQNTrainer] Step 12100, Loss: 0.001862
+[DQNTrainer] Step 12200, Loss: 0.003183
+Episode   41: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.933
+[DQNTrainer] Step 12300, Loss: 0.000759
+[DQNTrainer] Step 12400, Loss: 0.000051
+[DQNTrainer] Step 12500, Loss: 0.000680
+Episode   42: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.933
+[DQNTrainer] Step 12600, Loss: 0.000787
+[DQNTrainer] Step 12700, Loss: 0.001179
+[DQNTrainer] Step 12800, Loss: 0.001442
+Episode   43: 💀 Reward=-27.967 | Lives:13 | Towers: 2 | Waves:1/3 | ε:0.932
+[DQNTrainer] Step 12900, Loss: 0.000224
+[DQNTrainer] Step 13000, Loss: 0.000655
+[DQNTrainer] Step 13100, Loss: 0.000693
+Episode   44: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.932
+[DQNTrainer] Step 13200, Loss: 0.000677
+[DQNTrainer] Step 13300, Loss: 0.003167
+[DQNTrainer] Step 13400, Loss: 0.001531
+Episode   45: 💀 Reward=-26.487 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.931
+[DQNTrainer] Step 13500, Loss: 0.002444
+[DQNTrainer] Step 13600, Loss: 0.001205
+[DQNTrainer] Step 13700, Loss: 0.001389
+Episode   46: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.931
+[DQNTrainer] Step 13800, Loss: 0.000101
+[DQNTrainer] Step 13900, Loss: 0.000758
+[DQNTrainer] Step 14000, Loss: 0.001248
+Episode   47: 💀 Reward=-27.687 | Lives:13 | Towers: 1 | Waves:1/3 | ε:0.930
+[DQNTrainer] Step 14100, Loss: 0.000656
+[DQNTrainer] Step 14200, Loss: 0.000049
+[DQNTrainer] Step 14300, Loss: 0.001154
+Episode   48: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.930
+[DQNTrainer] Step 14400, Loss: 0.000529
+[DQNTrainer] Step 14500, Loss: 0.001539
+[DQNTrainer] Step 14600, Loss: 0.000922
+Episode   49: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.930
+[DQNTrainer] Step 14700, Loss: 0.000314
+[DQNTrainer] Step 14800, Loss: 0.000717
+[DQNTrainer] Step 14900, Loss: 0.000032
+Episode   50: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.929
+[DQNTrainer] Step 15000, Loss: 0.001929
+[DQNTrainer] Step 15100, Loss: 0.000091
+[DQNTrainer] Step 15200, Loss: 0.000715
+Episode   51: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.929
+[DQNTrainer] Step 15300, Loss: 0.000977
+[DQNTrainer] Step 15400, Loss: 0.001644
+[DQNTrainer] Step 15500, Loss: 0.001459
+Episode   52: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.928
+[DQNTrainer] Step 15600, Loss: 0.000773
+[DQNTrainer] Step 15700, Loss: 0.000539
+[DQNTrainer] Step 15800, Loss: 0.001336
+Episode   53: 💀 Reward=-26.347 | Lives:16 | Towers: 2 | Waves:1/3 | ε:0.928
+[DQNTrainer] Step 15900, Loss: 0.000144
+[DQNTrainer] Step 16000, Loss: 0.000670
+[DQNTrainer] Step 16100, Loss: 0.004441
+Episode   54: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.927
+[DQNTrainer] Step 16200, Loss: 0.002063
+[DQNTrainer] Step 16300, Loss: 0.000789
+[DQNTrainer] Step 16400, Loss: 0.000955
+Episode   55: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.927
+[DQNTrainer] Step 16500, Loss: 0.000100
+[DQNTrainer] Step 16600, Loss: 0.000107
+[DQNTrainer] Step 16700, Loss: 0.000783
+Episode   56: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.927
+[DQNTrainer] Step 16800, Loss: 0.001600
+[DQNTrainer] Step 16900, Loss: 0.000110
+[DQNTrainer] Step 17000, Loss: 0.001099
+Episode   57: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.926
+[DQNTrainer] Step 17100, Loss: 0.000139
+[DQNTrainer] Step 17200, Loss: 0.000061
+[DQNTrainer] Step 17300, Loss: 0.000262
+Episode   58: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.926
+[DQNTrainer] Step 17400, Loss: 0.001373
+[DQNTrainer] Step 17500, Loss: 0.000716
+[DQNTrainer] Step 17600, Loss: 0.001374
+Episode   59: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.925
+[DQNTrainer] Step 17700, Loss: 0.001336
+[DQNTrainer] Step 17800, Loss: 0.001232
+[DQNTrainer] Step 17900, Loss: 0.000664
+Episode   60: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.925
+[DQNTrainer] Step 18000, Loss: 0.000376
+[DQNTrainer] Step 18100, Loss: 0.000856
+[DQNTrainer] Step 18200, Loss: 0.002803
+Episode   61: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.924
+[DQNTrainer] Step 18300, Loss: 0.002663
+[DQNTrainer] Step 18400, Loss: 0.002521
+[DQNTrainer] Step 18500, Loss: 0.002086
+Episode   62: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.924
+[DQNTrainer] Step 18600, Loss: 0.000074
+[DQNTrainer] Step 18700, Loss: 0.000857
+[DQNTrainer] Step 18800, Loss: 0.000324
+Episode   63: 💀 Reward=-28.087 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.924
+[DQNTrainer] Step 18900, Loss: 0.000175
+[DQNTrainer] Step 19000, Loss: 0.001490
+[DQNTrainer] Step 19100, Loss: 0.001196
+Episode   64: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.923
+[DQNTrainer] Step 19200, Loss: 0.000810
+[DQNTrainer] Step 19300, Loss: 0.000768
+[DQNTrainer] Step 19400, Loss: 0.002350
+Episode   65: 💀 Reward=-28.087 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.923
+[DQNTrainer] Step 19500, Loss: 0.002513
+[DQNTrainer] Step 19600, Loss: 0.000101
+[DQNTrainer] Step 19700, Loss: 0.001381
+Episode   66: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.922
+[DQNTrainer] Step 19800, Loss: 0.000823
+[DQNTrainer] Step 19900, Loss: 0.001636
+[DQNTrainer] Step 20000, Loss: 0.000835
+Episode   67: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.922
+[DQNTrainer] Step 20100, Loss: 0.002226
+[DQNTrainer] Step 20200, Loss: 0.000846
+[DQNTrainer] Step 20300, Loss: 0.001322
+Episode   68: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.922
+[DQNTrainer] Step 20400, Loss: 0.001214
+[DQNTrainer] Step 20500, Loss: 0.000156
+[DQNTrainer] Step 20600, Loss: 0.001452
+Episode   69: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.921
+[DQNTrainer] Step 20700, Loss: 0.001061
+[DQNTrainer] Step 20800, Loss: 0.000274
+[DQNTrainer] Step 20900, Loss: 0.002524
+Episode   70: 💀 Reward=-27.167 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.921
+[DQNTrainer] Step 21000, Loss: 0.001427
+[DQNTrainer] Step 21100, Loss: 0.000214
+[DQNTrainer] Step 21200, Loss: 0.000870
+Episode   71: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.920
+[DQNTrainer] Step 21300, Loss: 0.000733
+[DQNTrainer] Step 21400, Loss: 0.003279
+[DQNTrainer] Step 21500, Loss: 0.000107
+Episode   72: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.920
+[DQNTrainer] Step 21600, Loss: 0.000857
+[DQNTrainer] Step 21700, Loss: 0.001467
+[DQNTrainer] Step 21800, Loss: 0.000064
+Episode   73: 💀 Reward=-28.087 | Lives:13 | Towers: 1 | Waves:1/3 | ε:0.919
+[DQNTrainer] Step 21900, Loss: 0.000681
+[DQNTrainer] Step 22000, Loss: 0.001653
+[DQNTrainer] Step 22100, Loss: 0.001325
+Episode   74: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.919
+[DQNTrainer] Step 22200, Loss: 0.000307
+[DQNTrainer] Step 22300, Loss: 0.002156
+[DQNTrainer] Step 22400, Loss: 0.000103
+Episode   75: 💀 Reward=-27.967 | Lives:13 | Towers: 2 | Waves:1/3 | ε:0.919
+[DQNTrainer] Step 22500, Loss: 0.000655
+[DQNTrainer] Step 22600, Loss: 0.001753
+[DQNTrainer] Step 22700, Loss: 0.001595
+Episode   76: 💀 Reward=-27.167 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.918
+[DQNTrainer] Step 22800, Loss: 0.000102
+[DQNTrainer] Step 22900, Loss: 0.000706
+[DQNTrainer] Step 23000, Loss: 0.000269
+Episode   77: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.918
+[DQNTrainer] Step 23100, Loss: 0.000377
+[DQNTrainer] Step 23200, Loss: 0.000805
+[DQNTrainer] Step 23300, Loss: 0.000104
+Episode   78: 💀 Reward=-26.887 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.917
+[DQNTrainer] Step 23400, Loss: 0.001194
+[DQNTrainer] Step 23500, Loss: 0.000129
+[DQNTrainer] Step 23600, Loss: 0.000769
+Episode   79: 💀 Reward=-27.167 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.917
+[DQNTrainer] Step 23700, Loss: 0.000826
+[DQNTrainer] Step 23800, Loss: 0.000645
+[DQNTrainer] Step 23900, Loss: 0.002070
+Episode   80: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.916
+[DQNTrainer] Step 24000, Loss: 0.004076
+[DQNTrainer] Step 24100, Loss: 0.001060
+[DQNTrainer] Step 24200, Loss: 0.001171
+Episode   81: 💀 Reward=-27.667 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.916
+[DQNTrainer] Step 24300, Loss: 0.000812
+[DQNTrainer] Step 24400, Loss: 0.000687
+[DQNTrainer] Step 24500, Loss: 0.001399
+Episode   82: 💀 Reward=-27.167 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.916
+[DQNTrainer] Step 24600, Loss: 0.000124
+[DQNTrainer] Step 24700, Loss: 0.001933
+[DQNTrainer] Step 24800, Loss: 0.000757
+Episode   83: 💀 Reward=-26.467 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.915
+[DQNTrainer] Step 24900, Loss: 0.002771
+[DQNTrainer] Step 25000, Loss: 0.001506
+[DQNTrainer] Step 25100, Loss: 0.001077
+Episode   84: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.915
+[DQNTrainer] Step 25200, Loss: 0.000711
+[DQNTrainer] Step 25300, Loss: 0.000809
+[DQNTrainer] Step 25400, Loss: 0.001139
+Episode   85: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.914
+[DQNTrainer] Step 25500, Loss: 0.000908
+[DQNTrainer] Step 25600, Loss: 0.000670
+[DQNTrainer] Step 25700, Loss: 0.000060
+Episode   86: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.914
+[DQNTrainer] Step 25800, Loss: 0.000726
+[DQNTrainer] Step 25900, Loss: 0.000472
+[DQNTrainer] Step 26000, Loss: 0.000078
+Episode   87: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.913
+[DQNTrainer] Step 26100, Loss: 0.000723
+[DQNTrainer] Step 26200, Loss: 0.002006
+[DQNTrainer] Step 26300, Loss: 0.000308
+Episode   88: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.913
+[DQNTrainer] Step 26400, Loss: 0.000208
+[DQNTrainer] Step 26500, Loss: 0.001927
+[DQNTrainer] Step 26600, Loss: 0.001011
+Episode   89: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.913
+[DQNTrainer] Step 26700, Loss: 0.001518
+[DQNTrainer] Step 26800, Loss: 0.000061
+[DQNTrainer] Step 26900, Loss: 0.001295
+Episode   90: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.912
+[DQNTrainer] Step 27000, Loss: 0.000081
+[DQNTrainer] Step 27100, Loss: 0.000121
+[DQNTrainer] Step 27200, Loss: 0.001217
+Episode   91: 💀 Reward=-26.367 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.912
+[DQNTrainer] Step 27300, Loss: 0.001535
+[DQNTrainer] Step 27400, Loss: 0.000797
+[DQNTrainer] Step 27500, Loss: 0.000750
+Episode   92: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.911
+[DQNTrainer] Step 27600, Loss: 0.000262
+[DQNTrainer] Step 27700, Loss: 0.000168
+[DQNTrainer] Step 27800, Loss: 0.000032
+Episode   93: 💀 Reward=-27.687 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.911
+[DQNTrainer] Step 27900, Loss: 0.000712
+[DQNTrainer] Step 28000, Loss: 0.000784
+[DQNTrainer] Step 28100, Loss: 0.000152
+Episode   94: 💀 Reward=-27.967 | Lives:12 | Towers: 2 | Waves:1/3 | ε:0.910
+[DQNTrainer] Step 28200, Loss: 0.000799
+[DQNTrainer] Step 28300, Loss: 0.000887
+[DQNTrainer] Step 28400, Loss: 0.000184
+Episode   95: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.910
+[DQNTrainer] Step 28500, Loss: 0.001031
+[DQNTrainer] Step 28600, Loss: 0.000675
+[DQNTrainer] Step 28700, Loss: 0.000874
+Episode   96: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.910
+[DQNTrainer] Step 28800, Loss: 0.000215
+[DQNTrainer] Step 28900, Loss: 0.000731
+[DQNTrainer] Step 29000, Loss: 0.002005
+Episode   97: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.909
+[DQNTrainer] Step 29100, Loss: 0.000149
+[DQNTrainer] Step 29200, Loss: 0.002738
+[DQNTrainer] Step 29300, Loss: 0.001378
+Episode   98: 💀 Reward=-26.887 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.909
+[DQNTrainer] Step 29400, Loss: 0.001952
+[DQNTrainer] Step 29500, Loss: 0.000850
+[DQNTrainer] Step 29600, Loss: 0.000411
+Episode   99: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.908
+[DQNTrainer] Step 29700, Loss: 0.000694
+[DQNTrainer] Step 29800, Loss: 0.000791
+[DQNTrainer] Step 29900, Loss: 0.000747
+
+======================================================================
+🎮 EPISODE 100 - ENHANCED TRAINING ANALYSIS
+======================================================================
+Epsilon: 0.908 | Result: 💀 DEFEAT
+Lives: 20 → 14 | Money: 100 → 25 | Waves: 1/3
+Towers Built: 2 | Total Reward: -27.567
+
+📋 KEY STRATEGIC ACTIONS:
+  Step   5: Start Wave           | Reward:  0.350 (+0.05++0.30) | Lives: 20 | Money: $125 | Towers:  0 | Valid: 5 ⭐
+  Step   6: Place Basic Tower    | Reward:  0.210 (+0.01++0.20) | Lives: 20 | Money: $ 75 | Towers:  1 | Valid: 5 🏗️
+  Step  13: Place Basic Tower    | Reward:  0.210 (+0.01++0.20) | Lives: 20 | Money: $ 25 | Towers:  2 | Valid: 5 🏗️
+  Step 204: Place Splash Tower   | Reward: -0.310 (-0.21+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 205: Place Splash Tower   | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 206: Place Laser Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 207: Place Frost Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 208: Place Laser Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 209: Place Basic Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 210: Place Basic Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 211: Place Sniper Tower   | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 212: Place Sniper Tower   | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 213: Place Frost Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 214: Place Laser Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+  Step 215: Place Frost Tower    | Reward: -0.110 (-0.01+-0.10) | Lives: 19 | Money: $ 25 | Towers:  2 | Valid: 5 💔🏗️
+
+📊 STRATEGIC ANALYSIS:
+  • Action Counts: {'Basic': 59, 'Sniper': 63, 'Splash': 57, 'Laser': 61, 'Frost': 59, 'Start Wave': 1}
+  • Towers Built: 2 (Success Rate: 0.7%)
+  • Wave Efficiency: 1 attempts for 1 waves
+  • Lives Preserved: 14/20 (70.0%)
+  • Final Status: Defeated (Wave 1/3)
+[DQNTrainer] Step 30000, Loss: 0.002742
+[DQNTrainer] Step 30100, Loss: 0.000092
+[DQNTrainer] Step 30200, Loss: 0.000781
+Episode  101: 💀 Reward=-26.767 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.907
+[DQNTrainer] Step 30300, Loss: 0.001715
+[DQNTrainer] Step 30400, Loss: 0.001674
+[DQNTrainer] Step 30500, Loss: 0.001163
+Episode  102: 💀 Reward=-27.687 | Lives:14 | Towers: 1 | Waves:1/3 | ε:0.907
+[DQNTrainer] Step 30600, Loss: 0.000670
+[DQNTrainer] Step 30700, Loss: 0.000036
+[DQNTrainer] Step 30800, Loss: 0.000729
+Episode  103: 💀 Reward=-26.487 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.907
+[DQNTrainer] Step 30900, Loss: 0.001132
+[DQNTrainer] Step 31000, Loss: 0.000738
+[DQNTrainer] Step 31100, Loss: 0.000740
+Episode  104: 💀 Reward=-27.567 | Lives:14 | Towers: 2 | Waves:1/3 | ε:0.906
+[DQNTrainer] Step 31200, Loss: 0.001267
+[DQNTrainer] Step 31300, Loss: 0.000724
+[DQNTrainer] Step 31400, Loss: 0.000731
+Episode  105: 💀 Reward=-27.287 | Lives:15 | Towers: 1 | Waves:1/3 | ε:0.906
+[DQNTrainer] Step 31500, Loss: 0.000096
+[DQNTrainer] Step 31600, Loss: 0.000979
+[DQNTrainer] Step 31700, Loss: 0.000166
+Episode  106: 💀 Reward=-26.467 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.905
+[DQNTrainer] Step 31800, Loss: 0.001280
+[DQNTrainer] Step 31900, Loss: 0.001452
+[DQNTrainer] Step 32000, Loss: 0.000081
+Episode  107: 💀 Reward=-26.487 | Lives:16 | Towers: 1 | Waves:1/3 | ε:0.905
+[DQNTrainer] Step 32100, Loss: 0.000741
+[DQNTrainer] Step 32200, Loss: 0.000158
+[DQNTrainer] Step 32300, Loss: 0.000822
+Episode  108: 💀 Reward=-26.767 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.905
+[DQNTrainer] Step 32400, Loss: 0.000685
+[DQNTrainer] Step 32500, Loss: 0.001449
+[DQNTrainer] Step 32600, Loss: 0.000099
+Episode  109: 💀 Reward=-27.167 | Lives:15 | Towers: 2 | Waves:1/3 | ε:0.904
+[DQNTrainer] Step 32700, Loss: 0.000514
+[DQNTrainer] Step 32800, Loss: 0.000838
+[DQNTrainer] Step 32900, Loss: 0.000103

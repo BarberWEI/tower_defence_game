@@ -14,6 +14,8 @@ class GameAI:
         
         self.difficulty = difficulty
         self.config = GameConfig(self.difficulty)
+        # Increase enemy speed for AI training to ensure path completion
+        self.config.enemy_base_speed = 4  # Doubled from 2 to 4
         self.money = self.config.starting_money
         self.lives = self.config.starting_lives
         self.game_over = False
@@ -24,7 +26,7 @@ class GameAI:
         self.wave_completed = True  # Start with first wave completed to allow starting
         self.towers = []
         self.enemies = []
-        self.path = Path(self.difficulty)
+        self.path = Path(0.1)  # Use very low difficulty for simple, short path
         self.wave_manager = WaveManager()
         self.state_dim = 10
         self.action_dim = 6
@@ -45,7 +47,7 @@ class GameAI:
         self.wave_completed = True  # Allow starting first wave
         self.towers = []
         self.enemies = []
-        self.path = Path(self.difficulty)
+        self.path = Path(0.1)  # Use very low difficulty for simple, short path
         self.wave_manager = WaveManager()
         self.prev_enemy_count = 0
         self.prev_wave_completed = False
@@ -181,7 +183,7 @@ class GameAI:
             self.game_over = True
 
     def get_state(self):
-        # 10-dimensional state vector (improved)
+        # 12-dimensional state vector for enhanced decision making
         avg_enemy_health = np.mean([e.health for e in self.enemies]) if self.enemies else 0
         avg_enemy_dist = 0
         num_different_enemy_types = 0
@@ -204,16 +206,23 @@ class GameAI:
             tower_type = getattr(tower, 'type', 'basic')
             tower_counts[tower_type] = tower_counts.get(tower_type, 0) + 1
         
+        # Calculate strategic metrics
+        can_start_wave = 1.0 if (self.wave_completed and self.wave_number < self.max_waves) else 0.0
+        can_afford_tower = 1.0 if self.money >= 50 else 0.0  # Can afford basic tower
+        enemy_threat = len(self.enemies) / 10.0  # Normalize enemy count as threat level
+        
         state = [
-            self.money / 100.0,  # Normalize money
-            self.lives / 20.0,   # Normalize lives
-            self.wave_number / self.max_waves,  # Normalize wave
-            len(self.towers) / 20.0,  # Normalize tower count
-            len(self.enemies) / 30.0,  # Normalize enemy count
-            avg_enemy_health / 100.0,  # Normalize health
-            avg_enemy_dist / 50.0,  # Normalize distance
-            num_different_enemy_types / 4.0,  # Normalize enemy type diversity
-            tower_counts.get('basic', 0) / 10.0,  # Basic tower count
-            1.0 if self.wave_completed else 0.0  # Wave completion status
+            self.money / 200.0,  # Normalize money (0-1 range)
+            self.lives / 20.0,   # Normalize lives (0-1 range)
+            self.wave_number / self.max_waves,  # Normalize wave progress (0-1 range)
+            len(self.towers) / 10.0,  # Normalize tower count (0-1 range)
+            len(self.enemies) / 20.0,  # Normalize enemy count (0-1 range)
+            avg_enemy_health / 100.0,  # Normalize health (0-1 range)
+            avg_enemy_dist / 10.0,  # Normalize distance (0-1 range)
+            num_different_enemy_types / 4.0,  # Normalize enemy type diversity (0-1 range)
+            tower_counts.get('basic', 0) / 5.0,  # Basic tower count (0-1 range)
+            1.0 if self.wave_completed else 0.0,  # Wave completion status
+            can_start_wave,  # Can start next wave
+            can_afford_tower  # Can afford to build towers
         ]
         return np.array(state, dtype=np.float32) 

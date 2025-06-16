@@ -17,7 +17,7 @@ class WaveManager:
         self.wave = wave_number
         self.wave_in_progress = True
         self.enemies_spawned = 0
-        self.spawn_timer = 0  # Reset timer when wave starts
+        self.spawn_timer = 0  # Start spawning immediately
         self.path_points = path_points
         self.config = config
         
@@ -54,14 +54,15 @@ class WaveManager:
         # Use frame-based timing instead of pygame timing
         if self.enemies_spawned < self.total_enemies:
             if self.spawn_timer <= 0:
-                # Spawn enemy
+                # Spawn enemy immediately
                 enemy_class = self.get_enemy_class(self.wave)
                 new_enemies.append(enemy_class(self.path_points, self.config))
                 self.enemies_spawned += 1
-                self.spawn_timer = self.spawn_delay  # Reset timer
+                self.spawn_timer = self.spawn_delay  # Reset timer for next spawn
             else:
                 self.spawn_timer -= 1  # Countdown each frame
         
+        # Wave ends when all enemies are spawned (not when they're all dead)
         if self.enemies_spawned >= self.total_enemies:
             self.wave_in_progress = False
         
