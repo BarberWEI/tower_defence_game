@@ -8,41 +8,43 @@ class BaseEnemy:
         self.config = config
         self.color = self.get_enemy_color()
         self.slow_factor = 1.0
-        self.slow_end_time = 0
+        self.slow_timer = 0  # Use frame counter instead of pygame timing
     
     def get_enemy_color(self):
         return (255, 0, 0)  # Default red color
     
-    def apply_slow(self, slow_amount, duration):
-        now = pygame.time.get_ticks()
-        if self.slow_end_time < now:
-            self.slow_factor = slow_amount
-            self.slow_end_time = now + duration
-        else:
-            # If already slowed, extend the slow duration if needed
-            self.slow_end_time = max(self.slow_end_time, now + duration)
-
+    def apply_slow(self, slow_amount, duration_frames):
+        # Use frame-based timing instead of pygame timing
+        self.slow_factor = slow_amount
+        self.slow_timer = duration_frames
+    
     def update(self):
-        # Handle slow effect
-        now = pygame.time.get_ticks()
-        if now > self.slow_end_time:
+        # Handle slow effect using frame counter
+        if self.slow_timer > 0:
+            self.slow_timer -= 1
+        else:
             self.slow_factor = 1.0
+            
         effective_speed = self.speed * self.slow_factor
         remaining_speed = effective_speed
+        
         while self.path_index < len(self.path) - 1 and remaining_speed > 0:
             target = self.path[self.path_index + 1]
             dx = target[0] - self.pos[0]
             dy = target[1] - self.pos[1]
             dist = (dx ** 2 + dy ** 2) ** 0.5
+            
             if dist == 0:
                 self.path_index += 1
                 continue
+                
             move_dist = min(remaining_speed, dist)
             move_x = dx / dist * move_dist
             move_y = dy / dist * move_dist
             self.pos = (self.pos[0] + move_x, self.pos[1] + move_y)
             remaining_speed -= move_dist
-            if move_dist == dist:
+            
+            if move_dist >= dist:
                 self.pos = target
                 self.path_index += 1
     

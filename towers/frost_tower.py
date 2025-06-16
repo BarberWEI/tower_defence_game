@@ -8,26 +8,29 @@ class FrostTower(BaseTower):
         self.type = "frost"
         self.range = 120
         self.damage = 5
-        self.cooldown = 1200  # milliseconds
+        self.cooldown = 24  # frames instead of milliseconds (1200ms / 50ms per frame)
         self.cost = 120
         self.slow_amount = 0.5  # 50% speed
-        self.slow_duration = 2000  # milliseconds
-        self.last_attack_time = 0
+        self.slow_duration = 40  # frames instead of milliseconds (2000ms / 50ms per frame)
+        self.cooldown_timer = 0
+        self.continuous = False
 
     def get_tower_color(self):
         return (100, 200, 255)
 
     def attack(self, enemies):
-        now = pygame.time.get_ticks()
-        if now - self.last_attack_time < self.cooldown:
+        # Use the base class cooldown system instead of pygame timing
+        if self.cooldown_timer > 0:
             return
+            
         for enemy in enemies:
             dist = math.hypot(enemy.pos[0] - self.pos[0], enemy.pos[1] - self.pos[1])
             if dist <= self.range:
                 enemy.health -= self.damage
-                # Apply slow effect
-                enemy.apply_slow(self.slow_amount, self.slow_duration)
-                self.last_attack_time = now
+                # Apply slow effect if the enemy supports it
+                if hasattr(enemy, 'apply_slow'):
+                    enemy.apply_slow(self.slow_amount, self.slow_duration)
+                self.cooldown_timer = self.cooldown
                 break
 
     def draw(self, screen):

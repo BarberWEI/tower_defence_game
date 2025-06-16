@@ -13,9 +13,11 @@ class BaseTower:
         return (100, 100, 100)  # Default gray color
     
     def update(self, enemies):
-        if self.cooldown_timer > 0 and not self.continuous:
+        # Handle cooldown for all towers
+        if self.cooldown_timer > 0:
             self.cooldown_timer -= 1
-            return
+            if not self.continuous:
+                return
         
         # Find closest enemy in range
         closest_enemy = None
@@ -30,9 +32,15 @@ class BaseTower:
         
         # Attack if enemy found
         if closest_enemy:
-            self.attack(closest_enemy, enemies)
-            if not self.continuous:
-                self.cooldown_timer = self.cooldown
+            # Handle different attack method signatures
+            if hasattr(self, 'type') and self.type == 'frost':
+                # FrostTower attack method takes only enemies and handles its own cooldown
+                self.attack(enemies)
+            else:
+                # Most towers take target and enemies
+                self.attack(closest_enemy, enemies)
+                if not self.continuous:
+                    self.cooldown_timer = self.cooldown
     
     def attack(self, target, enemies):
         # Base implementation - single target damage
