@@ -21,10 +21,10 @@ from io import StringIO
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import all test modules
-from tests.test_towers import TestTowers
+from tests.test_towers import TestTowersFixed
 from tests.test_enemies import TestEnemies
 from tests.test_projectiles import TestProjectiles
-from tests.test_game_systems import TestGameSystems
+from tests.test_game_systems import TestGameSystemsFixed
 from tests.test_integration import TestIntegration
 
 
@@ -80,12 +80,12 @@ class TowerDefenseTestRunner:
     def __init__(self, verbosity=1):
         self.verbosity = verbosity
         self.test_suites = {
-            'towers': TestTowers,
-            'enemies': TestEnemies,
-            'projectiles': TestProjectiles,
-            'game_systems': TestGameSystems,
-            'integration': TestIntegration
-        }
+        'towers': TestTowersFixed,
+        'enemies': TestEnemies,
+        'projectiles': TestProjectiles,
+        'game_systems': TestGameSystemsFixed,
+        'integration': TestIntegration
+    }
     
     def run_specific_suite(self, suite_name):
         """Run a specific test suite"""

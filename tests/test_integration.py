@@ -110,18 +110,18 @@ class TestIntegration(unittest.TestCase):
         
         # Add currency and buy damage upgrade
         self.upgrade_system.add_tower_currency(tower_id, 'basic', 100)
-        upgrades = self.upgrade_system.get_available_upgrades(tower_id, 'basic')
+        # Check if we can upgrade damage
+        can_upgrade = self.upgrade_system.can_upgrade(tower_id, 'basic', UpgradeType.DAMAGE, 0)
         
-        if upgrades[UpgradeType.DAMAGE]:
+        if can_upgrade:
             initial_damage = tower.damage
-            upgrade = upgrades[UpgradeType.DAMAGE][0]
             
-            # Purchase upgrade
-            success = self.upgrade_system.purchase_upgrade(tower_id, 'basic', upgrade)
+            # Purchase upgrade using actual method
+            success = self.upgrade_system.upgrade_tower(tower_id, 'basic', UpgradeType.DAMAGE, 0)
             self.assertTrue(success)
             
             # Apply to tower
-            self.upgrade_system.apply_upgrades_to_tower(tower)
+            self.upgrade_system.apply_upgrades_to_tower(tower, tower_id)
             
             # Tower should be stronger
             self.assertGreater(tower.damage, initial_damage)
@@ -137,8 +137,8 @@ class TestIntegration(unittest.TestCase):
         projectiles = []
         
         # Make both towers ready to shoot
-        tower1.shoot_timer = tower1.fire_rate
-        tower2.shoot_timer = tower2.fire_rate
+        tower1.fire_timer = 0
+        tower2.fire_timer = 0
         
         # Update both towers
         tower1.update(enemies, projectiles)
@@ -212,7 +212,7 @@ class TestIntegration(unittest.TestCase):
         projectiles = []
         
         # Make cannon shoot
-        cannon.shoot_timer = cannon.fire_rate
+        cannon.fire_timer = 0  # Ready to shoot
         cannon.update(enemies, projectiles)
         
         if projectiles:
@@ -278,8 +278,8 @@ class TestIntegration(unittest.TestCase):
         for tick in range(10):
             # Update all towers
             for tower in towers:
-                if tower.shoot_timer >= tower.fire_rate:
-                    tower.shoot_timer = tower.fire_rate
+                if tower.fire_timer <= 0:
+                    tower.fire_timer = 0
                 tower.update(enemies, projectiles)
             
             # Update all projectiles
@@ -311,23 +311,25 @@ class TestIntegration(unittest.TestCase):
             total_currency += damage_amount
         
         # Check currency accumulation
-        currency = self.upgrade_system.get_tower_currency(tower_id)
+        currency = self.upgrade_system.get_tower_currency(tower_id, 'basic')
         self.assertEqual(currency, total_currency)
         
         # Purchase upgrades
         upgrades_purchased = 0
         while currency > 0:
-            upgrades = self.upgrade_system.get_available_upgrades(tower_id, 'basic')
+            # Use actual available methods instead of non-existent get_available_upgrades
+            can_upgrade_damage = self.upgrade_system.can_upgrade(tower_id, 'basic', UpgradeType.DAMAGE, 0)
+            can_upgrade_range = self.upgrade_system.can_upgrade(tower_id, 'basic', UpgradeType.RANGE, 0)
             upgrade_made = False
             
             for upgrade_type in [UpgradeType.DAMAGE, UpgradeType.RANGE, UpgradeType.UTILITY]:
-                if upgrades[upgrade_type]:
-                    upgrade = upgrades[upgrade_type][0]
-                    if currency >= upgrade.cost:
-                        success = self.upgrade_system.purchase_upgrade(tower_id, 'basic', upgrade)
+                if self.upgrade_system.can_upgrade(tower_id, 'basic', upgrade_type, 0):
+                    cost = self.upgrade_system.get_upgrade_cost('basic', upgrade_type, 0)
+                    if currency >= cost:
+                        success = self.upgrade_system.upgrade_tower(tower_id, 'basic', upgrade_type, 0)
                         if success:
                             upgrades_purchased += 1
-                            currency = self.upgrade_system.get_tower_currency(tower_id)
+                            currency = self.upgrade_system.get_tower_currency(tower_id, 'basic')
                             upgrade_made = True
                             break
             
@@ -341,7 +343,7 @@ class TestIntegration(unittest.TestCase):
         initial_damage = tower.damage
         initial_range = tower.range
         
-        self.upgrade_system.apply_upgrades_to_tower(tower)
+        self.upgrade_system.apply_upgrades_to_tower(tower, tower_id)
         
         # Tower should be improved
         self.assertTrue(tower.damage >= initial_damage or tower.range >= initial_range)

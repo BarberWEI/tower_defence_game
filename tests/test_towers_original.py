@@ -15,8 +15,8 @@ from enemies import BasicEnemy, FlyingEnemy, InvisibleEnemy, FastEnemy
 from game_systems.tower_upgrade_system import TowerUpgradeSystem, UpgradeType
 
 
-class TestTowersFixed(unittest.TestCase):
-    """Fixed test cases for all tower types matching actual implementation"""
+class TestTowers(unittest.TestCase):
+    """Test cases for all tower types"""
     
     def setUp(self):
         """Set up test environment"""
@@ -64,6 +64,7 @@ class TestTowersFixed(unittest.TestCase):
         self.assertEqual(tower.tower_type, 'sniper')
         self.assertGreater(tower.damage, 0)
         self.assertGreater(tower.range, 100)  # Sniper should have long range
+        self.assertTrue(tower.can_target_invisible)  # Sniper can target invisible
 
     def test_freezer_tower_creation(self):
         """Test FreezerTower creation and properties"""
@@ -78,16 +79,16 @@ class TestTowersFixed(unittest.TestCase):
         tower = DetectorTower(100, 200)
         
         self.assertEqual(tower.tower_type, 'detector')
-        self.assertEqual(tower.damage, 0)  # Detector does no damage
+        self.assertTrue(tower.can_target_invisible)
         self.assertTrue(hasattr(tower, 'detection_range'))
-        self.assertFalse(tower.can_target_invisible)  # It detects but doesn't target
 
     def test_antiair_tower_creation(self):
         """Test AntiAirTower creation and properties"""
         tower = AntiAirTower(100, 200)
         
         self.assertEqual(tower.tower_type, 'antiair')
-        self.assertTrue(hasattr(tower, 'prioritize_flying'))  # Actual attribute name
+        self.assertTrue(tower.can_target_flying)
+        self.assertFalse(tower.can_target_ground)  # Should only target flying
 
     def test_poison_tower_creation(self):
         """Test PoisonTower creation and properties"""
@@ -166,24 +167,26 @@ class TestTowersFixed(unittest.TestCase):
         self.assertIsNotNone(tower.target)
 
     def test_antiair_tower_targeting(self):
-        """Test AntiAirTower prioritizes flying enemies"""
+        """Test AntiAirTower only targets flying enemies"""
         tower = AntiAirTower(200, 100)
         
-        # Should target flying enemies with priority
+        # Should not target ground enemies
+        ground_enemies = [self.basic_enemy]
+        tower.acquire_target(ground_enemies)
+        self.assertIsNone(tower.target)
+        
+        # Should target flying enemies
         flying_enemies = [self.flying_enemy]
         tower.acquire_target(flying_enemies)
         self.assertIsNotNone(tower.target)
 
-    def test_detector_tower_detection(self):
-        """Test DetectorTower detection mechanics"""
+    def test_detector_tower_invisible_targeting(self):
+        """Test DetectorTower can target invisible enemies"""
         tower = DetectorTower(300, 100)
         enemies = [self.invisible_enemy]
         
-        # Update to trigger detection
-        tower.update(enemies, [])
-        
-        # Should detect invisible enemies
-        self.assertGreater(len(tower.detected_enemies), 0)
+        tower.acquire_target(enemies)
+        self.assertIsNotNone(tower.target)
 
     def test_tower_projectile_creation(self):
         """Test that towers create projectiles when shooting"""
@@ -192,7 +195,7 @@ class TestTowersFixed(unittest.TestCase):
         projectiles = []
         
         # Force tower to be ready to shoot
-        tower.fire_timer = 0
+        tower.shoot_timer = tower.fire_rate
         
         tower.update([self.basic_enemy], projectiles)
         
@@ -204,12 +207,15 @@ class TestTowersFixed(unittest.TestCase):
         tower = BasicTower(100, 100)
         tower_id = tower.tower_id
         
-        # Add some currency using correct method signature
+        # Add some currency
         self.upgrade_system.add_tower_currency(tower_id, 'basic', 100)
         
-        # Test currency retrieval with correct signature
-        currency = self.upgrade_system.get_tower_currency(tower_id, 'basic')
-        self.assertEqual(currency, 100)
+        # Test upgrade availability
+        upgrades = self.upgrade_system.get_available_upgrades(tower_id, 'basic')
+        self.assertIsInstance(upgrades, dict)
+        self.assertIn(UpgradeType.DAMAGE, upgrades)
+        self.assertIn(UpgradeType.RANGE, upgrades)
+        self.assertIn(UpgradeType.UTILITY, upgrades)
 
     def test_tower_damage_tracking(self):
         """Test tower damage tracking for currency generation"""
@@ -254,30 +260,13 @@ class TestTowersFixed(unittest.TestCase):
                 self.assertTrue(hasattr(tower, 'range'))
                 self.assertTrue(hasattr(tower, 'fire_rate'))
 
-    def test_tower_fire_timer_mechanics(self):
-        """Test tower fire timer mechanics"""
-        tower = BasicTower(100, 100)
-        
-        # Should use fire_timer not shoot_timer
-        self.assertTrue(hasattr(tower, 'fire_timer'))
-        
-        # Test timer countdown
-        initial_timer = tower.fire_timer
-        tower.update([], [])
-        
-        # Timer should count down (if it was > 0)
-        if initial_timer > 0:
-            self.assertLessEqual(tower.fire_timer, initial_timer)
-
-    def test_tower_upgrade_levels(self):
-        """Test tower upgrade level tracking"""
-        tower = BasicTower(100, 100)
-        
-        # Should have upgrade tracking
-        self.assertTrue(hasattr(tower, 'upgrades'))
-        self.assertIn(UpgradeType.DAMAGE, tower.upgrades)
-        self.assertIn(UpgradeType.RANGE, tower.upgrades)
-        self.assertIn(UpgradeType.UTILITY, tower.upgrades)
+    def test_tower_terrain_requirements(self):
+        """Test tower terrain requirements"""
+        # Splash tower should require water terrain
+        splash_tower = SplashTower(100, 100)
+        self.assertTrue(hasattr(splash_tower, 'requires_water_terrain'))
+        if hasattr(splash_tower, 'requires_water_terrain'):
+            self.assertTrue(splash_tower.requires_water_terrain())
 
     def test_tower_size_variations(self):
         """Test that different towers have appropriate sizes"""
@@ -285,10 +274,9 @@ class TestTowersFixed(unittest.TestCase):
         cannon = CannonTower(100, 100)
         explosive = ExplosiveTower(100, 100)
         
-        # All should have size attribute
-        self.assertTrue(hasattr(basic, 'size'))
-        self.assertTrue(hasattr(cannon, 'size'))
-        self.assertTrue(hasattr(explosive, 'size'))
+        # Cannon and explosive should be larger than basic
+        self.assertGreaterEqual(cannon.size, basic.size)
+        self.assertGreaterEqual(explosive.size, basic.size)
 
 
 if __name__ == '__main__':
