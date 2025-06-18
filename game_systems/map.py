@@ -11,6 +11,10 @@ class Map:
         self.screen_width = screen_width
         self.screen_height = screen_height
         
+        # Map positioning - offset to leave space for UI
+        self.map_offset_x = 20  # Small margin from left
+        self.map_offset_y = 140  # Space for top UI (130px + margin)
+        
         # Load map data
         map_data = get_map_data()
         self.grid_layout = map_data['layout']
@@ -34,8 +38,8 @@ class Map:
         """Convert grid-based waypoints to pixel coordinates"""
         pixel_path = []
         for grid_x, grid_y in self.path_waypoints:
-            pixel_x = grid_x * self.cell_size + self.cell_size // 2
-            pixel_y = grid_y * self.cell_size + self.cell_size // 2
+            pixel_x = self.map_offset_x + grid_x * self.cell_size + self.cell_size // 2
+            pixel_y = self.map_offset_y + grid_y * self.cell_size + self.cell_size // 2
             pixel_path.append((pixel_x, pixel_y))
         return pixel_path
     
@@ -45,14 +49,14 @@ class Map:
     
     def pixel_to_grid(self, pixel_x: int, pixel_y: int) -> Tuple[int, int]:
         """Convert pixel coordinates to grid coordinates"""
-        grid_x = pixel_x // self.cell_size
-        grid_y = pixel_y // self.cell_size
+        grid_x = (pixel_x - self.map_offset_x) // self.cell_size
+        grid_y = (pixel_y - self.map_offset_y) // self.cell_size
         return (grid_x, grid_y)
     
     def grid_to_pixel(self, grid_x: int, grid_y: int) -> Tuple[int, int]:
         """Convert grid coordinates to pixel coordinates (center of cell)"""
-        pixel_x = grid_x * self.cell_size + self.cell_size // 2
-        pixel_y = grid_y * self.cell_size + self.cell_size // 2
+        pixel_x = self.map_offset_x + grid_x * self.cell_size + self.cell_size // 2
+        pixel_y = self.map_offset_y + grid_y * self.cell_size + self.cell_size // 2
         return (pixel_x, pixel_y)
     
     def get_terrain_at_pixel(self, pixel_x: int, pixel_y: int) -> int:
@@ -128,8 +132,8 @@ class Map:
                 color = get_terrain_color(terrain_type)
                 
                 rect = pygame.Rect(
-                    x * self.cell_size,
-                    y * self.cell_size,
+                    self.map_offset_x + x * self.cell_size,
+                    self.map_offset_y + y * self.cell_size,
                     self.cell_size,
                     self.cell_size
                 )

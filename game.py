@@ -56,6 +56,14 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left click
                     self.handle_mouse_click(event.pos)
+                elif event.button == 4:  # Mouse wheel up
+                    self.ui_manager.handle_scroll(-1)
+                elif event.button == 5:  # Mouse wheel down
+                    self.ui_manager.handle_scroll(1)
+            
+            elif event.type == pygame.MOUSEMOTION:
+                # Update mouse position for UI hover effects
+                self.ui_manager.update_mouse_pos(event.pos)
     
     def handle_key_press(self, key):
         """Handle keyboard input"""
@@ -73,29 +81,50 @@ class Game:
                 self.restart_game()
         
         elif key == pygame.K_1:
-            self.tower_manager.select_tower_type("basic")
+            self.select_tower_by_index(0)
         
         elif key == pygame.K_2:
-            self.tower_manager.select_tower_type("sniper")
+            self.select_tower_by_index(1)
         
         elif key == pygame.K_3:
-            self.tower_manager.select_tower_type("freezer")
+            self.select_tower_by_index(2)
             
         elif key == pygame.K_4:
-            self.tower_manager.select_tower_type("detector")
+            self.select_tower_by_index(3)
             
         elif key == pygame.K_5:
-            self.tower_manager.select_tower_type("antiair")
+            self.select_tower_by_index(4)
             
         elif key == pygame.K_6:
-            self.tower_manager.select_tower_type("poison")
+            self.select_tower_by_index(5)
             
         elif key == pygame.K_7:
-            self.tower_manager.select_tower_type("laser")
+            self.select_tower_by_index(6)
+    
+    def select_tower_by_index(self, index):
+        """Select tower by index from UI"""
+        self.ui_manager.selected_tower_index = index
+        tower_type = self.ui_manager.get_selected_tower_type()
+        if tower_type:
+            self.tower_manager.select_tower_type(tower_type)
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks"""
-        if self.tower_manager.placing_tower and not self.paused and not self.game_over:
+        if self.paused or self.game_over:
+            return
+        
+        # Check for tower bar clicks first
+        clicked_tower_index = self.ui_manager.handle_tower_bar_click(pos)
+        if clicked_tower_index is not None:
+            self.select_tower_by_index(clicked_tower_index)
+            return
+        
+        # Check for tower clicks (for upgrade panel)
+        if self.ui_manager.handle_tower_click(pos, self.towers):
+            return
+        
+        # Handle tower placement
+        if self.tower_manager.placing_tower:
             self.attempt_tower_placement(pos)
     
     def attempt_tower_placement(self, pos):
@@ -234,7 +263,8 @@ class Game:
             'game_over': self.game_over,
             'selected_tower': placement_state['selected_tower_type'],
             'show_wave_complete': self.show_wave_complete,
-            'wave_bonus': self.wave_bonus
+            'wave_bonus': self.wave_bonus,
+            'towers': self.towers
         }
     
     def draw(self):
@@ -278,6 +308,9 @@ class Game:
         self.show_wave_complete = False
         self.wave_complete_timer = 0
         self.wave_bonus = 0
+        self.ui_manager.clear_tower_selection()
+        self.ui_manager.upgrade_panel_visible = False
+        self.ui_manager.selected_placed_tower = None
     
     def run(self):
         """Main game loop"""
