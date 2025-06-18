@@ -15,5 +15,7 @@ class TankEnemy(Enemy):
     def take_damage(self, damage: int):
         """Tank enemies have armor that reduces damage"""
         armor_reduction = 0.8 if damage > 1 else 1.0
-        actual_damage = max(1, int(damage * armor_reduction))
-        self.health -= actual_damage 
+        reduced_damage = max(1, int(damage * armor_reduction))
+        actual_damage = min(reduced_damage, self.health)  # Can't deal more than remaining health
+        self.health -= reduced_damage
+        return actual_damage 

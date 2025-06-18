@@ -23,7 +23,8 @@ class BasicProjectile(Projectile):
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
-                enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage)
                 self.should_remove = True
-                return True
-        return False 
+                # Return the actual damage dealt and source tower for currency tracking
+                return {'hit': True, 'damage': actual_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None} 

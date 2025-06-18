@@ -30,6 +30,8 @@ class ShieldedEnemy(Enemy):
     
     def take_damage(self, damage: int):
         """Damage goes to shield first, then health"""
+        original_total_hp = self.shield + self.health
+        
         if self.shield > 0:
             self.shield -= damage
             if self.shield < 0:
@@ -38,6 +40,11 @@ class ShieldedEnemy(Enemy):
             self.shield_regen_timer = 0  # Reset regen timer when hit
         else:
             self.health -= damage
+        
+        # Calculate actual damage dealt
+        new_total_hp = max(0, self.shield + self.health)
+        actual_damage = original_total_hp - new_total_hp
+        return actual_damage
     
     def draw(self, screen: pygame.Surface):
         """Draw enemy with shield indicator"""

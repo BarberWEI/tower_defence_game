@@ -82,7 +82,9 @@ class Enemy:
     
     def take_damage(self, damage: int):
         """Apply damage to the enemy"""
+        actual_damage = min(damage, self.health)  # Can't deal more damage than remaining health
         self.health -= damage
+        return actual_damage
     
     def apply_freeze(self, duration: int):
         """Apply freeze effect to the enemy"""

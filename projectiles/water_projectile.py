@@ -15,26 +15,26 @@ class WaterProjectile(Projectile):
         self.color = (30, 144, 255)  # Deep blue
         self.has_splashed = False
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Check for collision and apply wet status in area"""
         # Check if projectile reached target area
         target_distance = math.sqrt((self.x - self.target_x)**2 + (self.y - self.target_y)**2)
         if target_distance < 8:  # Close enough to target
-            self.splash_water(enemies)
-            return True
+            enemies_hit = self.splash_water(enemies)
+            return {'hit': enemies_hit > 0, 'damage': 0, 'tower_id': self.source_tower_id}
         
         # Also check direct collision with any enemy
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
-                self.splash_water(enemies)
-                return True
-        return False
+                enemies_hit = self.splash_water(enemies)
+                return {'hit': enemies_hit > 0, 'damage': 0, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None}
     
     def splash_water(self, enemies: List):
         """Apply wet status to all enemies in splash radius"""
         if self.has_splashed:
-            return
+            return 0
         
         self.has_splashed = True
         enemies_hit = 0
@@ -47,6 +47,7 @@ class WaterProjectile(Projectile):
                 enemies_hit += 1
         
         self.should_remove = True
+        return enemies_hit
     
     def draw(self, screen: pygame.Surface):
         """Draw water projectile with water effects"""

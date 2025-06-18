@@ -64,15 +64,15 @@ class HomingProjectile(Projectile):
                     self.velocity_x = (self.velocity_x / vel_magnitude) * self.speed
                     self.velocity_y = (self.velocity_y / vel_magnitude) * self.speed
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Check collision and apply damage"""
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
-                enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage)
                 self.should_remove = True
-                return True
-        return False
+                return {'hit': True, 'damage': actual_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None}
     
     def draw(self, screen: pygame.Surface):
         """Draw homing projectile with trail effect"""

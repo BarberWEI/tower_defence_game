@@ -101,6 +101,7 @@ class MissileTower(Tower):
                 launch_x, launch_y, self.target.x, self.target.y,
                 self.projectile_speed, self.damage, self.explosion_radius, self.explosion_damage
             )
+            missile.source_tower_id = self.tower_id
             projectiles.append(missile)
     
     def draw(self, screen, selected: bool = False):
@@ -277,10 +278,24 @@ class HomingMissile:
     def check_collision(self, enemies):
         """Check collision with enemies"""
         if not self.active:
-            return
+            return {'hit': False, 'damage': 0, 'tower_id': None}
             
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
             if distance <= 8:  # Close enough for collision
-                self.explode(enemies)
-                return 
+                # Calculate total damage dealt in explosion
+                total_damage = 0
+                for enemy_in_range in enemies:
+                    explosion_distance = math.sqrt((enemy_in_range.x - self.x)**2 + (enemy_in_range.y - self.y)**2)
+                    if explosion_distance <= self.explosion_radius:
+                        if explosion_distance < 15:  # Direct hit
+                            damage_dealt = enemy_in_range.take_damage(self.damage)
+                        else:  # Splash damage
+                            damage_dealt = enemy_in_range.take_damage(self.explosion_damage)
+                        total_damage += damage_dealt
+                
+                self.active = False
+                self.should_remove = True
+                return {'hit': True, 'damage': total_damage, 'tower_id': getattr(self, 'source_tower_id', None)}
+        
+        return {'hit': False, 'damage': 0, 'tower_id': None} 

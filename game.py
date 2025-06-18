@@ -6,6 +6,8 @@ from enemies import Enemy
 from towers import Tower
 from projectiles import Projectile
 from game_systems import Map, WaveManager, UIManager, TowerManager
+from game_systems.tower_upgrade_system import TowerUpgradeSystem
+from game_systems.upgrade_ui import UpgradeUI
 
 class Game:
     """Main game controller - coordinates between all game systems"""
@@ -45,6 +47,8 @@ class Game:
         self.wave_manager = WaveManager(self.map.get_path())
         self.tower_manager = TowerManager()
         self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
+        self.upgrade_system = TowerUpgradeSystem()
+        self.upgrade_ui = UpgradeUI(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         
         # UI state
         self.show_wave_complete = False
@@ -75,6 +79,7 @@ class Game:
             elif event.type == pygame.MOUSEMOTION:
                 # Update mouse position for UI hover effects
                 self.ui_manager.update_mouse_pos(event.pos)
+                self.upgrade_ui.update_mouse_pos(event.pos)
     
     def handle_key_press(self, key):
         """Handle keyboard input - only essential keys"""
@@ -115,6 +120,7 @@ class Game:
         # Reinitialize systems with new screen dimensions
         self.map = Map(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
+        self.upgrade_ui = UpgradeUI(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         
         # Update wave manager with new path
         self.wave_manager = WaveManager(self.map.get_path())
@@ -126,7 +132,11 @@ class Game:
         if self.paused or self.game_over:
             return
         
-        # Check for tower bar clicks first
+        # Check for upgrade UI clicks first (highest priority)
+        if self.upgrade_ui.handle_click(pos, self.upgrade_system):
+            return
+        
+        # Check for tower bar clicks
         clicked_tower_index = self.ui_manager.handle_tower_bar_click(pos)
         if clicked_tower_index is not None:
             tower_type = self.ui_manager.get_selected_tower_type()
@@ -136,7 +146,13 @@ class Game:
         
         # Check for tower clicks (for upgrade panel)
         if self.ui_manager.handle_tower_click(pos, self.towers):
+            # Set the selected tower for upgrades
+            selected_tower = self.ui_manager.selected_placed_tower
+            self.upgrade_ui.set_selected_tower(selected_tower)
             return
+        else:
+            # Clear upgrade selection if clicking elsewhere
+            self.upgrade_ui.clear_selection()
         
         # Handle tower placement
         if self.tower_manager.placing_tower:
@@ -217,10 +233,35 @@ class Game:
             
             # Check projectile collisions with enemies
             if hasattr(projectile, 'check_collision'):
-                projectile.check_collision(self.enemies)
+                collision_result = projectile.check_collision(self.enemies)
+                
+                # Handle damage tracking for currency generation
+                if isinstance(collision_result, dict) and collision_result.get('hit'):
+                    damage_dealt = collision_result.get('damage', 0)
+                    tower_id = collision_result.get('tower_id')
+                    
+                    # Ensure damage_dealt is not None and is a number
+                    if damage_dealt is None:
+                        damage_dealt = 0
+                    
+                    if tower_id and damage_dealt > 0:
+                        # Find the tower and add currency
+                        tower = self._find_tower_by_id(tower_id)
+                        if tower:
+                            tower.add_damage_dealt(damage_dealt)
+                            # Add currency based on damage dealt (higher damage towers get more)
+                            currency_amount = max(1, damage_dealt // 2)
+                            self.upgrade_system.add_tower_currency(tower_id, tower.tower_type, currency_amount)
             
             if hasattr(projectile, 'should_remove') and projectile.should_remove:
                 self.projectiles.remove(projectile)
+    
+    def _find_tower_by_id(self, tower_id: str):
+        """Find a tower by its unique ID"""
+        for tower in self.towers:
+            if hasattr(tower, 'tower_id') and tower.tower_id == tower_id:
+                return tower
+        return None
     
     def update_waves(self):
         """Update wave management"""
@@ -310,6 +351,9 @@ class Game:
         game_state = self.get_game_state()
         self.ui_manager.draw_complete_ui(self.screen, game_state)
         
+        # Draw upgrade UI
+        self.upgrade_ui.draw_upgrade_panel(self.screen, self.upgrade_system)
+        
         pygame.display.flip()
     
     def restart_game(self):
@@ -327,6 +371,7 @@ class Game:
         # Reset systems
         self.wave_manager = WaveManager(self.map.get_path())
         self.tower_manager = TowerManager()
+        self.upgrade_system = TowerUpgradeSystem()
         
         # Reset UI state
         self.show_wave_complete = False
@@ -334,6 +379,7 @@ class Game:
         self.wave_bonus = 0
         self.ui_manager.clear_tower_selection()
         self.ui_manager.selected_placed_tower = None
+        self.upgrade_ui.clear_selection()
     
     def run(self):
         """Main game loop"""

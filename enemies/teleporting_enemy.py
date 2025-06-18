@@ -54,9 +54,9 @@ class TeleportingEnemy(Enemy):
         if (self.teleport_timer >= self.teleport_cooldown and 
             random.random() < self.teleport_chance):
             self.attempt_teleport()
-            return  # Avoid damage by teleporting
+            return 0  # Avoid damage by teleporting
         
-        super().take_damage(damage)
+        return super().take_damage(damage)
         
     def attempt_teleport(self):
         """Attempt to teleport along the path"""

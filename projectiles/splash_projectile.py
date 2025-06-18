@@ -18,7 +18,7 @@ class SplashProjectile(Projectile):
         self.has_exploded = True
         self.should_remove = True
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Check for direct hit, then explode"""
         direct_hit = False
         for enemy in enemies:
@@ -28,21 +28,24 @@ class SplashProjectile(Projectile):
                 break
         
         if direct_hit or self.has_reached_target():
-            self.explode(enemies)
-            return True
-        return False
+            total_damage = self.explode(enemies)
+            return {'hit': total_damage > 0, 'damage': total_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None}
     
     def explode(self, enemies: List):
         """Deal splash damage to all enemies in radius"""
+        total_damage = 0
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance <= self.splash_radius:
                 # Damage decreases with distance
                 damage_multiplier = 1.0 - (distance / self.splash_radius) * 0.5
                 actual_damage = max(1, int(self.damage * damage_multiplier))
-                enemy.take_damage(actual_damage)
+                damage_dealt = enemy.take_damage(actual_damage)
+                total_damage += damage_dealt
         
         self.should_remove = True
+        return total_damage
     
     def draw(self, screen: pygame.Surface):
         """Draw splash projectile"""

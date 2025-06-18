@@ -72,6 +72,7 @@ class CannonTower(Tower):
                 self.x, self.y, self.target.x, self.target.y,
                 self.projectile_speed, self.damage, self.splash_radius, self.splash_damage
             )
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
     
     def draw(self, screen, selected: bool = False):
@@ -148,13 +149,27 @@ class ExplosiveCannonball:
     def check_collision(self, enemies):
         """Check collision with enemies and create explosion"""
         if not self.active:
-            return
+            return {'hit': False, 'damage': 0, 'tower_id': None}
             
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
             if distance <= 10:  # Direct hit
-                self.explode(enemies)
-                return
+                total_damage = 0
+                # Damage all enemies in splash radius
+                for enemy_in_range in enemies:
+                    explosion_distance = math.sqrt((enemy_in_range.x - self.x)**2 + (enemy_in_range.y - self.y)**2)
+                    if explosion_distance <= self.splash_radius:
+                        if explosion_distance < 15:  # Direct hit
+                            damage_dealt = enemy_in_range.take_damage(self.damage)
+                        else:  # Splash damage
+                            damage_dealt = enemy_in_range.take_damage(self.splash_damage)
+                        total_damage += damage_dealt
+                
+                self.active = False
+                self.should_remove = True
+                return {'hit': True, 'damage': total_damage, 'tower_id': getattr(self, 'source_tower_id', None)}
+        
+        return {'hit': False, 'damage': 0, 'tower_id': None}
                 
     def explode(self, enemies):
         """Create explosion and damage nearby enemies"""

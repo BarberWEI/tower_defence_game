@@ -14,40 +14,44 @@ class IceProjectile(Projectile):
         self.size = 6
         self.color = (173, 216, 230)  # Light blue
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Apply freeze effect to enemies in area"""
         # Check if projectile reached target area
         target_distance = math.sqrt((self.x - self.target_x)**2 + (self.y - self.target_y)**2)
         if target_distance < 10:  # Close enough to target
             # Apply freeze to all enemies in area
-            enemies_hit = False
+            total_damage = 0
+            enemies_hit = 0
             for enemy in enemies:
                 distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
                 if distance <= self.area_radius:
                     enemy.apply_freeze(self.freeze_duration)
                     if self.damage > 0:
-                        enemy.take_damage(self.damage)
-                    enemies_hit = True
+                        actual_damage = enemy.take_damage(self.damage)
+                        total_damage += actual_damage
+                    enemies_hit += 1
             
-            if enemies_hit:
+            if enemies_hit > 0:
                 self.should_remove = True
-                return True
+                return {'hit': True, 'damage': total_damage, 'tower_id': self.source_tower_id}
         
         # Also check direct collision with any enemy
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
                 # Apply freeze to all enemies in area around hit point
+                total_damage = 0
                 for other_enemy in enemies:
                     area_distance = math.sqrt((self.x - other_enemy.x)**2 + (self.y - other_enemy.y)**2)
                     if area_distance <= self.area_radius:
                         other_enemy.apply_freeze(self.freeze_duration)
                         if self.damage > 0:
-                            other_enemy.take_damage(self.damage)
+                            actual_damage = other_enemy.take_damage(self.damage)
+                            total_damage += actual_damage
                 
                 self.should_remove = True
-                return True
-        return False
+                return {'hit': True, 'damage': total_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None}
     
     def draw(self, screen: pygame.Surface):
         """Draw ice projectile with special effect"""

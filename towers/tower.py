@@ -1,6 +1,8 @@
 import pygame
 import math
-from typing import List, Optional
+import uuid
+from typing import List, Optional, Dict
+from game_systems.tower_upgrade_system import UpgradeType
 
 class Tower:
     """Base class for all towers"""
@@ -9,22 +11,40 @@ class Tower:
         self.y = y
         self.tower_type = tower_type
         
+        # Unique identifier for currency tracking
+        self.tower_id = str(uuid.uuid4())
+        
         # Grid position (will be set by tower manager)
         self.grid_x = 0
         self.grid_y = 0
         
         # Base stats - to be overridden by subclasses
-        self.range = 100
-        self.damage = 1
-        self.fire_rate = 60  # frames between shots
+        self.base_range = 100
+        self.base_damage = 1
+        self.base_fire_rate = 60  # frames between shots
         self.projectile_speed = 5
         self.size = 15
         self.color = (0, 255, 0)  # Green by default
+        
+        # Current stats (base + upgrades)
+        self.range = self.base_range
+        self.damage = self.base_damage
+        self.fire_rate = self.base_fire_rate
+        
+        # Upgrade tracking
+        self.upgrades: Dict[UpgradeType, int] = {
+            UpgradeType.DAMAGE: 0,
+            UpgradeType.RANGE: 0,
+            UpgradeType.UTILITY: 0
+        }
         
         # State
         self.fire_timer = 0
         self.target: Optional[object] = None
         self.angle = 0
+        
+        # Currency tracking
+        self.total_damage_dealt = 0
         
     def update(self, enemies: List, projectiles: List):
         """Update tower state and shooting"""
@@ -70,7 +90,27 @@ class Tower:
                 self.x, self.y, self.target.x, self.target.y,
                 self.projectile_speed, self.damage
             )
+            # Link projectile to tower for damage tracking
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+    
+    def add_damage_dealt(self, damage: int):
+        """Track damage dealt by this tower for currency generation"""
+        self.total_damage_dealt += damage
+    
+    def reset_stats_to_base(self):
+        """Reset stats to base values before applying upgrades"""
+        self.range = self.base_range
+        self.damage = self.base_damage
+        self.fire_rate = self.base_fire_rate
+    
+    def get_upgrade_level(self, upgrade_type: UpgradeType) -> int:
+        """Get the current upgrade level for a specific upgrade type"""
+        return self.upgrades.get(upgrade_type, 0)
+    
+    def set_upgrade_level(self, upgrade_type: UpgradeType, level: int):
+        """Set the upgrade level for a specific upgrade type"""
+        self.upgrades[upgrade_type] = level
     
     def draw(self, screen: pygame.Surface, selected: bool = False):
         """Draw the tower on the screen"""

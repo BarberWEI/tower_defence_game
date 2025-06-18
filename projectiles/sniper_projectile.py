@@ -11,15 +11,20 @@ class SniperProjectile(Projectile):
         self.color = (0, 100, 255)  # Blue
         self.max_distance = 500  # Longer range
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Sniper projectiles pierce through enemies"""
         hit_count = 0
+        total_damage = 0
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
-                enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage)
+                total_damage += actual_damage
                 hit_count += 1
                 if hit_count >= 2:  # Pierce through up to 2 enemies
                     self.should_remove = True
-                    return True
-        return hit_count > 0 
+                    break
+        
+        if hit_count > 0:
+            return {'hit': True, 'damage': total_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None} 

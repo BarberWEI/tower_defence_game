@@ -52,7 +52,9 @@ class MegaBoss(Enemy):
     def take_damage(self, damage):
         """Take reduced damage"""
         reduced_damage = damage * (1 - self.damage_reduction)
-        super().take_damage(reduced_damage)
+        actual_damage = min(reduced_damage, self.health)  # Can't deal more than remaining health
+        self.health -= reduced_damage
+        return actual_damage
         
     def should_spawn_minions(self):
         """Check if boss should spawn minions"""

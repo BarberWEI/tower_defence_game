@@ -34,8 +34,9 @@ class RegeneratingEnemy(Enemy):
     
     def take_damage(self, damage):
         """Take damage and reset regeneration timer"""
-        super().take_damage(damage)
+        actual_damage = super().take_damage(damage)
         self.last_damage_time = 0  # Reset damage timer
+        return actual_damage
         
     def draw(self, screen):
         """Draw regenerating enemy with special effects"""

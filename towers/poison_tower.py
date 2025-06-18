@@ -66,6 +66,7 @@ class PoisonTower(Tower):
             projectile.splash_radius = self.splash_radius
             projectile.poison_damage = self.poison_damage
             projectile.poison_duration = self.poison_duration
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
     
     def draw(self, screen, selected: bool = False):
@@ -147,14 +148,19 @@ class PoisonProjectile:
     def check_collision(self, enemies):
         """Check collision with enemies and apply poison"""
         if not self.active:
-            return
+            return {'hit': False, 'damage': 0, 'tower_id': None}
             
         import math
+        total_damage = 0
+        enemies_hit = 0
+        
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
             if distance <= self.splash_radius:
                 # Apply direct damage
-                enemy.take_damage(self.damage)
+                damage_dealt = enemy.take_damage(self.damage)
+                total_damage += damage_dealt
+                enemies_hit += 1
                 
                 # Apply poison effect
                 if not hasattr(enemy, 'poison_timer'):
@@ -167,6 +173,10 @@ class PoisonProjectile:
                 # Stop regeneration for regenerating enemies
                 if hasattr(enemy, 'last_damage_time'):
                     enemy.last_damage_time = 0
-                    
-        self.active = False
-        self.should_remove = True 
+        
+        if enemies_hit > 0:
+            self.active = False
+            self.should_remove = True
+            return {'hit': True, 'damage': total_damage, 'tower_id': getattr(self, 'source_tower_id', None)}
+        
+        return {'hit': False, 'damage': 0, 'tower_id': None} 

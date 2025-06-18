@@ -88,7 +88,8 @@ class TowerDataManager:
         cost = self.tower_manager.get_tower_cost(tower_type)
         
         # Get tower instance to read stats
-        tower_class = self.tower_manager.tower_classes.get(tower_type)
+        tower_classes = self.tower_manager._get_tower_classes()
+        tower_class = tower_classes.get(tower_type)
         if tower_class:
             # Create temporary instance to read stats
             temp_tower = tower_class(0, 0)

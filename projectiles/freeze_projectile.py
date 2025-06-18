@@ -12,17 +12,18 @@ class FreezeProjectile(Projectile):
         self.size = 4
         self.color = (100, 200, 255)  # Light blue
     
-    def check_collision(self, enemies: List) -> bool:
+    def check_collision(self, enemies: List) -> dict:
         """Apply freeze effect to enemies"""
         for enemy in enemies:
             distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
             if distance < (self.size + enemy.size):
                 enemy.apply_freeze(self.freeze_duration)
+                actual_damage = 0
                 if self.damage > 0:
-                    enemy.take_damage(self.damage)
+                    actual_damage = enemy.take_damage(self.damage)
                 self.should_remove = True
-                return True
-        return False
+                return {'hit': True, 'damage': actual_damage, 'tower_id': self.source_tower_id}
+        return {'hit': False, 'damage': 0, 'tower_id': None}
     
     def draw(self, screen: pygame.Surface):
         """Draw freeze projectile with special effect"""

@@ -13,6 +13,9 @@ class Projectile:
         self.speed = speed
         self.damage = damage
         
+        # Tower tracking for currency generation
+        self.source_tower_id = None
+        
         # Calculate direction
         dx = target_x - start_x
         dy = target_y - start_y

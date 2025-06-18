@@ -1,7 +1,4 @@
 from typing import List, Tuple, Optional
-from towers import (BasicTower, SniperTower, FreezerTower, DetectorTower, 
-                   AntiAirTower, PoisonTower, LaserTower, CannonTower,
-                   LightningTower, FlameTower, IceTower, ExplosiveTower, MissileTower, SplashTower)
 from .tower_sizes import get_tower_size, get_tower_visual_size
 
 class TowerManager:
@@ -26,8 +23,17 @@ class TowerManager:
             "splash": 35      # Water-only, applies wet status
         }
         
-        # Tower classes
-        self.tower_classes = {
+        # State
+        self.selected_tower_type: Optional[str] = None
+        self.placing_tower = False
+    
+    def _get_tower_classes(self):
+        """Get tower classes with lazy import to avoid circular dependency"""
+        from towers import (BasicTower, SniperTower, FreezerTower, DetectorTower, 
+                           AntiAirTower, PoisonTower, LaserTower, CannonTower,
+                           LightningTower, FlameTower, IceTower, ExplosiveTower, MissileTower, SplashTower)
+        
+        return {
             "basic": BasicTower,
             "sniper": SniperTower,
             "freezer": FreezerTower,
@@ -43,10 +49,6 @@ class TowerManager:
             "missile": MissileTower,
             "splash": SplashTower
         }
-        
-        # State
-        self.selected_tower_type: Optional[str] = None
-        self.placing_tower = False
     
     def get_tower_cost(self, tower_type: str) -> int:
         """Get the cost of a tower type"""
@@ -58,7 +60,8 @@ class TowerManager:
     
     def select_tower_type(self, tower_type: str):
         """Select a tower type for placement"""
-        if tower_type in self.tower_classes:
+        tower_classes = self._get_tower_classes()
+        if tower_type in tower_classes:
             self.selected_tower_type = tower_type
             self.placing_tower = True
     
@@ -69,8 +72,9 @@ class TowerManager:
     
     def create_tower(self, tower_type: str, x: int, y: int, grid_x: int = 0, grid_y: int = 0, cell_size: int = 40):
         """Create a new tower of the specified type with multi-block support"""
-        if tower_type in self.tower_classes:
-            tower_class = self.tower_classes[tower_type]
+        tower_classes = self._get_tower_classes()
+        if tower_type in tower_classes:
+            tower_class = tower_classes[tower_type]
             tower = tower_class(x, y)
             
             # Set tower type and grid position
@@ -124,10 +128,11 @@ class TowerManager:
     
     def get_tower_info(self) -> dict:
         """Get information about all available towers"""
+        tower_classes = self._get_tower_classes()
         return {
             tower_type: {
                 'cost': cost,
-                'class': self.tower_classes[tower_type]
+                'class': tower_classes[tower_type]
             }
             for tower_type, cost in self.tower_costs.items()
         }
