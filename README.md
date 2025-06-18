@@ -72,20 +72,20 @@ The game follows good OOP principles with:
 
 ```
 tower_defence_game/
-├── enemies/
+├── enemies/                 # Enemy entity classes
 │   ├── __init__.py          # Package exports
 │   ├── enemy.py             # Base Enemy class
 │   ├── basic_enemy.py       # BasicEnemy class
 │   ├── fast_enemy.py        # FastEnemy class
 │   ├── tank_enemy.py        # TankEnemy class
 │   └── shielded_enemy.py    # ShieldedEnemy class
-├── towers/
+├── towers/                  # Tower entity classes
 │   ├── __init__.py          # Package exports
 │   ├── tower.py             # Base Tower class
 │   ├── basic_tower.py       # BasicTower class
 │   ├── sniper_tower.py      # SniperTower class
 │   └── freezer_tower.py     # FreezerTower class
-├── projectiles/
+├── projectiles/             # Projectile entity classes
 │   ├── __init__.py          # Package exports
 │   ├── projectile.py        # Base Projectile class
 │   ├── basic_projectile.py  # BasicProjectile class
@@ -93,11 +93,25 @@ tower_defence_game/
 │   ├── freeze_projectile.py # FreezeProjectile class
 │   ├── splash_projectile.py # SplashProjectile class
 │   └── homing_projectile.py # HomingProjectile class
-├── game.py                  # Main game loop and logic
+├── game_systems/            # Game logic and management systems
+│   ├── __init__.py          # Package exports
+│   ├── map.py               # Map layout and tower placement
+│   ├── wave_manager.py      # Enemy spawning and wave progression
+│   ├── ui_manager.py        # User interface rendering
+│   └── tower_manager.py     # Tower placement and management
+├── game.py                  # Main game controller (coordinates systems)
 ├── requirements.txt         # Python dependencies
 └── README.md               # This file
 ```
 
-Each class is properly separated with clean dependencies and modular design for easy maintenance and extension.
+## Architecture
+
+The game follows **clean architecture principles** with clear separation of concerns:
+
+- **Entities** (`enemies/`, `towers/`, `projectiles/`): Core game objects with their behaviors
+- **Game Systems** (`game_systems/`): Business logic and management (waves, UI, map, towers)
+- **Game Controller** (`game.py`): Coordinates between systems, handles main loop
+
+Each component has a single responsibility and communicates through well-defined interfaces.
 
 Enjoy defending your base! 
