@@ -25,7 +25,7 @@ class UIManager:
         self.tower_info = [
             ("1 - Basic Tower ($20)", self.GREEN, "Fast firing, good all-around"),
             ("2 - Sniper Tower ($50)", self.BLUE, "Long range, high damage"),
-            ("3 - Freezer Tower ($30)", self.BLUE, "Slows enemies, no damage")
+            ("3 - Freezer Tower ($30)", self.BLUE, "Slows enemies, can be placed on water")
         ]
         
         # UI layout
@@ -85,6 +85,33 @@ class UIManager:
         for i, instruction in enumerate(instructions):
             inst_text = self.small_font.render(instruction, True, self.GRAY)
             screen.blit(inst_text, (10, y_offset + i * 25))
+    
+    def draw_terrain_legend(self, screen: pygame.Surface):
+        """Draw terrain type legend"""
+        legend_x = self.screen_width - 200
+        legend_y = 60
+        
+        legend_title = self.small_font.render("Terrain Types:", True, self.BLACK)
+        screen.blit(legend_title, (legend_x, legend_y))
+        
+        # Define terrain colors and descriptions
+        terrain_legend = [
+            ((34, 139, 34), "Grass - Normal"),
+            ((139, 69, 19), "Path - Enemy route"),
+            ((105, 105, 105), "Rock - No towers"),
+            ((30, 144, 255), "Water - Freezer only"),
+            ((0, 100, 0), "Forest - Reduced range"),
+            ((238, 203, 173), "Sand - Normal")
+        ]
+        
+        for i, (color, description) in enumerate(terrain_legend):
+            y = legend_y + 20 + i * 20
+            # Draw color square
+            pygame.draw.rect(screen, color, (legend_x, y, 12, 12))
+            pygame.draw.rect(screen, self.BLACK, (legend_x, y, 12, 12), 1)
+            # Draw description
+            desc_text = self.small_font.render(description, True, self.BLACK)
+            screen.blit(desc_text, (legend_x + 20, y - 2))
     
     def draw_wave_progress_bar(self, screen: pygame.Surface, wave_info: Dict):
         """Draw a progress bar for the current wave"""
@@ -183,6 +210,9 @@ class UIManager:
         
         # Wave progress bar
         self.draw_wave_progress_bar(screen, game_state['wave_info'])
+        
+        # Terrain legend
+        self.draw_terrain_legend(screen)
         
         # Overlays based on game state
         if game_state.get('paused'):

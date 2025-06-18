@@ -4,6 +4,16 @@ A Bloons TD-style tower defense game built in Python using Pygame.
 
 ## Features
 
+### Grid-Based Terrain System
+The game features a sophisticated terrain system with different types:
+
+- **Grass** (Green): Normal terrain, all towers can be placed
+- **Path** (Brown): Enemy route, no towers allowed
+- **Rock** (Gray): Mountainous terrain, no towers can be placed
+- **Water** (Blue): Special terrain, only Freezer towers can be placed
+- **Forest** (Dark Green): Reduces tower range by 20%
+- **Sand** (Tan): Normal terrain for tower placement
+
 ### Enemy Types
 - **Basic Enemy**: Standard health and speed
 - **Fast Enemy**: High speed, low health, less affected by freeze
@@ -13,7 +23,7 @@ A Bloons TD-style tower defense game built in Python using Pygame.
 ### Tower Types
 - **Basic Tower**: Standard damage and range, targets enemies closest to the end
 - **Sniper Tower**: High damage and range, targets enemies with the most health
-- **Freezer Tower**: Applies freeze effect, targets fastest enemies
+- **Freezer Tower**: Applies freeze effect, targets fastest enemies, can be placed on water
 
 ### Projectile Types  
 - **Basic Projectile**: Standard damage projectile
@@ -57,7 +67,12 @@ A Bloons TD-style tower defense game built in Python using Pygame.
 - **Money**: Earned by defeating enemies, used to buy towers
 - **Lives**: Lost when enemies reach the end of the path
 - **Waves**: Enemies spawn in increasingly difficult waves
-- **Tower Placement**: Towers cannot be placed on the path or too close to other towers
+- **Terrain-Aware Tower Placement**: 
+  - Towers snap to grid positions
+  - Different terrains have different placement rules
+  - Forest terrain reduces tower range
+  - Water terrain only allows Freezer towers but enhances their effectiveness
+  - Rock and path terrain block tower placement entirely
 
 ## Object-Oriented Design
 
@@ -95,10 +110,14 @@ tower_defence_game/
 │   └── homing_projectile.py # HomingProjectile class
 ├── game_systems/            # Game logic and management systems
 │   ├── __init__.py          # Package exports
-│   ├── map.py               # Map layout and tower placement
+│   ├── map.py               # Grid-based map with terrain system
 │   ├── wave_manager.py      # Enemy spawning and wave progression
 │   ├── ui_manager.py        # User interface rendering
-│   └── tower_manager.py     # Tower placement and management
+│   ├── tower_manager.py     # Tower placement and management
+│   └── terrain_types.py     # Terrain type definitions and properties
+├── maps/                    # Map layouts and data
+│   ├── __init__.py          # Package exports
+│   └── default_map.py       # Default map layout with terrain types
 ├── game.py                  # Main game controller (coordinates systems)
 ├── requirements.txt         # Python dependencies
 └── README.md               # This file

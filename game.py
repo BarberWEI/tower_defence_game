@@ -88,11 +88,8 @@ class Game:
     
     def attempt_tower_placement(self, pos):
         """Try to place a tower at the given position"""
-        def is_valid_position(x, y):
-            return self.map.is_valid_tower_position(x, y, self.towers)
-        
         success, tower, cost = self.tower_manager.attempt_tower_placement(
-            pos, self.money, is_valid_position
+            pos, self.money, self.towers, self.map
         )
         
         if success and tower:
@@ -206,7 +203,8 @@ class Game:
             self.screen, 
             self.tower_manager.placing_tower, 
             mouse_pos, 
-            self.towers
+            self.towers,
+            self.tower_manager.selected_tower_type
         )
         
         # Draw game objects

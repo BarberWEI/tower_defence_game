@@ -50,9 +50,9 @@ class TowerManager:
         return None
     
     def attempt_tower_placement(self, pos: Tuple[int, int], money: int, 
-                              is_valid_position_func) -> Tuple[bool, Optional[object], int]:
+                              existing_towers: List, map_obj) -> Tuple[bool, Optional[object], int]:
         """
-        Attempt to place a tower at the given position
+        Attempt to place a tower at the given position with terrain awareness
         Returns: (success, tower_object, cost)
         """
         if not self.placing_tower or not self.selected_tower_type:
@@ -62,10 +62,21 @@ class TowerManager:
         tower_type = self.selected_tower_type
         cost = self.get_tower_cost(tower_type)
         
-        # Check if position is valid and player can afford it
-        if is_valid_position_func(x, y) and self.can_afford_tower(tower_type, money):
-            tower = self.create_tower(tower_type, x, y)
+        # Check if player can afford it
+        if not self.can_afford_tower(tower_type, money):
+            return False, None, 0
+        
+        # Check if position is valid with terrain awareness
+        if map_obj.is_valid_tower_position(x, y, existing_towers, tower_type):
+            # Snap to grid center
+            grid_x, grid_y = map_obj.pixel_to_grid(x, y)
+            center_x, center_y = map_obj.grid_to_pixel(grid_x, grid_y)
+            
+            # Create tower at grid center
+            tower = self.create_tower(tower_type, center_x, center_y)
             if tower:
+                # Apply terrain effects to the tower
+                map_obj.apply_terrain_effects_to_tower(tower, grid_x, grid_y)
                 self.cancel_placement()  # Reset placement state
                 return True, tower, cost
         
