@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional
-from towers import BasicTower, SniperTower, FreezerTower
+from towers import (BasicTower, SniperTower, FreezerTower, DetectorTower, 
+                   AntiAirTower, PoisonTower, LaserTower)
 
 class TowerManager:
     """Manages tower placement, costs, and tower-related logic"""
@@ -9,14 +10,22 @@ class TowerManager:
         self.tower_costs = {
             "basic": 20,
             "sniper": 50,
-            "freezer": 30
+            "freezer": 30,
+            "detector": 40,
+            "antiair": 60,
+            "poison": 45,
+            "laser": 80
         }
         
         # Tower classes
         self.tower_classes = {
             "basic": BasicTower,
             "sniper": SniperTower,
-            "freezer": FreezerTower
+            "freezer": FreezerTower,
+            "detector": DetectorTower,
+            "antiair": AntiAirTower,
+            "poison": PoisonTower,
+            "laser": LaserTower
         }
         
         # State

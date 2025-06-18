@@ -80,6 +80,18 @@ class Game:
         
         elif key == pygame.K_3:
             self.tower_manager.select_tower_type("freezer")
+            
+        elif key == pygame.K_4:
+            self.tower_manager.select_tower_type("detector")
+            
+        elif key == pygame.K_5:
+            self.tower_manager.select_tower_type("antiair")
+            
+        elif key == pygame.K_6:
+            self.tower_manager.select_tower_type("poison")
+            
+        elif key == pygame.K_7:
+            self.tower_manager.select_tower_type("laser")
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks"""
@@ -98,8 +110,19 @@ class Game:
     
     def update_enemies(self):
         """Update all enemies"""
+        enemies_to_add = []
+        
         for enemy in self.enemies[:]:
             enemy.update()
+            
+            # Handle poison effects
+            if hasattr(enemy, 'poison_timer') and enemy.poison_timer > 0:
+                enemy.poison_timer -= 1
+                if hasattr(enemy, 'poison_damage_timer'):
+                    enemy.poison_damage_timer += 1
+                    if enemy.poison_damage_timer >= 60:  # Every second
+                        enemy.take_damage(enemy.poison_damage)
+                        enemy.poison_damage_timer = 0
             
             if enemy.reached_end:
                 self.lives -= 1
@@ -110,6 +133,25 @@ class Game:
             elif enemy.health <= 0:
                 self.money += enemy.reward
                 self.enemies.remove(enemy)
+                
+                # Handle splitting enemies
+                if hasattr(enemy, 'on_death'):
+                    spawned_enemies = enemy.on_death()
+                    if spawned_enemies:
+                        enemies_to_add.extend(spawned_enemies)
+                        
+                # Handle boss minion spawning
+                if hasattr(enemy, 'should_spawn_minions') and enemy.should_spawn_minions():
+                    minion_count = enemy.get_minion_count()
+                    for i in range(minion_count):
+                        from enemies import BasicEnemy
+                        minion = BasicEnemy(self.map.get_path())
+                        minion.x = enemy.x + (i - minion_count/2) * 30
+                        minion.y = enemy.y
+                        enemies_to_add.append(minion)
+        
+        # Add any new enemies from splitting or boss abilities
+        self.enemies.extend(enemies_to_add)
     
     def update_towers(self):
         """Update all towers"""

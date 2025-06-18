@@ -15,15 +15,36 @@ The game features a sophisticated terrain system with different types:
 - **Sand** (Tan): Normal terrain for tower placement
 
 ### Enemy Types
+
+#### Basic Enemies
 - **Basic Enemy**: Standard health and speed
 - **Fast Enemy**: High speed, low health, less affected by freeze
 - **Tank Enemy**: High health, slow speed, has armor that reduces damage
 - **Shielded Enemy**: Has regenerating shields that must be destroyed first
 
+#### Special Enemies
+- **Invisible Enemy**: Semi-transparent, can only be detected by Detector towers or at close range
+- **Flying Enemy**: Hovers above ground, can only be hit by Anti-Air and Sniper towers
+- **Regenerating Enemy**: Heals over time when not taking damage, countered by Poison towers
+- **Splitting Enemy**: Splits into smaller enemies when killed (up to 3 generations)
+- **Teleporting Enemy**: Can teleport forward to avoid damage, countered by Laser towers
+
+#### Boss Enemies
+- **Speed Boss**: Becomes faster as it takes damage, has dash ability and speed trail
+- **Mega Boss**: Massive health, damage reduction, multiple phases, spawns minions
+
 ### Tower Types
-- **Basic Tower**: Standard damage and range, targets enemies closest to the end
-- **Sniper Tower**: High damage and range, targets enemies with the most health
-- **Freezer Tower**: Applies freeze effect, targets fastest enemies, can be placed on water
+
+#### Basic Towers
+- **Basic Tower** ($20): Standard damage and range, targets enemies closest to the end
+- **Sniper Tower** ($50): High damage and range, targets enemies with the most health
+- **Freezer Tower** ($30): Applies freeze effect, targets fastest enemies, can be placed on water
+
+#### Specialized Towers
+- **Detector Tower** ($40): Reveals invisible enemies, long detection range
+- **Anti-Air Tower** ($60): Fires homing missiles, prioritizes flying enemies
+- **Poison Tower** ($45): Applies poison damage over time, stops regeneration
+- **Laser Tower** ($80): Charges and fires piercing laser beam through multiple enemies
 
 ### Projectile Types  
 - **Basic Projectile**: Standard damage projectile
@@ -51,13 +72,19 @@ The game features a sophisticated terrain system with different types:
    - **1**: Select Basic Tower ($20)
    - **2**: Select Sniper Tower ($50) 
    - **3**: Select Freezer Tower ($30)
+   - **4**: Select Detector Tower ($40)
+   - **5**: Select Anti-Air Tower ($60)
+   - **6**: Select Poison Tower ($45)
+   - **7**: Select Laser Tower ($80)
    - **Click**: Place selected tower
    - **ESC**: Cancel tower placement
    - **SPACE**: Pause/Resume game
 
 3. **Objective:**
-   - Defend your base by placing towers along the path
-   - Enemies will spawn in waves and follow the brown path
+   - Defend your base by placing towers on appropriate terrain
+   - Enemies will spawn in waves with increasing difficulty
+   - Special enemies require specific tower types to counter effectively
+   - Boss waves (every 10 waves) feature powerful enemies with unique abilities
    - Prevent enemies from reaching the end to avoid losing lives
    - Earn money by defeating enemies to buy more towers
    - Survive as many waves as possible!

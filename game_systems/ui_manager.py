@@ -25,7 +25,11 @@ class UIManager:
         self.tower_info = [
             ("1 - Basic Tower ($20)", self.GREEN, "Fast firing, good all-around"),
             ("2 - Sniper Tower ($50)", self.BLUE, "Long range, high damage"),
-            ("3 - Freezer Tower ($30)", self.BLUE, "Slows enemies, can be placed on water")
+            ("3 - Freezer Tower ($30)", self.BLUE, "Slows enemies, can be placed on water"),
+            ("4 - Detector Tower ($40)", (255, 255, 0), "Reveals invisible enemies"),
+            ("5 - Anti-Air Tower ($60)", (0, 191, 255), "Targets flying enemies"),
+            ("6 - Poison Tower ($45)", (50, 205, 50), "Poison damage over time"),
+            ("7 - Laser Tower ($80)", (255, 0, 255), "Pierces through enemies")
         ]
         
         # UI layout
@@ -76,12 +80,13 @@ class UIManager:
         """Draw game instructions"""
         instructions = [
             "SPACE - Pause/Resume",
-            "ESC - Cancel tower placement",
+            "ESC - Cancel tower placement", 
             "Click to place selected tower",
+            "1-7 - Select tower type",
             "R - Restart game"
         ]
         
-        y_offset = 250
+        y_offset = 400  # Moved down to make room for more towers
         for i, instruction in enumerate(instructions):
             inst_text = self.small_font.render(instruction, True, self.GRAY)
             screen.blit(inst_text, (10, y_offset + i * 25))

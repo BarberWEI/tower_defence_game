@@ -1,5 +1,7 @@
 from typing import List, Tuple
-from enemies import BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy
+from enemies import (BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy,
+                    InvisibleEnemy, FlyingEnemy, RegeneratingEnemy, 
+                    SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss)
 
 class WaveManager:
     """Manages enemy waves and spawning"""
@@ -13,18 +15,37 @@ class WaveManager:
         self.spawn_delay = 60  # frames between enemy spawns
         self.wave_complete = False
         
-        # Wave configuration
+        # Wave configuration with boss waves
         self.wave_configs = {
             # Wave ranges and their enemy compositions
-            (1, 3): [(BasicEnemy, 1.0)],  # Waves 1-3: Only basic enemies
-            (4, 6): [(BasicEnemy, 0.7), (FastEnemy, 0.3)],  # Waves 4-6: Basic + Fast
-            (7, 10): [(BasicEnemy, 0.5), (FastEnemy, 0.3), (TankEnemy, 0.2)],  # Waves 7-10: Mix
-            (11, float('inf')): [(BasicEnemy, 0.4), (FastEnemy, 0.3), (TankEnemy, 0.2), (ShieldedEnemy, 0.1)]
+            (1, 2): [(BasicEnemy, 1.0)],  # Waves 1-2: Only basic enemies
+            (3, 4): [(BasicEnemy, 0.7), (FastEnemy, 0.3)],  # Waves 3-4: Basic + Fast
+            (5, 6): [(BasicEnemy, 0.5), (FastEnemy, 0.3), (TankEnemy, 0.2)],  # Basic mix
+            (7, 8): [(BasicEnemy, 0.4), (FastEnemy, 0.2), (TankEnemy, 0.2), (InvisibleEnemy, 0.2)],  # Add invisible
+            (9, 10): [(BasicEnemy, 0.3), (FastEnemy, 0.2), (TankEnemy, 0.2), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15)],  # Add flying
+            (11, 12): [(BasicEnemy, 0.25), (FastEnemy, 0.15), (TankEnemy, 0.2), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1)],  # Add shielded
+            (13, 14): [(BasicEnemy, 0.2), (FastEnemy, 0.15), (TankEnemy, 0.15), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1)],  # Add regenerating
+            (15, 16): [(BasicEnemy, 0.15), (FastEnemy, 0.15), (TankEnemy, 0.15), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.05)],  # Add teleporting
+            (17, 19): [(BasicEnemy, 0.15), (FastEnemy, 0.15), (TankEnemy, 0.1), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.05), (SplittingEnemy, 0.05)],  # Add splitting
+            (20, float('inf')): [(BasicEnemy, 0.1), (FastEnemy, 0.1), (TankEnemy, 0.1), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.1), (SplittingEnemy, 0.1)]  # All enemies
+        }
+        
+        # Special boss waves
+        self.boss_waves = {
+            10: SpeedBoss,
+            20: MegaBoss,
+            30: MegaBoss,  # Mega boss returns
+            40: SpeedBoss,  # Speed boss returns stronger
+            50: MegaBoss   # Final mega boss
         }
     
     def get_enemy_type_for_wave(self) -> type:
         """Determine which enemy type to spawn based on current wave"""
         import random
+        
+        # Check for boss waves first
+        if self.wave_number in self.boss_waves:
+            return self.boss_waves[self.wave_number]
         
         # Find the appropriate wave configuration
         for (min_wave, max_wave), enemy_types in self.wave_configs.items():
@@ -74,15 +95,23 @@ class WaveManager:
         if self.is_wave_complete([]):  # Empty list since we're just starting
             self.wave_number += 1
             self.enemies_spawned = 0
-            self.enemies_per_wave += 2  # Increase difficulty
+            
+            # Boss waves have different enemy counts
+            if self.wave_number in self.boss_waves:
+                self.enemies_per_wave = 1  # Only one boss
+            else:
+                self.enemies_per_wave += 2  # Increase difficulty for normal waves
             
             # Adjust spawn delay based on wave (faster spawning in later waves)
             if self.wave_number % 5 == 0:
                 self.spawn_delay = max(30, self.spawn_delay - 5)
             
+            # Boss waves give bigger money bonus
+            money_bonus = 100 if self.wave_number in self.boss_waves else 50
+            
             return {
                 'wave_number': self.wave_number,
-                'money_bonus': 50,
+                'money_bonus': money_bonus,
                 'enemies_per_wave': self.enemies_per_wave
             }
         
