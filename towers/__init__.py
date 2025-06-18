@@ -1,13 +1,6 @@
+from .tower import Tower
 from .basic_tower import BasicTower
 from .sniper_tower import SniperTower
-from .splash_tower import SplashTower
-from .laser_tower import LaserTower
-from .frost_tower import FrostTower
+from .freezer_tower import FreezerTower
 
-__all__ = [
-    "BasicTower",
-    "SniperTower",
-    "SplashTower",
-    "LaserTower",
-    "FrostTower"
-] 
+__all__ = ['Tower', 'BasicTower', 'SniperTower', 'FreezerTower'] 

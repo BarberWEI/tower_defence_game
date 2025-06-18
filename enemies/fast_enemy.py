@@ -1,13 +1,17 @@
-from .base_enemy import BaseEnemy
+from typing import List, Tuple
+from .enemy import Enemy
 
-class FastEnemy(BaseEnemy):
-    def __init__(self, path, config):
-        super().__init__(path, config)
-        self.type = 'fast'
-        self.health = int(config.enemy_base_health * 0.7)
-        self.max_health = self.health
-        self.speed = config.enemy_base_speed * 1.5
-        self.reward = int(config.enemy_reward * 1.2)
+class FastEnemy(Enemy):
+    """Fast enemy with high speed but low health"""
+    def __init__(self, path: List[Tuple[int, int]]):
+        super().__init__(path)
+        self.max_health = 1
+        self.health = self.max_health
+        self.speed = 2.5
+        self.reward = 8
+        self.size = 6
+        self.color = (255, 255, 0)  # Yellow
     
-    def get_enemy_color(self):
-        return (255, 165, 0)  # Orange 
+    def apply_freeze(self, duration: int):
+        """Fast enemies are less affected by freeze"""
+        super().apply_freeze(duration // 2) 

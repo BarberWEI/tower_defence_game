@@ -1,14 +1,12 @@
-from .base_tower import BaseTower
+from .tower import Tower
 
-class BasicTower(BaseTower):
-    def __init__(self, pos, config):
-        super().__init__(pos, config)
-        self.type = 'basic'
-        self.range = 150
-        self.damage = 20
-        self.cooldown = 30
-        self.cost = 50
-        self.continuous = False
-    
-    def get_tower_color(self):
-        return (100, 100, 100)  # Gray 
+class BasicTower(Tower):
+    """Basic tower with standard stats and targeting"""
+    def __init__(self, x: int, y: int):
+        super().__init__(x, y)
+        self.range = 80
+        self.damage = 1
+        self.fire_rate = 30  # 2 shots per second at 60 FPS
+        self.projectile_speed = 5
+        self.size = 12
+        self.color = (0, 200, 0)  # Green 
