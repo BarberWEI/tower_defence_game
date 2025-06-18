@@ -8,7 +8,7 @@ class FastEnemy(Enemy):
         self.max_health = 1
         self.health = self.max_health
         self.speed = 2.5
-        self.reward = 8
+        self.reward = 6
         self.size = 6
         self.color = (255, 255, 0)  # Yellow
     

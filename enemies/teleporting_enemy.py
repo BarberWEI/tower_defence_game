@@ -11,7 +11,7 @@ class TeleportingEnemy(Enemy):
         self.health = 50
         self.max_health = 50
         self.speed = 1.2
-        self.reward = 18
+        self.reward = 14
         self.color = (138, 43, 226)  # Blue violet
         
         # Teleport mechanics

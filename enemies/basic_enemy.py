@@ -8,6 +8,6 @@ class BasicEnemy(Enemy):
         self.max_health = 1
         self.health = self.max_health
         self.speed = 1.0
-        self.reward = 5
+        self.reward = 4
         self.size = 8
         self.color = (255, 100, 100)  # Light red 

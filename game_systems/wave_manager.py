@@ -23,30 +23,30 @@ class WaveManager:
             'boss_enemy_count': 1,           # Number of enemies in boss waves
         }
         
-        # Per-round adjustment configuration - EASY TO MODIFY!
+        # Per-round adjustment configuration - INCREASED DIFFICULTY!
         self.round_progression = {
-            # How many enemies to add each round
+            # How many enemies to add each round - INCREASED
             'enemy_increase_per_round': {
-                'default': 2,                    # Default increase per round
+                'default': 3,                    # Default increase per round (+1 from 2)
                 'wave_ranges': {
-                    (1, 5): 1,                   # Waves 1-5: +1 enemy per round (slow start)
-                    (6, 10): 2,                  # Waves 6-10: +2 enemies per round (normal)
-                    (11, 15): 3,                 # Waves 11-15: +3 enemies per round (ramping up)
-                    (16, 20): 4,                 # Waves 16-20: +4 enemies per round (getting intense)
-                    (21, 30): 5,                 # Waves 21-30: +5 enemies per round (very intense)
-                    (31, 99): 6,                 # Waves 31+: +6 enemies per round (maximum chaos)
+                    (1, 5): 2,                   # Waves 1-5: +2 enemy per round (+1 from 1)
+                    (6, 10): 3,                  # Waves 6-10: +3 enemies per round (+1 from 2)
+                    (11, 15): 4,                 # Waves 11-15: +4 enemies per round (+1 from 3)
+                    (16, 20): 6,                 # Waves 16-20: +6 enemies per round (+2 from 4)
+                    (21, 30): 8,                 # Waves 21-30: +8 enemies per round (+3 from 5)
+                    (31, 99): 10,                # Waves 31+: +10 enemies per round (+4 from 6)
                 }
             },
             
-            # How much to reduce spawn delay each round (making spawning faster)
+            # How much to reduce spawn delay each round (making spawning faster) - INCREASED
             'spawn_delay_reduction_per_round': {
-                'default': 3,                    # Default reduction per round
+                'default': 4,                    # Default reduction per round (+1 from 3)
                 'wave_ranges': {
-                    (1, 3): 2,                   # Waves 1-3: -2 frames per round (very slow start)
-                    (4, 8): 3,                   # Waves 4-8: -3 frames per round (slow)
-                    (9, 15): 4,                  # Waves 9-15: -4 frames per round (normal)
-                    (16, 25): 5,                 # Waves 16-25: -5 frames per round (fast)
-                    (26, 99): 6,                 # Waves 26+: -6 frames per round (very fast)
+                    (1, 3): 3,                   # Waves 1-3: -3 frames per round (+1 from 2)
+                    (4, 8): 4,                   # Waves 4-8: -4 frames per round (+1 from 3)
+                    (9, 15): 5,                  # Waves 9-15: -5 frames per round (+1 from 4)
+                    (16, 25): 7,                 # Waves 16-25: -7 frames per round (+2 from 5)
+                    (26, 99): 9,                 # Waves 26+: -9 frames per round (+3 from 6)
                 }
             },
             
@@ -201,27 +201,27 @@ class WaveManager:
         return enemy
     
     def apply_enemy_scaling(self, enemy):
-        """Apply progressive scaling to enemies based on wave number"""
+        """Apply progressive scaling to enemies based on wave number - INCREASED DIFFICULTY"""
         if self.wave_number <= 1:
             return  # No scaling for wave 1
         
-        # Calculate scaling factors (very gradual)
+        # Calculate scaling factors - MORE AGGRESSIVE
         wave_factor = (self.wave_number - 1)
         
-        # Health scaling: +8% per wave (very gradual)
-        health_multiplier = 1.0 + (wave_factor * 0.08)
+        # Health scaling: +12% per wave (increased from 8%)
+        health_multiplier = 1.0 + (wave_factor * 0.12)
         
-        # Speed scaling: +2% per wave (very subtle)
-        speed_multiplier = 1.0 + (wave_factor * 0.02)
+        # Speed scaling: +4% per wave (increased from 2%)
+        speed_multiplier = 1.0 + (wave_factor * 0.04)
         
-        # Reward scaling: +5% per wave to keep economy balanced
-        reward_multiplier = 1.0 + (wave_factor * 0.05)
+        # Reward scaling: +3% per wave (reduced from 5% to compensate for base reward reduction)
+        reward_multiplier = 1.0 + (wave_factor * 0.03)
         
-        # Apply scaling with caps to prevent extreme values
-        enemy.max_health = int(enemy.max_health * min(health_multiplier, 3.0))  # Cap at 3x health
+        # Apply scaling with higher caps for more extreme late-game difficulty
+        enemy.max_health = int(enemy.max_health * min(health_multiplier, 5.0))  # Cap at 5x health (increased from 3x)
         enemy.health = enemy.max_health
-        enemy.speed = enemy.speed * min(speed_multiplier, 2.0)  # Cap at 2x speed
-        enemy.reward = int(enemy.reward * min(reward_multiplier, 2.5))  # Cap at 2.5x reward
+        enemy.speed = enemy.speed * min(speed_multiplier, 3.0)  # Cap at 3x speed (increased from 2x)
+        enemy.reward = int(enemy.reward * min(reward_multiplier, 2.0))  # Cap at 2x reward (reduced from 2.5x)
     
     def is_wave_complete(self, active_enemies: List) -> bool:
         """Check if the current wave is complete"""

@@ -13,7 +13,7 @@ class SplittingEnemy(Enemy):
         # Scale stats based on generation
         base_health = 100
         base_speed = 0.8
-        base_reward = 25
+        base_reward = 20
         
         self.health = int(base_health / generation)
         self.max_health = self.health
@@ -58,12 +58,11 @@ class SplittingEnemy(Enemy):
                 new_enemy.path_index = self.path_index
                 new_enemy.distance_traveled = self.distance_traveled
                 
-                # Position them slightly offset on the path instead of spreading randomly
-                offset_distance = (i - self.split_count/2) * 15  # Small offset along path
-                new_enemy.distance_traveled = max(0, self.distance_traveled + offset_distance)
-                
-                # Update position based on path
-                new_enemy.update_position()
+                # Position them slightly offset from the current position
+                offset_x = (i - self.split_count/2) * 15  # Small offset
+                offset_y = (i - self.split_count/2) * 10  # Small vertical offset
+                new_enemy.x = self.x + offset_x
+                new_enemy.y = self.y + offset_y
                 spawned_enemies.append(new_enemy)
             return spawned_enemies
         return [] 

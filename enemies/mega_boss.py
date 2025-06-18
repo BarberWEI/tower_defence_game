@@ -11,7 +11,7 @@ class MegaBoss(Enemy):
         self.health = 2000
         self.max_health = 2000
         self.speed = 0.5
-        self.reward = 500
+        self.reward = 400
         self.color = (128, 0, 128)  # Purple
         self.size = 25
         

@@ -9,7 +9,7 @@ class InvisibleEnemy(Enemy):
         self.health = 60
         self.max_health = 60
         self.speed = 1.5
-        self.reward = 15
+        self.reward = 12
         self.color = (128, 128, 128, 100)  # Semi-transparent gray
         self.invisible = True
         self.detection_radius = 80  # Radius where it becomes visible

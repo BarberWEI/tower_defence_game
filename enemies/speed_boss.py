@@ -11,7 +11,7 @@ class SpeedBoss(Enemy):
         self.max_health = 800
         self.base_speed = 1.0
         self.speed = self.base_speed
-        self.reward = 200
+        self.reward = 160
         self.color = (255, 255, 0)  # Yellow
         self.size = 18
         

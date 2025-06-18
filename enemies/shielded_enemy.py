@@ -13,7 +13,7 @@ class ShieldedEnemy(Enemy):
         self.shield_regen_timer = 0
         self.shield_regen_delay = 180  # 3 seconds at 60 FPS
         self.speed = 1.2
-        self.reward = 12
+        self.reward = 10
         self.size = 10
         self.color = (0, 255, 255)  # Cyan
     

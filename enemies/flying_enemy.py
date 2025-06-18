@@ -10,7 +10,7 @@ class FlyingEnemy(Enemy):
         self.health = 40
         self.max_health = 40
         self.speed = 2.0
-        self.reward = 12
+        self.reward = 10
         self.color = (255, 165, 0)  # Orange
         self.flying = True
         self.hover_offset = 0  # For hovering animation

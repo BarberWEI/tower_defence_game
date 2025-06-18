@@ -9,7 +9,7 @@ class RegeneratingEnemy(Enemy):
         self.health = 80
         self.max_health = 80
         self.speed = 1.0
-        self.reward = 20
+        self.reward = 16
         self.color = (0, 255, 100)  # Light green
         self.regen_rate = 0.5  # Health per second
         self.regen_timer = 0

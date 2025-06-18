@@ -8,7 +8,7 @@ class TankEnemy(Enemy):
         self.max_health = 5
         self.health = self.max_health
         self.speed = 0.5
-        self.reward = 15
+        self.reward = 12
         self.size = 12
         self.color = (100, 50, 50)  # Dark red
     
