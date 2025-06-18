@@ -21,6 +21,9 @@ class Enemy:
         # Status effects
         self.frozen = False
         self.freeze_timer = 0
+        self.wet = False
+        self.wet_timer = 0
+        self.lightning_damage_multiplier = 1.0
         
         # State
         self.reached_end = False
@@ -33,6 +36,13 @@ class Enemy:
             self.freeze_timer -= 1
             if self.freeze_timer <= 0:
                 self.frozen = False
+        
+        # Handle wet effect
+        if self.wet:
+            self.wet_timer -= 1
+            if self.wet_timer <= 0:
+                self.wet = False
+                self.lightning_damage_multiplier = 1.0
         
         # Move along path if not frozen
         if not self.frozen:
@@ -79,15 +89,36 @@ class Enemy:
         self.frozen = True
         self.freeze_timer = max(self.freeze_timer, duration)
     
+    def apply_wet_status(self, duration: int, lightning_multiplier: float):
+        """Apply wet status to the enemy"""
+        self.wet = True
+        self.wet_timer = max(self.wet_timer, duration)
+        self.lightning_damage_multiplier = lightning_multiplier
+    
     def get_distance_from_start(self) -> float:
         """Get the total distance traveled along the path"""
         return self.distance_traveled
     
     def draw(self, screen: pygame.Surface):
         """Draw the enemy on the screen"""
-        # Draw main enemy circle
-        color = (100, 100, 255) if self.frozen else self.color
+        # Draw main enemy circle with status effects
+        color = self.color
+        if self.frozen:
+            color = (100, 100, 255)  # Blue when frozen
+        elif self.wet:
+            # Slightly darker and more saturated when wet
+            color = tuple(max(0, min(255, int(c * 0.8))) for c in self.color)
+        
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
+        
+        # Draw wet effect overlay
+        if self.wet:
+            # Draw water droplets around enemy
+            for angle in [0, 120, 240]:
+                rad = math.radians(angle)
+                drop_x = self.x + math.cos(rad) * (self.size + 3)
+                drop_y = self.y + math.sin(rad) * (self.size + 3)
+                pygame.draw.circle(screen, (30, 144, 255), (int(drop_x), int(drop_y)), 2)
         
         # Draw health bar
         if self.health < self.max_health:

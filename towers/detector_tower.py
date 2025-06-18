@@ -3,87 +3,74 @@ import pygame
 import math
 
 class DetectorTower(Tower):
-    """Tower that can detect invisible enemies and has long range"""
+    """Support tower that reveals invisible enemies to other towers - does not attack"""
     
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.damage = 15
-        self.range = 200  # Very long range
-        self.fire_rate = 45  # Moderate fire rate
-        self.projectile_speed = 6
+        super().__init__(x, y, 'detector')
+        self.damage = 0  # No damage - pure support
+        self.range = 0   # No attack range
+        self.fire_rate = 0  # No firing
+        self.projectile_speed = 0
         self.size = 12
         self.color = (255, 255, 0)  # Yellow
-        self.detection_range = 250  # Even longer detection range
+        self.detection_range = 300  # Large detection range
         
         # Detection properties
         self.detected_enemies = set()  # Track detected invisible enemies
         self.detection_pulse_timer = 0
+        self.max_detections = 3  # Can only detect 3 invisible enemies at once
+        
+        # No targeting - pure support
+        self.can_target_flying = False
+        self.can_target_invisible = False
         
     def update(self, enemies, projectiles):
-        """Update with detection capabilities"""
-        super().update(enemies, projectiles)
-        
+        """Update with detection capabilities only - no attacking"""
         # Update detection pulse
         self.detection_pulse_timer += 0.1
         
-        # Detect invisible enemies
+        # Detect invisible enemies and make them targetable by other towers (max 3)
         self.detected_enemies.clear()
+        invisible_in_range = []
+        
+        # Find all invisible enemies in range
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
             if distance <= self.detection_range:
                 if hasattr(enemy, 'invisible') and enemy.invisible:
-                    self.detected_enemies.add(enemy)
-    
-    def can_target_enemy(self, enemy):
-        """Check if this tower can target an enemy"""
-        # Can always target regular enemies
-        if not hasattr(enemy, 'invisible') or not enemy.invisible:
-            return True
-            
-        # Can target invisible enemies within detection range
-        distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-        return distance <= self.detection_range
+                    invisible_in_range.append((enemy, distance))
+        
+        # Sort by distance and take only the closest 3
+        invisible_in_range.sort(key=lambda x: x[1])
+        detected_count = 0
+        
+        for enemy, distance in invisible_in_range:
+            if detected_count < self.max_detections:
+                self.detected_enemies.add(enemy)
+                # Mark enemy as detected so other towers can target it
+                enemy.detected_by_detector = True
+                detected_count += 1
+            else:
+                # Clear detection flag for enemies beyond the limit
+                if hasattr(enemy, 'detected_by_detector'):
+                    enemy.detected_by_detector = False
     
     def acquire_target(self, enemies):
-        """Find target with detection capabilities"""
-        targets_in_range = []
-        
-        for enemy in enemies:
-            distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-            if distance <= self.range and self.can_target_enemy(enemy):
-                targets_in_range.append((enemy, distance))
-        
-        if targets_in_range:
-            # Target closest enemy
-            targets_in_range.sort(key=lambda x: x[1])
-            self.target = targets_in_range[0][0]
-            
-            # Calculate angle to target
-            if self.target:
-                dx = self.target.x - self.x
-                dy = self.target.y - self.y
-                self.angle = math.atan2(dy, dx)
-        else:
-            self.target = None
+        """Detector tower doesn't target enemies - pure support"""
+        self.target = None
     
     def shoot(self, projectiles):
-        """Shoot at target"""
-        if self.target:
-            from projectiles import BasicProjectile
-            projectile = BasicProjectile(
-                self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage
-            )
-            projectile.color = (255, 255, 0)  # Yellow projectile
-            projectiles.append(projectile)
+        """Detector tower doesn't shoot - pure support"""
+        pass
     
-    def draw(self, screen):
+    def draw(self, screen, selected: bool = False):
         """Draw detector tower with detection effects"""
-        # Draw range circle
-        pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
+        # Draw detection range circle when selected
+        if selected:
+            pygame.draw.circle(screen, (255, 255, 100), (int(self.x), int(self.y)), int(self.detection_range), 1)
         
         # Draw detection pulse
-        pulse_radius = int(30 + 10 * math.sin(self.detection_pulse_timer))
+        pulse_radius = int(25 + 8 * math.sin(self.detection_pulse_timer))
         pygame.draw.circle(screen, (255, 255, 0), (int(self.x), int(self.y)), pulse_radius, 1)
         
         # Draw main tower
@@ -104,11 +91,10 @@ class DetectorTower(Tower):
         # Draw detection lines to invisible enemies
         for enemy in self.detected_enemies:
             pygame.draw.line(screen, (255, 255, 0), 
-                           (int(self.x), int(self.y)), (int(enemy.x), int(enemy.y)), 1)
+                           (int(self.x), int(self.y)), (int(enemy.x), int(enemy.y)), 2)
         
-        # Draw barrel pointing at target
-        if self.target:
-            barrel_length = self.size + 5
-            end_x = self.x + math.cos(self.angle) * barrel_length
-            end_y = self.y + math.sin(self.angle) * barrel_length
-            pygame.draw.line(screen, (0, 0, 0), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 3) 
+        # Draw rotating radar sweep
+        sweep_angle = self.detection_pulse_timer * 2
+        sweep_x = self.x + math.cos(sweep_angle) * 15
+        sweep_y = self.y + math.sin(sweep_angle) * 15
+        pygame.draw.line(screen, (255, 255, 255), (int(self.x), int(self.y)), (int(sweep_x), int(sweep_y)), 2) 

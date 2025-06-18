@@ -2,6 +2,7 @@ import pygame
 import math
 from typing import List, Tuple, Optional
 from .terrain_types import *
+from .tower_sizes import *
 from maps.default_map import get_map_data
 
 class Map:
@@ -11,17 +12,32 @@ class Map:
         self.screen_width = screen_width
         self.screen_height = screen_height
         
-        # Map positioning - offset to leave space for UI
-        self.map_offset_x = 20  # Small margin from left
-        self.map_offset_y = 140  # Space for top UI (130px + margin)
-        
-        # Load map data
+        # Load map data first
         map_data = get_map_data()
         self.grid_layout = map_data['layout']
         self.grid_width = map_data['width'] 
         self.grid_height = map_data['height']
-        self.cell_size = map_data['cell_size']
         self.path_waypoints = map_data['path_waypoints']
+        
+        # Calculate dynamic map positioning and cell size to fill available space
+        self.top_ui_height = 140  # Space for top UI
+        self.bottom_ui_height = 120  # Space for bottom UI
+        
+        # Available space for map
+        available_width = screen_width
+        available_height = screen_height - self.top_ui_height - self.bottom_ui_height
+        
+        # Calculate cell size to fit the grid perfectly in available space
+        cell_width = available_width // self.grid_width
+        cell_height = available_height // self.grid_height
+        self.cell_size = min(cell_width, cell_height)  # Use smaller to maintain aspect ratio
+        
+        # Calculate actual map dimensions and center it
+        actual_map_width = self.grid_width * self.cell_size
+        actual_map_height = self.grid_height * self.cell_size
+        
+        self.map_offset_x = (available_width - actual_map_width) // 2
+        self.map_offset_y = self.top_ui_height + (available_height - actual_map_height) // 2
         
         # Convert grid waypoints to pixel coordinates
         self.path = self._convert_waypoints_to_pixels()
@@ -31,8 +47,8 @@ class Map:
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
         
-        # Tower placement constraints
-        self.min_distance_between_towers = 35  # Reduced since we use grid
+        # Tower placement constraints (dynamic based on cell size)
+        self.min_distance_between_towers = max(self.cell_size * 0.8, 25)  # Scale with cell size
     
     def _convert_waypoints_to_pixels(self) -> List[Tuple[int, int]]:
         """Convert grid-based waypoints to pixel coordinates"""
@@ -75,24 +91,34 @@ class Map:
         """Check if a position is valid for tower placement"""
         grid_x, grid_y = self.pixel_to_grid(pixel_x, pixel_y)
         
-        # Check if within map bounds
-        if not (0 <= grid_x < self.grid_width and 0 <= grid_y < self.grid_height):
+        # Check if tower can be placed at this position (multi-block support)
+        if tower_type and not can_place_tower_at_position(grid_x, grid_y, tower_type, 
+                                                         self.grid_width, self.grid_height, existing_towers):
             return False
         
-        terrain_type = self.get_terrain_at_grid(grid_x, grid_y)
-        
-        # Check if terrain allows tower placement
-        if not is_tower_placeable(terrain_type):
+        # Check if within map bounds (for single cell, multi-cell handled above)
+        if not tower_type and not (0 <= grid_x < self.grid_width and 0 <= grid_y < self.grid_height):
             return False
         
-        # Check if specific tower type can be placed on this terrain
-        if tower_type and not can_place_tower_type(terrain_type, tower_type):
-            return False
+        # Get all cells that would be occupied by this tower
+        if tower_type:
+            occupied_cells = get_tower_occupied_cells(grid_x, grid_y, tower_type)
+        else:
+            occupied_cells = [(grid_x, grid_y)]
         
-        # Check if too close to other towers
-        for tower in existing_towers:
-            distance = math.sqrt((pixel_x - tower.x)**2 + (pixel_y - tower.y)**2)
-            if distance < self.min_distance_between_towers:
+        # Check terrain for all occupied cells
+        for cell_x, cell_y in occupied_cells:
+            if not (0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height):
+                return False
+                
+            terrain_type = self.get_terrain_at_grid(cell_x, cell_y)
+            
+            # Check if terrain allows tower placement
+            if not is_tower_placeable(terrain_type):
+                return False
+            
+            # Check if specific tower type can be placed on this terrain
+            if tower_type and not can_place_tower_type(terrain_type, tower_type):
                 return False
         
         return True
@@ -152,12 +178,9 @@ class Map:
     
     def draw_tower_placement_preview(self, screen: pygame.Surface, mouse_pos: Tuple[int, int], 
                                    existing_towers: List, tower_type: str = None):
-        """Draw tower placement preview with terrain-aware feedback"""
+        """Draw tower placement preview with terrain-aware feedback and multi-block support"""
         x, y = mouse_pos
         grid_x, grid_y = self.pixel_to_grid(x, y)
-        
-        # Snap to grid center
-        center_x, center_y = self.grid_to_pixel(grid_x, grid_y)
         
         # Get placement info
         placement_info = self.get_placement_info(x, y, tower_type)
@@ -173,8 +196,31 @@ class Map:
         else:
             color = self.RED
         
-        # Draw placement preview
-        pygame.draw.circle(screen, color, (center_x, center_y), 18, 3)
+        # Draw multi-block placement preview
+        if tower_type:
+            occupied_cells = get_tower_occupied_cells(grid_x, grid_y, tower_type)
+            
+            # Draw all occupied cells
+            for cell_x, cell_y in occupied_cells:
+                if 0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height:
+                    cell_rect = pygame.Rect(
+                        self.map_offset_x + cell_x * self.cell_size,
+                        self.map_offset_y + cell_y * self.cell_size,
+                        self.cell_size,
+                        self.cell_size
+                    )
+                    pygame.draw.rect(screen, color, cell_rect, 3)
+            
+            # Draw tower preview circle at center of multi-block area
+            width, height = get_tower_size(tower_type)
+            center_x = self.map_offset_x + (grid_x + width/2) * self.cell_size
+            center_y = self.map_offset_y + (grid_y + height/2) * self.cell_size
+            tower_radius = get_tower_visual_size(tower_type, self.cell_size)
+            pygame.draw.circle(screen, color, (int(center_x), int(center_y)), tower_radius, 3)
+        else:
+            # Single cell preview
+            center_x, center_y = self.grid_to_pixel(grid_x, grid_y)
+            pygame.draw.circle(screen, color, (center_x, center_y), 18, 3)
         
         # Draw terrain info tooltip
         if not valid_position:

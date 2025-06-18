@@ -6,11 +6,11 @@ class AntiAirTower(Tower):
     """Tower specialized for targeting flying enemies"""
     
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.damage = 25
+        super().__init__(x, y, 'antiair')
+        self.damage = 20
         self.range = 180
-        self.fire_rate = 60  # Slower fire rate but high damage
-        self.projectile_speed = 4.0
+        self.fire_rate = 50  # Medium fire rate
+        self.projectile_speed = 5.0
         self.size = 12
         self.color = (0, 191, 255)  # Deep sky blue
         
@@ -60,10 +60,11 @@ class AntiAirTower(Tower):
             missile.homing_strength = 0.1  # Strong homing
             projectiles.append(missile)
     
-    def draw(self, screen):
+    def draw(self, screen, selected: bool = False):
         """Draw anti-air tower"""
-        # Draw range circle
-        pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
+        # Draw range circle only when selected
+        if selected:
+            pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
         
         # Draw base
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)

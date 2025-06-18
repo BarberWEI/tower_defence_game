@@ -4,9 +4,14 @@ from typing import List, Optional
 
 class Tower:
     """Base class for all towers"""
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int, tower_type: str = 'basic'):
         self.x = x
         self.y = y
+        self.tower_type = tower_type
+        
+        # Grid position (will be set by tower manager)
+        self.grid_x = 0
+        self.grid_y = 0
         
         # Base stats - to be overridden by subclasses
         self.range = 100
@@ -67,10 +72,11 @@ class Tower:
             )
             projectiles.append(projectile)
     
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, selected: bool = False):
         """Draw the tower on the screen"""
-        # Draw range circle when selected (simplified - always show for demo)
-        pygame.draw.circle(screen, (200, 200, 200), (self.x, self.y), self.range, 1)
+        # Draw range circle only when selected
+        if selected:
+            pygame.draw.circle(screen, (200, 200, 200), (self.x, self.y), self.range, 1)
         
         # Draw tower base
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)

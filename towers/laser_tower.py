@@ -3,13 +3,13 @@ import pygame
 import math
 
 class LaserTower(Tower):
-    """Tower that fires continuous laser beam through multiple enemies"""
+    """Tower that fires continuous laser beam through multiple GROUND enemies only"""
     
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.damage = 20  # High damage
-        self.range = 160
-        self.fire_rate = 20  # Fast firing
+        super().__init__(x, y, 'laser')
+        self.damage = 12  # Balanced damage
+        self.range = 140  # Good range
+        self.fire_rate = 45  # Medium firing rate
         self.projectile_speed = 10  # Not used for laser but needed for inheritance
         self.size = 12
         self.color = (255, 0, 255)  # Magenta
@@ -21,8 +21,12 @@ class LaserTower(Tower):
         self.laser_target = None
         self.laser_end_point = None
         self.charging = False
-        self.charge_time = 30  # Frames to charge
+        self.charge_time = 45  # Longer charge time for balance
         self.charge_timer = 0
+        
+        # Targeting restrictions - can target flying but not invisible
+        self.can_target_flying = True
+        self.can_target_invisible = False
         
     def update(self, enemies, projectiles):
         """Update laser tower"""
@@ -40,13 +44,26 @@ class LaserTower(Tower):
                 self.charging = False
                 self.charge_timer = 0
     
+    def can_target_enemy(self, enemy):
+        """Check if this tower can target a specific enemy"""
+        # Can target flying enemies
+        if hasattr(enemy, 'flying') and enemy.flying and not self.can_target_flying:
+            return False
+            
+        # Can target invisible enemies if they've been detected by a detector tower
+        if hasattr(enemy, 'invisible') and enemy.invisible and not self.can_target_invisible:
+            if not hasattr(enemy, 'detected_by_detector') or not enemy.detected_by_detector:
+                return False
+            
+        return True
+    
     def acquire_target(self, enemies):
-        """Find target for laser"""
+        """Find target for laser - GROUND ENEMIES ONLY"""
         targets_in_range = []
         
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-            if distance <= self.range:
+            if distance <= self.range and self.can_target_enemy(enemy):
                 targets_in_range.append((enemy, distance))
         
         if targets_in_range:
@@ -89,6 +106,10 @@ class LaserTower(Tower):
             hit_enemies = []
             
             for enemy in enemies:
+                # Only hit enemies we can target
+                if not self.can_target_enemy(enemy):
+                    continue
+                    
                 # Check if enemy is in laser path
                 enemy_dx = enemy.x - self.x
                 enemy_dy = enemy.y - self.y
@@ -120,10 +141,11 @@ class LaserTower(Tower):
             else:
                 self.laser_end_point = (self.x + dx * laser_length, self.y + dy * laser_length)
     
-    def draw(self, screen):
+    def draw(self, screen, selected: bool = False):
         """Draw laser tower"""
-        # Draw range circle
-        pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
+        # Draw range circle only when selected
+        if selected:
+            pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
         
         # Draw charging effect
         if self.charging:

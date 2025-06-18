@@ -13,9 +13,16 @@ class Game:
     def __init__(self):
         pygame.init()
         
-        # Screen setup
+        # Screen setup with fullscreen support
+        self.fullscreen = False
         self.SCREEN_WIDTH = 1200
         self.SCREEN_HEIGHT = 800
+        
+        # Get display info for fullscreen
+        info = pygame.display.Info()
+        self.fullscreen_width = info.current_w
+        self.fullscreen_height = info.current_h
+        
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         pygame.display.set_caption("Tower Defense Game")
         self.clock = pygame.time.Clock()
@@ -80,6 +87,9 @@ class Game:
             if self.game_over:
                 self.restart_game()
         
+        elif key == pygame.K_F1:
+            self.toggle_fullscreen()
+        
         elif key == pygame.K_1:
             self.select_tower_by_index(0)
         
@@ -100,6 +110,49 @@ class Game:
             
         elif key == pygame.K_7:
             self.select_tower_by_index(6)
+            
+        elif key == pygame.K_8:
+            self.select_tower_by_index(7)
+            
+        elif key == pygame.K_9:
+            self.select_tower_by_index(8)
+            
+        elif key == pygame.K_0:
+            self.select_tower_by_index(9)
+            
+        elif key == pygame.K_q:
+            self.select_tower_by_index(10)
+            
+        elif key == pygame.K_w:
+            self.select_tower_by_index(11)
+            
+        elif key == pygame.K_e:
+            self.select_tower_by_index(12)
+    
+    def toggle_fullscreen(self):
+        """Toggle between fullscreen and windowed mode"""
+        self.fullscreen = not self.fullscreen
+        
+        if self.fullscreen:
+            # Switch to fullscreen
+            self.screen = pygame.display.set_mode((self.fullscreen_width, self.fullscreen_height), pygame.FULLSCREEN)
+            # Update screen dimensions for game systems
+            old_width, old_height = self.SCREEN_WIDTH, self.SCREEN_HEIGHT
+            self.SCREEN_WIDTH = self.fullscreen_width
+            self.SCREEN_HEIGHT = self.fullscreen_height
+        else:
+            # Switch to windowed
+            self.screen = pygame.display.set_mode((1200, 800))
+            # Restore original dimensions
+            self.SCREEN_WIDTH = 1200
+            self.SCREEN_HEIGHT = 800
+        
+        # Reinitialize systems with new screen dimensions
+        self.map = Map(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        
+        # Update wave manager with new path
+        self.wave_manager = WaveManager(self.map.get_path())
     
     def select_tower_by_index(self, index):
         """Select tower by index from UI"""
@@ -190,17 +243,21 @@ class Game:
     def update_projectiles(self):
         """Update all projectiles"""
         for projectile in self.projectiles[:]:
-            projectile.update()
+            # Handle different projectile update methods
+            if hasattr(projectile, 'update') and callable(getattr(projectile, 'update')):
+                if hasattr(projectile, 'update_homing'):
+                    projectile.update_homing(self.enemies)
+                elif hasattr(projectile.__class__, 'update') and len(projectile.update.__code__.co_varnames) > 1:
+                    # Missile projectiles need enemies parameter
+                    projectile.update(self.enemies)
+                else:
+                    projectile.update()
             
             # Check projectile collisions with enemies
             if hasattr(projectile, 'check_collision'):
                 projectile.check_collision(self.enemies)
             
-            # Handle homing projectiles
-            if hasattr(projectile, 'update_homing'):
-                projectile.update_homing(self.enemies)
-            
-            if projectile.should_remove:
+            if hasattr(projectile, 'should_remove') and projectile.should_remove:
                 self.projectiles.remove(projectile)
     
     def update_waves(self):
@@ -242,9 +299,11 @@ class Game:
         for enemy in self.enemies:
             enemy.draw(self.screen)
         
-        # Draw towers
+        # Draw towers with selection state
+        selected_tower = self.ui_manager.selected_placed_tower
         for tower in self.towers:
-            tower.draw(self.screen)
+            is_selected = (tower == selected_tower)
+            tower.draw(self.screen, selected=is_selected)
         
         # Draw projectiles
         for projectile in self.projectiles:
@@ -269,6 +328,9 @@ class Game:
     
     def draw(self):
         """Draw everything"""
+        # Fill entire screen with black background layer
+        self.screen.fill((0, 0, 0))
+        
         # Draw map (includes background and path)
         mouse_pos = pygame.mouse.get_pos()
         self.map.draw(
@@ -309,7 +371,6 @@ class Game:
         self.wave_complete_timer = 0
         self.wave_bonus = 0
         self.ui_manager.clear_tower_selection()
-        self.ui_manager.upgrade_panel_visible = False
         self.ui_manager.selected_placed_tower = None
     
     def run(self):

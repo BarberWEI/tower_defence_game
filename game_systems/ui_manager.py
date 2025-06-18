@@ -46,70 +46,116 @@ class UIManager:
         self.selected_tower_index = None
         self.hovered_tower_index = None
         
-        # Tower information with visual data
+        # Tower information with visual data - rebalanced
         self.tower_data = [
             {
                 'name': 'Basic Tower',
-                'cost': 20,
+                'cost': 15,
                 'color': (0, 200, 0),
-                'description': 'Fast firing, good all-around',
-                'stats': {'Damage': 1, 'Range': 80, 'Speed': 'Fast'},
+                'description': 'Cheap starter tower',
+                'stats': {'Damage': 2, 'Range': 80, 'Speed': 'Fast'},
                 'key': '1'
             },
             {
                 'name': 'Sniper Tower',
-                'cost': 50,
+                'cost': 45,
                 'color': (0, 0, 255),
                 'description': 'Long range, high damage',
-                'stats': {'Damage': 3, 'Range': 150, 'Speed': 'Slow'},
+                'stats': {'Damage': 5, 'Range': 200, 'Speed': 'Slow'},
                 'key': '2'
             },
             {
                 'name': 'Freezer Tower',
-                'cost': 30,
+                'cost': 25,
                 'color': (0, 255, 255),
-                'description': 'Slows enemies, water placement',
-                'stats': {'Damage': 1, 'Range': 100, 'Speed': 'Medium'},
+                'description': 'Slows enemies, no damage',
+                'stats': {'Damage': 0, 'Range': 70, 'Speed': 'Medium'},
                 'key': '3'
             },
             {
                 'name': 'Detector Tower',
-                'cost': 40,
+                'cost': 30,
                 'color': (255, 255, 0),
                 'description': 'Reveals invisible enemies',
-                'stats': {'Damage': 15, 'Range': 200, 'Speed': 'Medium'},
+                'stats': {'Damage': 0, 'Range': 300, 'Speed': 'Support'},
                 'key': '4'
             },
             {
                 'name': 'Anti-Air Tower',
-                'cost': 60,
+                'cost': 55,
                 'color': (0, 191, 255),
                 'description': 'Targets flying enemies',
-                'stats': {'Damage': 25, 'Range': 180, 'Speed': 'Slow'},
+                'stats': {'Damage': 20, 'Range': 180, 'Speed': 'Medium'},
                 'key': '5'
             },
             {
                 'name': 'Poison Tower',
-                'cost': 45,
+                'cost': 40,
                 'color': (50, 205, 50),
                 'description': 'Poison damage over time',
-                'stats': {'Damage': 8, 'Range': 120, 'Speed': 'Medium'},
+                'stats': {'Damage': 6, 'Range': 120, 'Speed': 'Medium'},
                 'key': '6'
             },
             {
                 'name': 'Laser Tower',
-                'cost': 80,
+                'cost': 60,
                 'color': (255, 0, 255),
                 'description': 'Pierces through enemies',
-                'stats': {'Damage': 20, 'Range': 160, 'Speed': 'Fast'},
+                'stats': {'Damage': 12, 'Range': 140, 'Speed': 'Medium'},
                 'key': '7'
+            },
+            {
+                'name': 'Cannon Tower',
+                'cost': 75,
+                'color': (139, 69, 19),
+                'description': 'Splash damage, 2x2 size',
+                'stats': {'Damage': 25, 'Range': 160, 'Speed': 'Slow'},
+                'key': '8'
+            },
+            {
+                'name': 'Lightning Tower',
+                'cost': 50,
+                'color': (255, 255, 0),
+                'description': 'Chains between enemies',
+                'stats': {'Damage': 7, 'Range': 120, 'Speed': 'Medium'},
+                'key': '9'
+            },
+            {
+                'name': 'Flame Tower',
+                'cost': 35,
+                'color': (255, 69, 0),
+                'description': 'Cone attack with burn',
+                'stats': {'Damage': 6, 'Range': 90, 'Speed': 'Very Fast'},
+                'key': '0'
+            },
+            {
+                'name': 'Ice Tower',
+                'cost': 30,
+                'color': (173, 216, 230),
+                'description': 'Area freeze and slow',
+                'stats': {'Damage': 2, 'Range': 90, 'Speed': 'Slow'},
+                'key': 'Q'
+            },
+            {
+                'name': 'Explosive Tower',
+                'cost': 100,
+                'color': (255, 165, 0),
+                'description': 'Massive splash, 3x3 size',
+                'stats': {'Damage': 35, 'Range': 180, 'Speed': 'Very Slow'},
+                'key': 'W'
+            },
+            {
+                'name': 'Missile Tower',
+                'cost': 120,
+                'color': (128, 128, 128),
+                'description': 'Homing missiles, AOE, 2x2 size',
+                'stats': {'Damage': 40, 'Range': 250, 'Speed': 'Ultra Slow'},
+                'key': 'E'
             }
         ]
         
-        # Upgrade system
+        # Tower selection for range display
         self.selected_placed_tower = None
-        self.upgrade_panel_visible = False
-        self.upgrade_panel_rect = pygame.Rect(screen_width - 300, 100, 280, 400)
         
         # Mouse state
         self.mouse_pos = (0, 0)
@@ -283,81 +329,21 @@ class UIManager:
                 y_offset += 15
     
     def draw_upgrade_panel(self, screen: pygame.Surface, tower, money: int):
-        """Draw the tower upgrade panel"""
-        if not self.upgrade_panel_visible or not tower:
-            return
-        
-        # Panel background
-        pygame.draw.rect(screen, self.UI_BG, self.upgrade_panel_rect)
-        pygame.draw.rect(screen, self.UI_BORDER, self.upgrade_panel_rect, 3)
-        
-        # Title
-        title_text = self.medium_font.render("Tower Upgrades", True, self.WHITE)
-        screen.blit(title_text, (self.upgrade_panel_rect.x + 10, self.upgrade_panel_rect.y + 10))
-        
-        # Tower info
-        tower_name = tower.__class__.__name__.replace('Tower', ' Tower')
-        name_text = self.small_font.render(tower_name, True, self.YELLOW)
-        screen.blit(name_text, (self.upgrade_panel_rect.x + 10, self.upgrade_panel_rect.y + 40))
-        
-        # Current stats
-        stats_y = self.upgrade_panel_rect.y + 70
-        stats = [
-            f"Damage: {tower.damage}",
-            f"Range: {tower.range}",
-            f"Fire Rate: {60 // tower.fire_rate:.1f}/sec"
-        ]
-        
-        for i, stat in enumerate(stats):
-            stat_text = self.tiny_font.render(stat, True, self.WHITE)
-            screen.blit(stat_text, (self.upgrade_panel_rect.x + 10, stats_y + i * 20))
-        
-        # Upgrade options (placeholder for now)
-        upgrade_y = stats_y + 80
-        upgrade_options = [
-            ("Damage +1", 50, "Increase damage by 1"),
-            ("Range +20", 40, "Increase range by 20"),
-            ("Speed +10%", 60, "Increase fire rate by 10%"),
-            ("Special", 100, "Unlock special ability")
-        ]
-        
-        for i, (name, cost, desc) in enumerate(upgrade_options):
-            option_y = upgrade_y + i * 60
-            option_rect = pygame.Rect(self.upgrade_panel_rect.x + 10, option_y, 
-                                    self.upgrade_panel_rect.width - 20, 50)
-            
-            # Background
-            can_afford = money >= cost
-            bg_color = self.DARK_GRAY if can_afford else (60, 30, 30)
-            pygame.draw.rect(screen, bg_color, option_rect)
-            pygame.draw.rect(screen, self.UI_BORDER, option_rect, 1)
-            
-            # Text
-            color = self.WHITE if can_afford else self.GRAY
-            name_text = self.small_font.render(f"{name} - ${cost}", True, color)
-            desc_text = self.tiny_font.render(desc, True, self.LIGHT_GRAY)
-            
-            screen.blit(name_text, (option_rect.x + 5, option_rect.y + 5))
-            screen.blit(desc_text, (option_rect.x + 5, option_rect.y + 25))
-        
-        # Close button
-        close_rect = pygame.Rect(self.upgrade_panel_rect.right - 30, 
-                               self.upgrade_panel_rect.y + 5, 20, 20)
-        pygame.draw.rect(screen, self.RED, close_rect)
-        close_text = self.small_font.render("X", True, self.WHITE)
-        close_text_rect = close_text.get_rect(center=close_rect.center)
-        screen.blit(close_text, close_text_rect)
+        """Draw the tower upgrade panel - simplified to just show range"""
+        # Note: The actual range circle is drawn in the game loop when tower is selected
+        # This method is kept for compatibility but does nothing now
+        pass
     
     def handle_tower_click(self, pos: Tuple[int, int], towers: List) -> bool:
-        """Handle clicks on placed towers for upgrade panel"""
+        """Handle clicks on placed towers to show range"""
         mouse_x, mouse_y = pos
         
         # Don't handle if clicking in UI areas - map starts at y=140 and ends before bottom bar
         if mouse_y >= self.bottom_bar_y or mouse_y <= 130:  # Bottom bar or top stats area
             return False
         
-        # Also check if click is within map bounds (x: 20-980, y: 140-780)
-        if mouse_x < 20 or mouse_x > 980:  # Map width is 960px starting at x=20
+        # Check if click is within screen bounds (dynamic for fullscreen)
+        if mouse_x < 0 or mouse_x > self.screen_width or mouse_y < 140 or mouse_y >= self.bottom_bar_y:
             return False
         
         for tower in towers:
@@ -365,24 +351,10 @@ class UIManager:
             distance = math.sqrt((mouse_x - tower.x)**2 + (mouse_y - tower.y)**2)
             if distance <= tower.size + 5:  # Small buffer for easier clicking
                 self.selected_placed_tower = tower
-                self.upgrade_panel_visible = True
                 return True
         
-        # Click elsewhere closes upgrade panel
-        if self.upgrade_panel_visible:
-            # Check if clicking close button
-            close_rect = pygame.Rect(self.upgrade_panel_rect.right - 30, 
-                                   self.upgrade_panel_rect.y + 5, 20, 20)
-            if close_rect.collidepoint(pos):
-                self.upgrade_panel_visible = False
-                self.selected_placed_tower = None
-                return True
-            
-            # Check if clicking outside panel
-            if not self.upgrade_panel_rect.collidepoint(pos):
-                self.upgrade_panel_visible = False
-                self.selected_placed_tower = None
-        
+        # Click elsewhere deselects tower
+        self.selected_placed_tower = None
         return False
     
     def draw_game_stats(self, screen: pygame.Surface, money: int, lives: int, wave_info: Dict):
@@ -401,15 +373,25 @@ class UIManager:
         lives_text = self.large_font.render(f"Lives: {lives}", True, lives_color)
         screen.blit(lives_text, (20, 60))
         
-        # Wave information
+        # Wave information with scaling indicator
         wave_text = self.large_font.render(f"Wave: {wave_info['wave_number']}", True, self.WHITE)
         screen.blit(wave_text, (20, 100))
+        
+        # Enemy scaling indicator (subtle)
+        if wave_info['wave_number'] > 1:
+            scaling_factor = (wave_info['wave_number'] - 1) * 8  # 8% per wave
+            scaling_text = self.tiny_font.render(f"Enemy Boost: +{scaling_factor}%", True, (255, 200, 100))
+            screen.blit(scaling_text, (150, 105))
         
         # Wave progress bar
         self.draw_wave_progress_bar(screen, wave_info)
         
         # Terrain legend (moved to top right)
         self.draw_terrain_legend(screen)
+        
+        # Fullscreen indicator (bottom right of stats area)
+        fullscreen_text = self.tiny_font.render("F1: Fullscreen", True, self.WHITE)
+        screen.blit(fullscreen_text, (self.screen_width - 120, 110))
     
     def draw_wave_progress_bar(self, screen: pygame.Surface, wave_info: Dict):
         """Draw wave progress bar in stats area"""
@@ -443,7 +425,7 @@ class UIManager:
     
     def draw_terrain_legend(self, screen: pygame.Surface):
         """Draw terrain legend in top right"""
-        legend_x = self.screen_width - 200
+        legend_x = min(self.screen_width - 200, 980 - 190)  # Keep within game area
         legend_y = 20
         
         # Background
@@ -483,6 +465,10 @@ class UIManager:
         resume_text = self.medium_font.render("Press SPACE to resume", True, self.WHITE)
         resume_rect = resume_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
         screen.blit(resume_text, resume_rect)
+        
+        fullscreen_text = self.small_font.render("Press F11 for fullscreen", True, self.WHITE)
+        fullscreen_rect = fullscreen_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 90))
+        screen.blit(fullscreen_text, fullscreen_rect)
     
     def draw_game_over_overlay(self, screen: pygame.Surface, final_wave: int):
         """Draw game over overlay"""
@@ -515,9 +501,7 @@ class UIManager:
         # Tower tooltip
         self.draw_tower_tooltip(screen)
         
-        # Tower upgrade panel
-        if 'towers' in game_state:
-            self.draw_upgrade_panel(screen, self.selected_placed_tower, game_state['money'])
+        # Tower range display is handled in game loop when tower is selected
         
         # Overlays
         if game_state.get('paused'):
@@ -528,7 +512,8 @@ class UIManager:
     def get_selected_tower_type(self) -> Optional[str]:
         """Get the currently selected tower type"""
         if self.selected_tower_index is not None:
-            tower_types = ['basic', 'sniper', 'freezer', 'detector', 'antiair', 'poison', 'laser']
+            tower_types = ['basic', 'sniper', 'freezer', 'detector', 'antiair', 'poison', 'laser', 
+                          'cannon', 'lightning', 'flame', 'ice', 'explosive', 'missile']
             return tower_types[self.selected_tower_index]
         return None
     

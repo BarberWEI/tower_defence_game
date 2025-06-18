@@ -1,12 +1,49 @@
 from .tower import Tower
+import math
 
 class BasicTower(Tower):
     """Basic tower with standard stats and targeting"""
     def __init__(self, x: int, y: int):
-        super().__init__(x, y)
+        super().__init__(x, y, 'basic')
         self.range = 80
-        self.damage = 1
-        self.fire_rate = 30  # 2 shots per second at 60 FPS
-        self.projectile_speed = 5
+        self.damage = 2
+        self.fire_rate = 25  # Faster firing
+        self.projectile_speed = 6
         self.size = 12
-        self.color = (0, 200, 0)  # Green 
+        self.color = (0, 200, 0)  # Green
+        
+        # Targeting restrictions - ground only
+        self.can_target_flying = False
+        self.can_target_invisible = False
+    
+    def can_target_enemy(self, enemy):
+        """Check if this tower can target a specific enemy"""
+        if hasattr(enemy, 'flying') and enemy.flying and not self.can_target_flying:
+            return False
+        # Can target invisible enemies if they've been detected by a detector tower
+        if hasattr(enemy, 'invisible') and enemy.invisible and not self.can_target_invisible:
+            if not hasattr(enemy, 'detected_by_detector') or not enemy.detected_by_detector:
+                return False
+        return True
+    
+    def acquire_target(self, enemies):
+        """Find target using targeting restrictions"""
+        valid_targets = []
+        
+        for enemy in enemies:
+            distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
+            if distance <= self.range and self.can_target_enemy(enemy):
+                valid_targets.append((enemy, distance))
+        
+        if not valid_targets:
+            self.target = None
+            return
+        
+        # Target closest to end of path
+        self.target = max(valid_targets, key=lambda x: x[0].get_distance_from_start())[0]
+        
+        # Calculate angle to target
+        if self.target:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.angle = math.atan2(dy, dx) 

@@ -5,13 +5,27 @@ from .tower import Tower
 class SniperTower(Tower):
     """High-range, high-damage tower with slow fire rate"""
     def __init__(self, x: int, y: int):
-        super().__init__(x, y)
+        super().__init__(x, y, 'sniper')
         self.range = 200
-        self.damage = 3
-        self.fire_rate = 120  # 0.5 shots per second at 60 FPS
-        self.projectile_speed = 10
+        self.damage = 35
+        self.fire_rate = 90  # Slow but powerful
+        self.projectile_speed = 12
         self.size = 15
         self.color = (0, 0, 200)  # Blue
+        
+        # Targeting restrictions - ground only
+        self.can_target_flying = False
+        self.can_target_invisible = False
+    
+    def can_target_enemy(self, enemy):
+        """Check if this tower can target a specific enemy"""
+        if hasattr(enemy, 'flying') and enemy.flying and not self.can_target_flying:
+            return False
+        # Can target invisible enemies if they've been detected by a detector tower
+        if hasattr(enemy, 'invisible') and enemy.invisible and not self.can_target_invisible:
+            if not hasattr(enemy, 'detected_by_detector') or not enemy.detected_by_detector:
+                return False
+        return True
     
     def acquire_target(self, enemies: List):
         """Sniper targets the enemy with the most health"""
@@ -19,7 +33,7 @@ class SniperTower(Tower):
         
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-            if distance <= self.range:
+            if distance <= self.range and self.can_target_enemy(enemy):
                 valid_targets.append((enemy, distance))
         
         if not valid_targets:

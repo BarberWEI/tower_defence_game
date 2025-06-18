@@ -1,20 +1,28 @@
 from typing import List, Tuple, Optional
 from towers import (BasicTower, SniperTower, FreezerTower, DetectorTower, 
-                   AntiAirTower, PoisonTower, LaserTower)
+                   AntiAirTower, PoisonTower, LaserTower, CannonTower,
+                   LightningTower, FlameTower, IceTower, ExplosiveTower, MissileTower)
+from .tower_sizes import get_tower_size, get_tower_visual_size
 
 class TowerManager:
     """Manages tower placement, costs, and tower-related logic"""
     
     def __init__(self):
-        # Tower costs
+        # Tower costs - rebalanced for better progression
         self.tower_costs = {
-            "basic": 20,
-            "sniper": 50,
-            "freezer": 30,
-            "detector": 40,
-            "antiair": 60,
-            "poison": 45,
-            "laser": 80
+            "basic": 15,      # Cheap starter tower
+            "sniper": 45,     # Long range, high damage
+            "freezer": 25,    # Utility tower - slows enemies
+            "detector": 30,   # Support tower - reveals invisible
+            "antiair": 55,    # Specialized for flying enemies
+            "poison": 40,     # DOT specialist
+            "laser": 60,      # Piercing damage
+            "cannon": 75,     # Area damage, 2x2 size
+            "lightning": 50,  # Chain lightning
+            "flame": 35,      # Cone attack with burn
+            "ice": 30,        # Area freeze
+            "explosive": 100, # Massive damage, 3x3 size
+            "missile": 120    # Homing missiles with AOE
         }
         
         # Tower classes
@@ -25,7 +33,13 @@ class TowerManager:
             "detector": DetectorTower,
             "antiair": AntiAirTower,
             "poison": PoisonTower,
-            "laser": LaserTower
+            "laser": LaserTower,
+            "cannon": CannonTower,
+            "lightning": LightningTower,
+            "flame": FlameTower,
+            "ice": IceTower,
+            "explosive": ExplosiveTower,
+            "missile": MissileTower
         }
         
         # State
@@ -51,11 +65,21 @@ class TowerManager:
         self.selected_tower_type = None
         self.placing_tower = False
     
-    def create_tower(self, tower_type: str, x: int, y: int):
-        """Create a new tower of the specified type"""
+    def create_tower(self, tower_type: str, x: int, y: int, grid_x: int = 0, grid_y: int = 0, cell_size: int = 40):
+        """Create a new tower of the specified type with multi-block support"""
         if tower_type in self.tower_classes:
             tower_class = self.tower_classes[tower_type]
-            return tower_class(x, y)
+            tower = tower_class(x, y)
+            
+            # Set tower type and grid position
+            tower.tower_type = tower_type
+            tower.grid_x = grid_x
+            tower.grid_y = grid_y
+            
+            # Set visual size based on tower type and cell size
+            tower.size = get_tower_visual_size(tower_type, cell_size)
+            
+            return tower
         return None
     
     def attempt_tower_placement(self, pos: Tuple[int, int], money: int, 
@@ -77,12 +101,17 @@ class TowerManager:
         
         # Check if position is valid with terrain awareness
         if map_obj.is_valid_tower_position(x, y, existing_towers, tower_type):
-            # Snap to grid center
+            # Snap to grid position
             grid_x, grid_y = map_obj.pixel_to_grid(x, y)
-            center_x, center_y = map_obj.grid_to_pixel(grid_x, grid_y)
             
-            # Create tower at grid center
-            tower = self.create_tower(tower_type, center_x, center_y)
+            # Calculate center position for multi-block towers
+            width, height = get_tower_size(tower_type)
+            center_x = map_obj.map_offset_x + (grid_x + width/2) * map_obj.cell_size
+            center_y = map_obj.map_offset_y + (grid_y + height/2) * map_obj.cell_size
+            
+            # Create tower at calculated center
+            tower = self.create_tower(tower_type, int(center_x), int(center_y), 
+                                    grid_x, grid_y, map_obj.cell_size)
             if tower:
                 # Apply terrain effects to the tower
                 map_obj.apply_terrain_effects_to_tower(tower, grid_x, grid_y)

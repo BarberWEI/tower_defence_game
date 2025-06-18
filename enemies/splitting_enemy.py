@@ -56,8 +56,14 @@ class SplittingEnemy(Enemy):
                 # Create smaller version at current position
                 new_enemy = SplittingEnemy(self.path, self.split_count, self.generation + 1)
                 new_enemy.path_index = self.path_index
-                new_enemy.x = self.x + (i - self.split_count/2) * 20  # Spread them out
-                new_enemy.y = self.y
+                new_enemy.distance_traveled = self.distance_traveled
+                
+                # Position them slightly offset on the path instead of spreading randomly
+                offset_distance = (i - self.split_count/2) * 15  # Small offset along path
+                new_enemy.distance_traveled = max(0, self.distance_traveled + offset_distance)
+                
+                # Update position based on path
+                new_enemy.update_position()
                 spawned_enemies.append(new_enemy)
             return spawned_enemies
         return [] 

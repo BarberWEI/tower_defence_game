@@ -6,10 +6,10 @@ class PoisonTower(Tower):
     """Tower that applies poison damage over time, counters regenerating enemies"""
     
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.damage = 8  # Lower direct damage
+        super().__init__(x, y, 'poison')
+        self.damage = 6  # Lower direct damage
         self.range = 120
-        self.fire_rate = 40
+        self.fire_rate = 35  # Medium fire rate
         self.projectile_speed = 5
         self.size = 12
         self.color = (50, 205, 50)  # Lime green
@@ -18,6 +18,42 @@ class PoisonTower(Tower):
         self.poison_damage = 3  # Damage per second
         self.poison_duration = 300  # 5 seconds
         self.splash_radius = 40
+        
+        # Targeting restrictions - ground only
+        self.can_target_flying = False
+        self.can_target_invisible = False
+    
+    def can_target_enemy(self, enemy):
+        """Check if this tower can target a specific enemy"""
+        if hasattr(enemy, 'flying') and enemy.flying and not self.can_target_flying:
+            return False
+        # Can target invisible enemies if they've been detected by a detector tower
+        if hasattr(enemy, 'invisible') and enemy.invisible and not self.can_target_invisible:
+            if not hasattr(enemy, 'detected_by_detector') or not enemy.detected_by_detector:
+                return False
+        return True
+    
+    def acquire_target(self, enemies):
+        """Find target using targeting restrictions"""
+        valid_targets = []
+        
+        for enemy in enemies:
+            distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
+            if distance <= self.range and self.can_target_enemy(enemy):
+                valid_targets.append((enemy, distance))
+        
+        if not valid_targets:
+            self.target = None
+            return
+        
+        # Target closest to end of path
+        self.target = max(valid_targets, key=lambda x: x[0].get_distance_from_start())[0]
+        
+        # Calculate angle to target
+        if self.target:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.angle = math.atan2(dy, dx)
         
     def shoot(self, projectiles):
         """Shoot poison projectile"""
@@ -32,10 +68,11 @@ class PoisonTower(Tower):
             projectile.poison_duration = self.poison_duration
             projectiles.append(projectile)
     
-    def draw(self, screen):
+    def draw(self, screen, selected: bool = False):
         """Draw poison tower"""
-        # Draw range circle
-        pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
+        # Draw range circle only when selected
+        if selected:
+            pygame.draw.circle(screen, (200, 200, 200), (int(self.x), int(self.y)), int(self.range), 1)
         
         # Draw base
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)
