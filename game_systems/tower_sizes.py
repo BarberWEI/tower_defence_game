@@ -15,7 +15,8 @@ TOWER_SIZES = {
     'flame': (1, 1),
     'ice': (1, 1),
     'explosive': (3, 3),     # Massive explosive tower
-    'missile': (2, 2)        # 2x2 size for missile tower
+    'missile': (2, 2),       # 2x2 size for missile tower
+    'splash': (1, 1)         # Regular size splash tower
 }
 
 def get_tower_size(tower_type: str) -> tuple:

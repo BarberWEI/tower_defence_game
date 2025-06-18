@@ -32,7 +32,7 @@ class Game:
         self.running = True
         self.paused = False
         self.game_over = False
-        self.money = 100
+        self.money = 20
         self.lives = 20
         
         # Game objects
@@ -43,8 +43,8 @@ class Game:
         # Initialize game systems
         self.map = Map(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.wave_manager = WaveManager(self.map.get_path())
-        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.tower_manager = TowerManager()
+        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
         
         # UI state
         self.show_wave_complete = False
@@ -68,12 +68,16 @@ class Game:
                 elif event.button == 5:  # Mouse wheel down
                     self.ui_manager.handle_scroll(1)
             
+            elif event.type == pygame.MOUSEWHEEL:
+                # Handle newer pygame wheel events
+                self.ui_manager.handle_scroll(event.y)
+            
             elif event.type == pygame.MOUSEMOTION:
                 # Update mouse position for UI hover effects
                 self.ui_manager.update_mouse_pos(event.pos)
     
     def handle_key_press(self, key):
-        """Handle keyboard input"""
+        """Handle keyboard input - only essential keys"""
         if key == pygame.K_SPACE:
             self.paused = not self.paused
         
@@ -89,45 +93,6 @@ class Game:
         
         elif key == pygame.K_F1:
             self.toggle_fullscreen()
-        
-        elif key == pygame.K_1:
-            self.select_tower_by_index(0)
-        
-        elif key == pygame.K_2:
-            self.select_tower_by_index(1)
-        
-        elif key == pygame.K_3:
-            self.select_tower_by_index(2)
-            
-        elif key == pygame.K_4:
-            self.select_tower_by_index(3)
-            
-        elif key == pygame.K_5:
-            self.select_tower_by_index(4)
-            
-        elif key == pygame.K_6:
-            self.select_tower_by_index(5)
-            
-        elif key == pygame.K_7:
-            self.select_tower_by_index(6)
-            
-        elif key == pygame.K_8:
-            self.select_tower_by_index(7)
-            
-        elif key == pygame.K_9:
-            self.select_tower_by_index(8)
-            
-        elif key == pygame.K_0:
-            self.select_tower_by_index(9)
-            
-        elif key == pygame.K_q:
-            self.select_tower_by_index(10)
-            
-        elif key == pygame.K_w:
-            self.select_tower_by_index(11)
-            
-        elif key == pygame.K_e:
-            self.select_tower_by_index(12)
     
     def toggle_fullscreen(self):
         """Toggle between fullscreen and windowed mode"""
@@ -149,17 +114,12 @@ class Game:
         
         # Reinitialize systems with new screen dimensions
         self.map = Map(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
         
         # Update wave manager with new path
         self.wave_manager = WaveManager(self.map.get_path())
     
-    def select_tower_by_index(self, index):
-        """Select tower by index from UI"""
-        self.ui_manager.selected_tower_index = index
-        tower_type = self.ui_manager.get_selected_tower_type()
-        if tower_type:
-            self.tower_manager.select_tower_type(tower_type)
+
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks"""
@@ -169,7 +129,9 @@ class Game:
         # Check for tower bar clicks first
         clicked_tower_index = self.ui_manager.handle_tower_bar_click(pos)
         if clicked_tower_index is not None:
-            self.select_tower_by_index(clicked_tower_index)
+            tower_type = self.ui_manager.get_selected_tower_type()
+            if tower_type:
+                self.tower_manager.select_tower_type(tower_type)
             return
         
         # Check for tower clicks (for upgrade panel)
@@ -354,7 +316,7 @@ class Game:
         """Restart the game"""
         self.game_over = False
         self.paused = False
-        self.money = 100
+        self.money = 20
         self.lives = 20
         
         # Clear game objects

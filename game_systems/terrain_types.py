@@ -42,7 +42,7 @@ TERRAIN_PROPERTIES = {
         'tower_placeable': True,
         'enemy_walkable': False,
         'special_rules': 'water_only',
-        'allowed_towers': ['freezer']  # Only freezer towers can be placed on water
+        'allowed_towers': ['freezer', 'splash']  # Only freezer and splash towers can be placed on water
     },
     FOREST: {
         'name': 'Forest',
@@ -74,10 +74,19 @@ def is_enemy_walkable(terrain_type: int) -> bool:
     """Check if enemies can walk on this terrain type"""
     return get_terrain_property(terrain_type, 'enemy_walkable') or False
 
+def requires_water_terrain(tower_type: str) -> bool:
+    """Check if a tower type requires water terrain"""
+    water_only_towers = ['splash']
+    return tower_type in water_only_towers
+
 def can_place_tower_type(terrain_type: int, tower_type: str) -> bool:
     """Check if a specific tower type can be placed on this terrain"""
     if not is_tower_placeable(terrain_type):
         return False
+    
+    # Check if tower requires water terrain
+    if requires_water_terrain(tower_type):
+        return terrain_type == WATER
     
     allowed_towers = get_terrain_property(terrain_type, 'allowed_towers')
     if allowed_towers == 'all':

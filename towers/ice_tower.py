@@ -7,7 +7,7 @@ class IceTower(Tower):
     
     def __init__(self, x, y):
         super().__init__(x, y, 'ice')
-        self.damage = 2  # Even lower damage (was 3)
+        self.damage = 0  # No damage, just freeze (swapped with freezer)
         self.range = 90   # Slightly reduced range (was 100)
         self.fire_rate = 60  # Much slower firing (was 45)
         self.projectile_speed = 5

@@ -77,7 +77,12 @@ class LightningTower(Tower):
             return
             
         current_enemy = enemies[0]
-        current_enemy.take_damage(self.damage)
+        # Calculate damage based on wet status
+        damage = self.damage
+        if hasattr(current_enemy, 'wet') and current_enemy.wet:
+            damage = int(damage * current_enemy.lightning_damage_multiplier)
+        
+        current_enemy.take_damage(damage)
         hit_enemies.append(current_enemy)
         
         # Visual effect

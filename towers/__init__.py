@@ -12,9 +12,10 @@ from .flame_tower import FlameTower
 from .ice_tower import IceTower
 from .explosive_tower import ExplosiveTower
 from .missile_tower import MissileTower
+from .splash_tower import SplashTower
 
 __all__ = [
     'Tower', 'BasicTower', 'SniperTower', 'FreezerTower',
     'DetectorTower', 'AntiAirTower', 'PoisonTower', 'LaserTower',
-    'CannonTower', 'LightningTower', 'FlameTower', 'IceTower', 'ExplosiveTower', 'MissileTower'
+    'CannonTower', 'LightningTower', 'FlameTower', 'IceTower', 'ExplosiveTower', 'MissileTower', 'SplashTower'
 ] 

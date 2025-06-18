@@ -1,7 +1,7 @@
 from typing import List, Tuple, Optional
 from towers import (BasicTower, SniperTower, FreezerTower, DetectorTower, 
                    AntiAirTower, PoisonTower, LaserTower, CannonTower,
-                   LightningTower, FlameTower, IceTower, ExplosiveTower, MissileTower)
+                   LightningTower, FlameTower, IceTower, ExplosiveTower, MissileTower, SplashTower)
 from .tower_sizes import get_tower_size, get_tower_visual_size
 
 class TowerManager:
@@ -22,7 +22,8 @@ class TowerManager:
             "flame": 35,      # Cone attack with burn
             "ice": 30,        # Area freeze
             "explosive": 100, # Massive damage, 3x3 size
-            "missile": 120    # Homing missiles with AOE
+            "missile": 120,   # Homing missiles with AOE
+            "splash": 35      # Water-only, applies wet status
         }
         
         # Tower classes
@@ -39,7 +40,8 @@ class TowerManager:
             "flame": FlameTower,
             "ice": IceTower,
             "explosive": ExplosiveTower,
-            "missile": MissileTower
+            "missile": MissileTower,
+            "splash": SplashTower
         }
         
         # State

@@ -58,8 +58,8 @@ class WaterProjectile(Projectile):
         # Draw water trail
         trail_length = 3
         for i in range(trail_length):
-            trail_x = self.x - self.dx * i * 2
-            trail_y = self.y - self.dy * i * 2
+            trail_x = self.x - self.velocity_x * i * 0.5
+            trail_y = self.y - self.velocity_y * i * 0.5
             trail_size = max(1, self.size - i)
             trail_alpha = 255 - (i * 80)
             if trail_alpha > 0:
