@@ -4,11 +4,12 @@ from typing import List, Tuple
 
 class Enemy:
     """Base class for all enemies"""
-    def __init__(self, path: List[Tuple[int, int]]):
+    def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         self.path = path
         self.path_index = 0
         self.x = float(path[0][0])
         self.y = float(path[0][1])
+        self.wave_number = wave_number
         
         # Base stats - to be overridden by subclasses
         self.max_health = 1
@@ -25,28 +26,87 @@ class Enemy:
         self.wet_timer = 0
         self.lightning_damage_multiplier = 1.0
         
+        # Progressive immunity system
+        self.immunities = self._generate_random_immunities()
+        
         # State
         self.reached_end = False
         self.distance_traveled = 0
     
+    def _generate_random_immunities(self) -> dict:
+        """Generate random immunities based on wave progression"""
+        import random
+        
+        immunities = {
+            'freeze_immune': False,
+            'slow_immune': False,
+            'poison_immune': False,
+            'burn_immune': False,
+            'wet_immune': False,
+            'stun_immune': False
+        }
+        
+        # Calculate immunity chances based on wave number
+        base_chance = min(0.15, self.wave_number * 0.01)  # 1% per wave, max 15%
+        
+        # Special waves have higher immunity chances
+        if self.wave_number % 10 == 0:  # Boss waves
+            base_chance *= 2.0
+        elif self.wave_number % 5 == 0:  # Mini-boss waves
+            base_chance *= 1.5
+        
+        # Randomly assign immunities
+        for immunity_type in immunities:
+            if random.random() < base_chance:
+                immunities[immunity_type] = True
+        
+        # Ensure at least some enemies remain vulnerable early game
+        if self.wave_number <= 3:
+            # Force at most 1 immunity for early waves
+            immune_count = sum(immunities.values())
+            if immune_count > 1:
+                # Keep only one random immunity
+                immune_types = [k for k, v in immunities.items() if v]
+                keep_immunity = random.choice(immune_types)
+                immunities = {k: (k == keep_immunity) for k in immunities}
+        
+        return immunities
+    
+    def is_immune_to(self, effect_type: str) -> bool:
+        """Check if enemy is immune to a specific effect"""
+        return self.immunities.get(f"{effect_type}_immune", False)
+    
     def update(self):
         """Update enemy position and state"""
-        # Handle freeze effect
-        if self.frozen:
+        # Handle freeze effect (if not immune) - NOW SLOWS INSTEAD OF STOPPING
+        if self.frozen and not self.is_immune_to('freeze'):
             self.freeze_timer -= 1
             if self.freeze_timer <= 0:
                 self.frozen = False
+                # Restore original speed when freeze ends
+                if hasattr(self, 'original_speed'):
+                    self.speed = self.original_speed
+        elif self.is_immune_to('freeze'):
+            # Immune enemies can't be frozen
+            self.frozen = False
+            self.freeze_timer = 0
+            if hasattr(self, 'original_speed'):
+                self.speed = self.original_speed
         
-        # Handle wet effect
-        if self.wet:
+        # Handle wet effect (if not immune)
+        if self.wet and not self.is_immune_to('wet'):
             self.wet_timer -= 1
             if self.wet_timer <= 0:
                 self.wet = False
                 self.lightning_damage_multiplier = 1.0
+        elif self.is_immune_to('wet'):
+            # Immune enemies can't be wet
+            self.wet = False
+            self.wet_timer = 0
+            self.lightning_damage_multiplier = 1.0
         
-        # Move along path if not frozen
-        if not self.frozen:
-            self.move_along_path()
+        # Always move (even when "frozen" - just slower)
+        self.move_along_path()
     
     def move_along_path(self):
         """Move the enemy along the predefined path"""
@@ -87,15 +147,24 @@ class Enemy:
         return actual_damage
     
     def apply_freeze(self, duration: int):
-        """Apply freeze effect to the enemy"""
-        self.frozen = True
-        self.freeze_timer = max(self.freeze_timer, duration)
+        """Apply freeze effect to the enemy (if not immune) - NOW SLOWS TO 25% SPEED"""
+        if not self.is_immune_to('freeze'):
+            # Store original speed if not already stored
+            if not hasattr(self, 'original_speed'):
+                self.original_speed = self.speed
+            
+            # Apply freeze (heavy slow instead of complete stop)
+            self.frozen = True
+            self.freeze_timer = max(self.freeze_timer, duration)
+            # Reduce speed to 25% when "frozen"
+            self.speed = self.original_speed * 0.25
     
     def apply_wet_status(self, duration: int, lightning_multiplier: float):
-        """Apply wet status to the enemy"""
-        self.wet = True
-        self.wet_timer = max(self.wet_timer, duration)
-        self.lightning_damage_multiplier = lightning_multiplier
+        """Apply wet status to the enemy (if not immune)"""
+        if not self.is_immune_to('wet'):
+            self.wet = True
+            self.wet_timer = max(self.wet_timer, duration)
+            self.lightning_damage_multiplier = lightning_multiplier
     
     def get_distance_from_start(self) -> float:
         """Get the total distance traveled along the path"""
@@ -112,6 +181,9 @@ class Enemy:
             color = tuple(max(0, min(255, int(c * 0.8))) for c in self.color)
         
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
+        
+        # Draw immunity indicators
+        self._draw_immunity_indicators(screen)
         
         # Draw wet effect overlay
         if self.wet:
@@ -134,4 +206,27 @@ class Enemy:
             
             # Health (green)
             health_width = int((self.health / self.max_health) * bar_width)
-            pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height)) 
+            pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
+    
+    def _draw_immunity_indicators(self, screen: pygame.Surface):
+        """Draw small indicators for immunities"""
+        immune_effects = [k.replace('_immune', '') for k, v in self.immunities.items() if v]
+        
+        if not immune_effects:
+            return
+        
+        # Draw immunity shield symbol
+        shield_color = (255, 215, 0)  # Gold
+        shield_x = int(self.x + self.size - 3)
+        shield_y = int(self.y - self.size + 3)
+        
+        # Draw small shield
+        shield_points = [
+            (shield_x, shield_y),
+            (shield_x + 4, shield_y),
+            (shield_x + 4, shield_y + 6),
+            (shield_x + 2, shield_y + 8),
+            (shield_x, shield_y + 6)
+        ]
+        pygame.draw.polygon(screen, shield_color, shield_points)
+        pygame.draw.polygon(screen, (0, 0, 0), shield_points, 1) 

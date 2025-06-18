@@ -3,8 +3,8 @@ from .enemy import Enemy
 
 class BasicEnemy(Enemy):
     """Basic enemy with standard stats"""
-    def __init__(self, path: List[Tuple[int, int]]):
-        super().__init__(path)
+    def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
+        super().__init__(path, wave_number)
         self.max_health = 1
         self.health = self.max_health
         self.speed = 1.0

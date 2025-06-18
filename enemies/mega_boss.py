@@ -7,7 +7,7 @@ class MegaBoss(Enemy):
     """Massive boss enemy with multiple phases and abilities"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 2000
         self.max_health = 2000
         self.speed = 0.5

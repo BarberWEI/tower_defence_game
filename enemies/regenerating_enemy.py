@@ -5,7 +5,7 @@ class RegeneratingEnemy(Enemy):
     """Enemy that regenerates health over time"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 80
         self.max_health = 80
         self.speed = 1.0

@@ -38,26 +38,26 @@ class WaveManager:
                 }
             },
             
-            # How much to reduce spawn delay each round (making spawning faster) - INCREASED
+            # How much to reduce spawn delay each round (making spawning faster) - MASSIVELY INCREASED
             'spawn_delay_reduction_per_round': {
-                'default': 4,                    # Default reduction per round (+1 from 3)
+                'default': 8,                    # Default reduction per round (doubled from 4)
                 'wave_ranges': {
-                    (1, 3): 3,                   # Waves 1-3: -3 frames per round (+1 from 2)
-                    (4, 8): 4,                   # Waves 4-8: -4 frames per round (+1 from 3)
-                    (9, 15): 5,                  # Waves 9-15: -5 frames per round (+1 from 4)
-                    (16, 25): 7,                 # Waves 16-25: -7 frames per round (+2 from 5)
-                    (26, 99): 9,                 # Waves 26+: -9 frames per round (+3 from 6)
+                    (1, 3): 6,                   # Waves 1-3: -6 frames per round (doubled from 3)
+                    (4, 8): 8,                   # Waves 4-8: -8 frames per round (doubled from 4)
+                    (9, 15): 10,                 # Waves 9-15: -10 frames per round (doubled from 5)
+                    (16, 25): 14,                # Waves 16-25: -14 frames per round (doubled from 7)
+                    (26, 99): 18,                # Waves 26+: -18 frames per round (doubled from 9)
                 }
             },
             
-            # Special round multipliers (for extra difficulty spikes)
+            # Special round multipliers (for extra difficulty spikes) - KEEP ENEMY COUNT, INCREASE SPEED
             'special_rounds': {
-                5: {'enemy_multiplier': 1.5, 'spawn_delay_multiplier': 0.8},    # Wave 5: 50% more enemies, 20% faster
-                10: {'enemy_multiplier': 2.0, 'spawn_delay_multiplier': 0.7},   # Wave 10: Double enemies, 30% faster
-                15: {'enemy_multiplier': 1.8, 'spawn_delay_multiplier': 0.6},   # Wave 15: 80% more enemies, 40% faster
-                20: {'enemy_multiplier': 2.5, 'spawn_delay_multiplier': 0.5},   # Wave 20: 2.5x enemies, 50% faster
-                25: {'enemy_multiplier': 3.0, 'spawn_delay_multiplier': 0.4},   # Wave 25: Triple enemies, 60% faster
-                30: {'enemy_multiplier': 4.0, 'spawn_delay_multiplier': 0.3},   # Wave 30: Quadruple enemies, 70% faster
+                5: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.6},    # Wave 5: Same enemies, 40% faster
+                10: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.5},   # Wave 10: Same enemies, 50% faster
+                15: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.4},   # Wave 15: Same enemies, 60% faster
+                20: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.3},   # Wave 20: Same enemies, 70% faster
+                25: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.25},  # Wave 25: Same enemies, 75% faster
+                30: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.2},   # Wave 30: Same enemies, 80% faster
             }
         }
         
@@ -191,7 +191,8 @@ class WaveManager:
             return None
         
         enemy_class = self.get_enemy_type_for_wave()
-        enemy = enemy_class(self.path)
+        # Pass wave number to enemy for immunity system
+        enemy = enemy_class(self.path, self.wave_number)
         
         # Apply progressive scaling based on wave number
         self.apply_enemy_scaling(enemy)

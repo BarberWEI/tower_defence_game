@@ -5,7 +5,7 @@ class InvisibleEnemy(Enemy):
     """Enemy that is invisible to most towers"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 60
         self.max_health = 60
         self.speed = 1.5

@@ -6,7 +6,7 @@ class FlyingEnemy(Enemy):
     """Enemy that flies and can only be hit by anti-air towers"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 40
         self.max_health = 40
         self.speed = 2.0

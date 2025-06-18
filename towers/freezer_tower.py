@@ -34,7 +34,7 @@ class FreezerTower(Tower):
         
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-            if distance <= self.range and not enemy.frozen and self.can_target_enemy(enemy):
+            if distance <= self.range and not getattr(enemy, 'frozen', False) and self.can_target_enemy(enemy):
                 valid_targets.append((enemy, distance))
         
         if not valid_targets:
@@ -58,4 +58,6 @@ class FreezerTower(Tower):
                 self.x, self.y, self.target.x, self.target.y,
                 self.projectile_speed, self.damage, self.freeze_duration
             )
+            # Link projectile to tower for damage tracking
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile) 

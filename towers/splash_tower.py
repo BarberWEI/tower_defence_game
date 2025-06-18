@@ -67,6 +67,8 @@ class SplashTower(Tower):
                 self.projectile_speed, self.damage, self.wet_duration,
                 self.splash_radius, self.lightning_damage_multiplier
             )
+            # Link projectile to tower for damage tracking
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
     
     def draw(self, screen, selected: bool = False):

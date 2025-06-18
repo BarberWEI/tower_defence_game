@@ -126,12 +126,18 @@ class LaserTower(Tower):
             
             # Sort by distance and apply damage
             hit_enemies.sort(key=lambda x: x[1])
+            total_damage_dealt = 0
             for enemy, _ in hit_enemies:
-                enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage)
+                total_damage_dealt += actual_damage
                 
                 # Prevent teleporting enemies from teleporting when hit by laser
                 if hasattr(enemy, 'teleport_timer'):
                     enemy.teleport_timer = 0  # Reset teleport cooldown
+            
+            # Track damage for currency generation
+            if total_damage_dealt > 0:
+                self.add_damage_dealt(total_damage_dealt)
             
             # Set laser visual effect
             self.laser_timer = self.laser_duration

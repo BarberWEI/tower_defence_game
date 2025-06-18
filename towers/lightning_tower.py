@@ -74,7 +74,7 @@ class LightningTower(Tower):
     def fire_lightning_chain(self, enemies, hit_enemies):
         """Create lightning chain effect"""
         if not enemies:
-            return
+            return 0
             
         current_enemy = enemies[0]
         # Calculate damage based on wet status
@@ -82,8 +82,9 @@ class LightningTower(Tower):
         if hasattr(current_enemy, 'wet') and current_enemy.wet:
             damage = int(damage * current_enemy.lightning_damage_multiplier)
         
-        current_enemy.take_damage(damage)
+        actual_damage = current_enemy.take_damage(damage)
         hit_enemies.append(current_enemy)
+        total_damage = actual_damage
         
         # Visual effect
         self.lightning_timer = self.lightning_duration
@@ -103,7 +104,10 @@ class LightningTower(Tower):
                 next_targets.sort(key=lambda x: x[1])
                 next_enemy = next_targets[0][0]
                 # Recursive chain
-                self.fire_lightning_chain([next_enemy], hit_enemies)
+                chain_damage = self.fire_lightning_chain([next_enemy], hit_enemies)
+                total_damage += chain_damage
+        
+        return total_damage
     
     def update(self, enemies, projectiles):
         """Update lightning tower"""
@@ -116,7 +120,9 @@ class LightningTower(Tower):
         
         # Fire lightning if ready and have target
         if self.target and self.fire_timer <= 0:
-            self.fire_lightning_chain([self.target], [])
+            damage_dealt = self.fire_lightning_chain([self.target], [])
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
             self.fire_timer = self.fire_rate
         
         # Update lightning timer

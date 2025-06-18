@@ -5,8 +5,8 @@ class TowerManager:
     """Manages tower placement, costs, and tower-related logic"""
     
     def __init__(self):
-        # Tower costs - rebalanced for better progression
-        self.tower_costs = {
+        # Base tower costs - these will be modified by wave progression
+        self.base_tower_costs = {
             "basic": 15,      # Cheap starter tower
             "sniper": 45,     # Long range, high damage
             "freezer": 25,    # Utility tower - slows enemies
@@ -22,6 +22,9 @@ class TowerManager:
             "missile": 120,   # Homing missiles with AOE
             "splash": 35      # Water-only, applies wet status
         }
+        
+        # Current wave number for cost calculation
+        self.current_wave = 1
         
         # State
         self.selected_tower_type: Optional[str] = None
@@ -50,9 +53,42 @@ class TowerManager:
             "splash": SplashTower
         }
     
+    def set_current_wave(self, wave_number: int):
+        """Update the current wave number for cost calculations"""
+        self.current_wave = wave_number
+    
+    def calculate_progressive_cost(self, base_cost: int, wave_number: int) -> int:
+        """Calculate tower cost with wave-based progression"""
+        if wave_number <= 1:
+            return base_cost
+        
+        # Cost increases by 8% per wave after wave 1, with diminishing returns
+        wave_factor = wave_number - 1
+        
+        # Progressive cost scaling with reasonable caps
+        if wave_number <= 10:
+            # Early game: 8% per wave
+            multiplier = 1.0 + (wave_factor * 0.08)
+        elif wave_number <= 20:
+            # Mid game: 5% per wave (slower growth)
+            early_multiplier = 1.0 + (9 * 0.08)  # First 10 waves
+            mid_factor = wave_number - 10
+            multiplier = early_multiplier + (mid_factor * 0.05)
+        else:
+            # Late game: 3% per wave (even slower)
+            early_multiplier = 1.0 + (9 * 0.08)  # First 10 waves
+            mid_multiplier = early_multiplier + (10 * 0.05)  # Next 10 waves
+            late_factor = wave_number - 20
+            multiplier = mid_multiplier + (late_factor * 0.03)
+        
+        # Cap the cost increase at 4x original cost
+        multiplier = min(multiplier, 4.0)
+        
+        return int(base_cost * multiplier)
+    
     def get_tower_cost(self, tower_type: str) -> int:
         """Get the cost of a tower type"""
-        return self.tower_costs.get(tower_type, 0)
+        return self.calculate_progressive_cost(self.base_tower_costs.get(tower_type, 0), self.current_wave)
     
     def can_afford_tower(self, tower_type: str, money: int) -> bool:
         """Check if player can afford a tower"""
@@ -119,8 +155,12 @@ class TowerManager:
             tower = self.create_tower(tower_type, int(center_x), int(center_y), 
                                     grid_x, grid_y, map_obj.cell_size)
             if tower:
-                # Apply terrain effects to the tower
-                map_obj.apply_terrain_effects_to_tower(tower, grid_x, grid_y)
+                # Set references for terrain effects and currency generation
+                tower.set_map_reference(map_obj)
+                tower.set_grid_position(grid_x, grid_y)
+                
+                # Apply terrain effects to the tower (now handled by base Tower class)
+                tower.apply_terrain_effects()
                 self.cancel_placement()  # Reset placement state
                 return True, tower, cost
         
@@ -131,10 +171,10 @@ class TowerManager:
         tower_classes = self._get_tower_classes()
         return {
             tower_type: {
-                'cost': cost,
+                'cost': self.get_tower_cost(tower_type),
                 'class': tower_classes[tower_type]
             }
-            for tower_type, cost in self.tower_costs.items()
+            for tower_type in self.base_tower_costs
         }
     
     def get_placement_state(self) -> dict:

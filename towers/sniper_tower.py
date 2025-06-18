@@ -57,4 +57,6 @@ class SniperTower(Tower):
                 self.x, self.y, self.target.x, self.target.y,
                 self.projectile_speed, self.damage
             )
+            # Link projectile to tower for damage tracking
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile) 

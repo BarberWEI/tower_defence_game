@@ -70,10 +70,11 @@ class FlameTower(Tower):
     def spray_flames(self, enemies):
         """Create flame cone effect"""
         if not self.target:
-            return
+            return 0
             
         # Find all enemies in flame cone
         cone_angle_rad = math.radians(self.cone_angle / 2)
+        total_damage = 0
         
         for enemy in enemies:
             if not self.can_target_enemy(enemy):
@@ -94,7 +95,8 @@ class FlameTower(Tower):
             
             if angle_diff <= cone_angle_rad:
                 # Apply immediate damage
-                enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage)
+                total_damage += actual_damage
                 
                 # Apply burn effect
                 if not hasattr(enemy, 'burn_timer'):
@@ -106,6 +108,7 @@ class FlameTower(Tower):
         
         # Create visual flame particles
         self.create_flame_particles()
+        return total_damage
     
     def create_flame_particles(self):
         """Create flame particle effects"""
@@ -141,7 +144,9 @@ class FlameTower(Tower):
         
         # Spray flames if ready and have target
         if self.target and self.fire_timer <= 0:
-            self.spray_flames(enemies)
+            damage_dealt = self.spray_flames(enemies)
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
             self.fire_timer = self.fire_rate
         
         # Update flame particles
@@ -151,11 +156,17 @@ class FlameTower(Tower):
                 self.flame_particles.remove(particle)
         
         # Update burn effects on enemies
+        burn_damage_dealt = 0
         for enemy in enemies:
             if hasattr(enemy, 'burn_timer') and enemy.burn_timer > 0:
                 enemy.burn_timer -= 1
                 if enemy.burn_timer % 20 == 0:  # Every 1/3 second
-                    enemy.take_damage(enemy.burn_damage)
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    burn_damage_dealt += actual_burn_damage
+        
+        # Track burn damage
+        if burn_damage_dealt > 0:
+            self.add_damage_dealt(burn_damage_dealt)
     
     def draw(self, screen, selected: bool = False):
         """Draw flame tower"""

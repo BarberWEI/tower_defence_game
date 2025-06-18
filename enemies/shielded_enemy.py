@@ -4,8 +4,8 @@ from .enemy import Enemy
 
 class ShieldedEnemy(Enemy):
     """Enemy with regenerating shields"""
-    def __init__(self, path: List[Tuple[int, int]]):
-        super().__init__(path)
+    def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
+        super().__init__(path, wave_number)
         self.max_health = 2
         self.health = self.max_health
         self.max_shield = 2

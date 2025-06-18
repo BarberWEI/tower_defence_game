@@ -34,7 +34,7 @@ class AntiAirTower(Tower):
         if flying_targets:
             flying_targets.sort(key=lambda x: x[1])
             self.target = flying_targets[0][0]
-        elif ground_targets and not self.prioritize_flying:
+        elif ground_targets:
             # Can hit ground enemies too, but with lower priority
             ground_targets.sort(key=lambda x: x[1])
             self.target = ground_targets[0][0]
@@ -58,6 +58,8 @@ class AntiAirTower(Tower):
             )
             missile.color = (0, 191, 255)  # Blue missile
             missile.homing_strength = 0.1  # Strong homing
+            # Link projectile to tower for damage tracking
+            missile.source_tower_id = self.tower_id
             projectiles.append(missile)
     
     def draw(self, screen, selected: bool = False):

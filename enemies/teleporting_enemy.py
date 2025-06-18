@@ -7,7 +7,7 @@ class TeleportingEnemy(Enemy):
     """Enemy that can teleport to avoid damage"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 50
         self.max_health = 50
         self.speed = 1.2

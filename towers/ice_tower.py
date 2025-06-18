@@ -64,6 +64,8 @@ class IceTower(Tower):
                 self.projectile_speed, self.damage, self.freeze_duration,
                 self.area_effect_radius, self.slow_factor
             )
+            # Link projectile to tower for damage tracking
+            projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
     
     def draw(self, screen, selected: bool = False):

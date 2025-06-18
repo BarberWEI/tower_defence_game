@@ -26,10 +26,14 @@ class Tower:
         self.size = 15
         self.color = (0, 255, 0)  # Green by default
         
-        # Current stats (base + upgrades)
+        # Current stats (base + upgrades + terrain effects)
         self.range = self.base_range
         self.damage = self.base_damage
         self.fire_rate = self.base_fire_rate
+        
+        # Terrain effects tracking
+        self.terrain_effects_applied = False
+        self.terrain_type = None
         
         # Upgrade tracking
         self.upgrades: Dict[UpgradeType, int] = {
@@ -46,6 +50,74 @@ class Tower:
         # Currency tracking
         self.total_damage_dealt = 0
         
+        # Reference to game systems (set by tower manager)
+        self.map_reference = None
+        self.upgrade_system_reference = None
+        
+    def set_grid_position(self, grid_x: int, grid_y: int):
+        """Set the grid position and apply terrain effects"""
+        self.grid_x = grid_x
+        self.grid_y = grid_y
+        if self.map_reference and not self.terrain_effects_applied:
+            self.apply_terrain_effects()
+    
+    def set_map_reference(self, map_obj):
+        """Set reference to map for terrain effects"""
+        self.map_reference = map_obj
+        if not self.terrain_effects_applied:
+            self.apply_terrain_effects()
+    
+    def set_upgrade_system_reference(self, upgrade_system):
+        """Set reference to upgrade system for currency generation"""
+        self.upgrade_system_reference = upgrade_system
+    
+    def apply_terrain_effects(self):
+        """Apply terrain-specific effects to this tower"""
+        if not self.map_reference or self.terrain_effects_applied:
+            return
+            
+        from game_systems.terrain_types import get_terrain_property
+        
+        terrain_type = self.map_reference.get_terrain_at_grid(self.grid_x, self.grid_y)
+        self.terrain_type = terrain_type
+        special_rules = get_terrain_property(terrain_type, 'special_rules')
+        
+        if special_rules == 'reduced_range':
+            # Forest reduces tower range by 20%
+            self.range = int(self.base_range * 0.8)
+        elif special_rules == 'water_only':
+            # Water terrain might give special bonuses to certain towers
+            if hasattr(self, 'freeze_duration'):
+                self.freeze_duration = int(self.freeze_duration * 1.5)
+        
+        self.terrain_effects_applied = True
+    
+    def track_damage_and_generate_currency(self, damage_dealt: int):
+        """Track damage and generate currency - centralized for all towers"""
+        if damage_dealt > 0:
+            self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency at 5/100 (0.05) of original rate
+            # Original: max(1, damage_dealt // 2)
+            # New: max(1, damage_dealt // 40) to get 5/100 rate
+            currency_amount = max(1, damage_dealt // 40)
+            
+            if self.upgrade_system_reference:
+                self.upgrade_system_reference.add_tower_currency(
+                    self.tower_id, self.tower_type, currency_amount
+                )
+    
+    def track_utility_hit(self):
+        """Track utility hit for support towers - centralized"""
+        # Support towers get minimal currency for successful hits
+        # Reduced from 1 to 0.05 (5/100 rate)
+        currency_amount = 1  # Keep at 1 since it's already minimal for utility
+        
+        if self.upgrade_system_reference:
+            self.upgrade_system_reference.add_tower_currency(
+                self.tower_id, self.tower_type, currency_amount
+            )
+
     def update(self, enemies: List, projectiles: List):
         """Update tower state and shooting"""
         # Update fire timer
@@ -99,10 +171,14 @@ class Tower:
         self.total_damage_dealt += damage
     
     def reset_stats_to_base(self):
-        """Reset stats to base values before applying upgrades"""
+        """Reset stats to base values before applying upgrades and terrain effects"""
         self.range = self.base_range
         self.damage = self.base_damage
         self.fire_rate = self.base_fire_rate
+        
+        # Reapply terrain effects after reset
+        self.terrain_effects_applied = False
+        self.apply_terrain_effects()
     
     def get_upgrade_level(self, upgrade_type: UpgradeType) -> int:
         """Get the current upgrade level for a specific upgrade type"""

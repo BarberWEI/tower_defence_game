@@ -46,6 +46,8 @@ class Game:
         self.map = Map(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.wave_manager = WaveManager(self.map.get_path())
         self.tower_manager = TowerManager()
+        # Initialize tower costs for wave 1
+        self.tower_manager.set_current_wave(1)
         self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
         self.upgrade_system = TowerUpgradeSystem()
         self.upgrade_ui = UpgradeUI(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
@@ -165,6 +167,8 @@ class Game:
         )
         
         if success and tower:
+            # Set upgrade system reference for currency generation
+            tower.set_upgrade_system_reference(self.upgrade_system)
             self.towers.append(tower)
             self.money -= cost
     
@@ -216,7 +220,16 @@ class Game:
     def update_towers(self):
         """Update all towers"""
         for tower in self.towers:
+            # Track damage before update
+            previous_damage = tower.total_damage_dealt
+            
             tower.update(self.enemies, self.projectiles)
+            
+            # Check if tower dealt damage directly (not through projectiles)
+            damage_this_frame = tower.total_damage_dealt - previous_damage
+            if damage_this_frame > 0:
+                # Use centralized currency generation (already includes 5/100 nerf)
+                tower.track_damage_and_generate_currency(damage_this_frame)
     
     def update_projectiles(self):
         """Update all projectiles"""
@@ -244,14 +257,16 @@ class Game:
                     if damage_dealt is None:
                         damage_dealt = 0
                     
-                    if tower_id and damage_dealt > 0:
-                        # Find the tower and add currency
+                    if tower_id:
+                        # Find the tower and use centralized currency generation
                         tower = self._find_tower_by_id(tower_id)
                         if tower:
-                            tower.add_damage_dealt(damage_dealt)
-                            # Add currency based on damage dealt (higher damage towers get more)
-                            currency_amount = max(1, damage_dealt // 2)
-                            self.upgrade_system.add_tower_currency(tower_id, tower.tower_type, currency_amount)
+                            if damage_dealt > 0:
+                                # Use centralized damage tracking and currency generation
+                                tower.track_damage_and_generate_currency(damage_dealt)
+                            else:
+                                # Support towers get minimal currency for successful hits
+                                tower.track_utility_hit()
             
             if hasattr(projectile, 'should_remove') and projectile.should_remove:
                 self.projectiles.remove(projectile)
@@ -277,6 +292,10 @@ class Game:
             self.wave_bonus = wave_info['money_bonus']
             self.show_wave_complete = True
             self.wave_complete_timer = 180  # Show for 3 seconds
+            
+            # Update tower costs for the new wave
+            current_wave = wave_info.get('wave_number', 1)
+            self.tower_manager.set_current_wave(current_wave)
     
     def update_ui_state(self):
         """Update UI-related timers and state"""
@@ -371,6 +390,8 @@ class Game:
         # Reset systems
         self.wave_manager = WaveManager(self.map.get_path())
         self.tower_manager = TowerManager()
+        # Reset tower costs to wave 1
+        self.tower_manager.set_current_wave(1)
         self.upgrade_system = TowerUpgradeSystem()
         
         # Reset UI state

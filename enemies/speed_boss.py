@@ -6,7 +6,7 @@ class SpeedBoss(Enemy):
     """Boss that becomes faster as it takes damage"""
     
     def __init__(self, path):
-        super().__init__(path)
+        super().__init__(path, wave_number)
         self.health = 800
         self.max_health = 800
         self.base_speed = 1.0
