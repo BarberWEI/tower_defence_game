@@ -1,27 +1,15 @@
 from typing import List, Tuple, Optional
+from config.game_config import get_tower_config
 from .tower_sizes import get_tower_size, get_tower_visual_size
 
 class TowerManager:
     """Manages tower placement, costs, and tower-related logic"""
     
     def __init__(self):
-        # Base tower costs - these will be modified by wave progression
-        self.base_tower_costs = {
-            "basic": 15,      # Cheap starter tower
-            "sniper": 45,     # Long range, high damage
-            "freezer": 25,    # Utility tower - slows enemies
-            "detector": 30,   # Support tower - reveals invisible
-            "antiair": 55,    # Specialized for flying enemies
-            "poison": 40,     # DOT specialist
-            "laser": 60,      # Piercing damage
-            "cannon": 75,     # Area damage, 2x2 size
-            "lightning": 50,  # Chain lightning
-            "flame": 35,      # Cone attack with burn
-            "ice": 30,        # Area freeze
-            "explosive": 100, # Massive damage, 3x3 size
-            "missile": 120,   # Homing missiles with AOE
-            "splash": 35      # Water-only, applies wet status
-        }
+        # Load tower configuration from centralized config
+        self.config = get_tower_config()
+        self.base_tower_costs = self.config['base_costs']
+        self.cost_progression = self.config['cost_progression']
         
         # Current wave number for cost calculation
         self.current_wave = 1
@@ -58,31 +46,38 @@ class TowerManager:
         self.current_wave = wave_number
     
     def calculate_progressive_cost(self, base_cost: int, wave_number: int) -> int:
-        """Calculate tower cost with wave-based progression"""
+        """Calculate tower cost with wave-based progression using config values"""
         if wave_number <= 1:
             return base_cost
         
-        # Cost increases by 8% per wave after wave 1, with diminishing returns
+        # Get progression config
+        early_waves = self.cost_progression['early_game_waves']
+        mid_waves = self.cost_progression['mid_game_waves']
+        early_increase = self.cost_progression['early_increase_per_wave']
+        mid_increase = self.cost_progression['mid_increase_per_wave']
+        late_increase = self.cost_progression['late_increase_per_wave']
+        max_multiplier = self.cost_progression['max_cost_multiplier']
+        
         wave_factor = wave_number - 1
         
-        # Progressive cost scaling with reasonable caps
-        if wave_number <= 10:
-            # Early game: 8% per wave
-            multiplier = 1.0 + (wave_factor * 0.08)
-        elif wave_number <= 20:
-            # Mid game: 5% per wave (slower growth)
-            early_multiplier = 1.0 + (9 * 0.08)  # First 10 waves
-            mid_factor = wave_number - 10
-            multiplier = early_multiplier + (mid_factor * 0.05)
+        # Progressive cost scaling using config values
+        if wave_number <= early_waves:
+            # Early game: use early_increase_per_wave
+            multiplier = 1.0 + (wave_factor * early_increase)
+        elif wave_number <= mid_waves:
+            # Mid game: use mid_increase_per_wave
+            early_multiplier = 1.0 + ((early_waves - 1) * early_increase)  # First early waves
+            mid_factor = wave_number - early_waves
+            multiplier = early_multiplier + (mid_factor * mid_increase)
         else:
-            # Late game: 3% per wave (even slower)
-            early_multiplier = 1.0 + (9 * 0.08)  # First 10 waves
-            mid_multiplier = early_multiplier + (10 * 0.05)  # Next 10 waves
-            late_factor = wave_number - 20
-            multiplier = mid_multiplier + (late_factor * 0.03)
+            # Late game: use late_increase_per_wave
+            early_multiplier = 1.0 + ((early_waves - 1) * early_increase)  # First early waves
+            mid_multiplier = early_multiplier + ((mid_waves - early_waves) * mid_increase)  # Next mid waves
+            late_factor = wave_number - mid_waves
+            multiplier = mid_multiplier + (late_factor * late_increase)
         
-        # Cap the cost increase at 4x original cost
-        multiplier = min(multiplier, 4.0)
+        # Cap the cost increase using config value
+        multiplier = min(multiplier, max_multiplier)
         
         return int(base_cost * multiplier)
     

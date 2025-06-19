@@ -1,23 +1,28 @@
 import pygame
 import math
 from typing import List, Tuple, Optional
+from config.game_config import get_map_config
 from .terrain_types import *
 from .tower_sizes import *
-from maps.default_map import get_map_data
 
 class Map:
     """Handles grid-based map layout, terrain types, and tower placement validation"""
     
-    def __init__(self, screen_width: int, screen_height: int):
+    def __init__(self, screen_width: int, screen_height: int, map_name: str = 'default_map'):
         self.screen_width = screen_width
         self.screen_height = screen_height
+        self.map_name = map_name
         
-        # Load map data first
-        map_data = get_map_data()
-        self.grid_layout = map_data['layout']
+        # Load map data from centralized config
+        all_maps = get_map_config()
+        if map_name not in all_maps:
+            map_name = 'default_map'  # Fallback to default
+        
+        map_data = all_maps[map_name]
+        self.grid_layout = map_data['terrain']
         self.grid_width = map_data['width'] 
         self.grid_height = map_data['height']
-        self.path_waypoints = map_data['path_waypoints']
+        self.path_waypoints = map_data['path']
         
         # Calculate dynamic map positioning and cell size to fill available space
         self.top_ui_height = 140  # Space for top UI

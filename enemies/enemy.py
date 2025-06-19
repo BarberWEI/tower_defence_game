@@ -1,6 +1,7 @@
 import pygame
 import math
 from typing import List, Tuple
+from config.game_config import get_balance_config
 
 class Enemy:
     """Base class for all enemies"""
@@ -34,7 +35,7 @@ class Enemy:
         self.distance_traveled = 0
     
     def _generate_random_immunities(self) -> dict:
-        """Generate random immunities based on wave progression"""
+        """Generate random immunities based on wave progression using config values"""
         import random
         
         immunities = {
@@ -46,29 +47,35 @@ class Enemy:
             'stun_immune': False
         }
         
-        # Calculate immunity chances based on wave number
-        base_chance = min(0.15, self.wave_number * 0.01)  # 1% per wave, max 15%
+        # Get immunity configuration
+        config = get_balance_config()
+        immunity_config = config['immunity']
         
-        # Special waves have higher immunity chances
+        # Calculate immunity chances based on wave number using config
+        base_chance = min(immunity_config['max_immunity_chance'], 
+                         self.wave_number * immunity_config['base_chance_per_wave'])
+        
+        # Special waves have higher immunity chances using config multipliers
         if self.wave_number % 10 == 0:  # Boss waves
-            base_chance *= 2.0
+            base_chance *= immunity_config['boss_wave_multiplier']
         elif self.wave_number % 5 == 0:  # Mini-boss waves
-            base_chance *= 1.5
+            base_chance *= immunity_config['mini_boss_multiplier']
         
         # Randomly assign immunities
         for immunity_type in immunities:
             if random.random() < base_chance:
                 immunities[immunity_type] = True
         
-        # Ensure at least some enemies remain vulnerable early game
-        if self.wave_number <= 3:
-            # Force at most 1 immunity for early waves
+        # Ensure at least some enemies remain vulnerable early game using config
+        if self.wave_number <= immunity_config['early_game_waves']:
+            # Force at most max_immunities for early waves
             immune_count = sum(immunities.values())
-            if immune_count > 1:
-                # Keep only one random immunity
+            max_immunities = immunity_config['early_game_max_immunities']
+            if immune_count > max_immunities:
+                # Keep only max_immunities random immunities
                 immune_types = [k for k, v in immunities.items() if v]
-                keep_immunity = random.choice(immune_types)
-                immunities = {k: (k == keep_immunity) for k in immunities}
+                keep_immunities = random.sample(immune_types, max_immunities)
+                immunities = {k: (k in keep_immunities) for k in immunities}
         
         return immunities
     
@@ -147,7 +154,7 @@ class Enemy:
         return actual_damage
     
     def apply_freeze(self, duration: int):
-        """Apply freeze effect to the enemy (if not immune) - NOW SLOWS TO 25% SPEED"""
+        """Apply freeze effect to the enemy (if not immune) - NOW SLOWS USING CONFIG VALUE"""
         if not self.is_immune_to('freeze'):
             # Store original speed if not already stored
             if not hasattr(self, 'original_speed'):
@@ -156,8 +163,9 @@ class Enemy:
             # Apply freeze (heavy slow instead of complete stop)
             self.frozen = True
             self.freeze_timer = max(self.freeze_timer, duration)
-            # Reduce speed to 25% when "frozen"
-            self.speed = self.original_speed * 0.25
+            # Reduce speed using config value
+            config = get_balance_config()
+            self.speed = self.original_speed * config['freeze']['slow_factor']
     
     def apply_wet_status(self, duration: int, lightning_multiplier: float):
         """Apply wet status to the enemy (if not immune)"""

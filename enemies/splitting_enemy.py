@@ -3,9 +3,9 @@ from .basic_enemy import BasicEnemy
 import pygame
 
 class SplittingEnemy(Enemy):
-    """Enemy that splits into smaller enemies when killed"""
+    """Enemy that splits into smaller enemies when destroyed"""
     
-    def __init__(self, path, split_count=2, generation=1):
+    def __init__(self, path, split_count=2, generation=1, wave_number=1):
         super().__init__(path, wave_number)
         self.generation = generation
         self.split_count = split_count

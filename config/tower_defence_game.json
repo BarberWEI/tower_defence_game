@@ -1,0 +1,202 @@
+{
+  "wave_config": {
+    "spawn_config": {
+      "base_enemy_count": 5,
+      "base_spawn_delay": 120,
+      "min_spawn_delay": 30,
+      "boss_enemy_count": 1
+    },
+    "round_progression": {
+      "enemy_increase_per_round": {
+        "wave_ranges": {
+          "1-5": 1,
+          "6-10": 2,
+          "11-15": 3,
+          "16-20": 4,
+          "21-25": 5,
+          "26-30": 6,
+          "31-35": 7,
+          "36-40": 8,
+          "41-45": 9,
+          "46-50": 10
+        },
+        "default": 1
+      },
+      "spawn_delay_reduction_per_round": {
+        "wave_ranges": {
+          "1-10": 5,
+          "11-20": 8,
+          "21-30": 10,
+          "31-40": 12,
+          "41-50": 15
+        },
+        "default": 5
+      },
+      "special_rounds": {
+        "10": {
+          "enemy_multiplier": 1.5,
+          "spawn_delay_multiplier": 0.8
+        },
+        "20": {
+          "enemy_multiplier": 2.0,
+          "spawn_delay_multiplier": 0.7
+        },
+        "30": {
+          "enemy_multiplier": 2.5,
+          "spawn_delay_multiplier": 0.6
+        },
+        "40": {
+          "enemy_multiplier": 3.0,
+          "spawn_delay_multiplier": 0.5
+        },
+        "50": {
+          "enemy_multiplier": 4.0,
+          "spawn_delay_multiplier": 0.4
+        }
+      }
+    },
+    "wave_compositions": {
+      "1-5": [
+        ["BasicEnemy", 0.8],
+        ["FastEnemy", 0.2]
+      ],
+      "6-10": [
+        ["BasicEnemy", 0.6],
+        ["FastEnemy", 0.3],
+        ["TankEnemy", 0.1]
+      ],
+      "11-15": [
+        ["BasicEnemy", 0.4],
+        ["FastEnemy", 0.3],
+        ["TankEnemy", 0.2],
+        ["FlyingEnemy", 0.1]
+      ],
+      "16-20": [
+        ["BasicEnemy", 0.3],
+        ["FastEnemy", 0.2],
+        ["TankEnemy", 0.2],
+        ["FlyingEnemy", 0.15],
+        ["ShieldedEnemy", 0.15]
+      ],
+      "21-30": [
+        ["BasicEnemy", 0.2],
+        ["FastEnemy", 0.2],
+        ["TankEnemy", 0.2],
+        ["FlyingEnemy", 0.15],
+        ["ShieldedEnemy", 0.15],
+        ["InvisibleEnemy", 0.1]
+      ],
+      "31-40": [
+        ["FastEnemy", 0.2],
+        ["TankEnemy", 0.2],
+        ["FlyingEnemy", 0.15],
+        ["ShieldedEnemy", 0.15],
+        ["InvisibleEnemy", 0.1],
+        ["RegeneratingEnemy", 0.1],
+        ["TeleportingEnemy", 0.1]
+      ],
+      "41-50": [
+        ["TankEnemy", 0.15],
+        ["FlyingEnemy", 0.15],
+        ["ShieldedEnemy", 0.15],
+        ["InvisibleEnemy", 0.15],
+        ["RegeneratingEnemy", 0.15],
+        ["TeleportingEnemy", 0.15],
+        ["SplittingEnemy", 0.1]
+      ]
+    },
+    "boss_waves": {
+      "15": "SpeedBoss",
+      "25": "SpeedBoss",
+      "35": "MegaBoss",
+      "45": "MegaBoss",
+      "50": "MegaBoss"
+    },
+    "enemy_scaling": {
+      "health_per_wave": 0.15,
+      "speed_per_wave": 0.03,
+      "reward_per_wave": 0.08,
+      "max_health_multiplier": 5.0,
+      "max_speed_multiplier": 2.5,
+      "max_reward_multiplier": 3.0
+    },
+    "money_config": {
+      "normal_wave_bonus": 50,
+      "boss_wave_bonus": 200
+    }
+  },
+  "map_config": {
+    "default_map": {
+      "width": 20,
+      "height": 15,
+      "terrain": [
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+        [0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+        [0,1,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+        [0,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,1,1,0,0],
+        [0,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      ],
+      "path": [
+        [0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1], [8,1], [9,1],
+        [9,2], [9,3], [10,3], [11,3], [12,3], [13,3], [14,3], [15,3], [16,3], [17,3],
+        [17,4], [17,5], [17,6], [16,6], [15,6], [14,6], [13,6], [12,6], [11,6], [10,6],
+        [9,6], [8,6], [7,6], [6,6], [5,6], [4,6], [3,6], [2,6], [1,6],
+        [1,7], [1,8], [1,9], [1,10], [1,11], [1,12], [1,13],
+        [13,7], [13,8], [13,9], [14,9], [15,9], [16,9], [17,9]
+      ]
+    }
+  },
+  "tower_config": {
+    "base_costs": {
+      "basic": 20,
+      "sniper": 40,
+      "cannon": 60,
+      "freezer": 30,
+      "poison": 35,
+      "laser": 80,
+      "lightning": 50,
+      "missile": 100,
+      "flame": 45,
+      "ice": 55,
+      "detector": 25,
+      "antiair": 70,
+      "explosive": 90,
+      "splash": 120
+    },
+    "cost_progression": {
+      "early_game_waves": 15,
+      "mid_game_waves": 30,
+      "early_increase_per_wave": 0.02,
+      "mid_increase_per_wave": 0.03,
+      "late_increase_per_wave": 0.05,
+      "max_cost_multiplier": 3.0
+    }
+  },
+  "balance_config": {
+    "currency": {
+      "damage_divisor": 40,
+      "utility_hit_reward": 1
+    },
+    "immunity": {
+      "base_chance_per_wave": 0.01,
+      "max_immunity_chance": 0.15,
+      "boss_wave_multiplier": 2.0,
+      "mini_boss_multiplier": 1.5,
+      "early_game_waves": 10,
+      "early_game_max_immunities": 2
+    },
+    "freeze": {
+      "slow_factor": 0.25
+    }
+  }
+} 

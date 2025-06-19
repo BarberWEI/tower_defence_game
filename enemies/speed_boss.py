@@ -5,7 +5,7 @@ import math
 class SpeedBoss(Enemy):
     """Boss that becomes faster as it takes damage"""
     
-    def __init__(self, path):
+    def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
         self.health = 800
         self.max_health = 800

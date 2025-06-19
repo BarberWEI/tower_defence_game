@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from config.game_config import get_wave_config
 from enemies import (BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy,
                     InvisibleEnemy, FlyingEnemy, RegeneratingEnemy, 
                     SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss)
@@ -10,85 +11,32 @@ class WaveManager:
         self.path = path
         self.wave_number = 1
         self.enemies_spawned = 0
-        self.enemies_per_wave = 8
         self.spawn_timer = 0
-        self.spawn_delay = 90
         self.wave_complete = False
         
-        # Spawning configuration - easily adjustable difficulty settings
-        self.spawn_config = {
-            'base_spawn_delay': 90,          # Starting spawn delay in frames
-            'min_spawn_delay': 15,           # Minimum spawn delay (maximum speed)
-            'base_enemy_count': 8,           # Starting number of enemies per wave
-            'boss_enemy_count': 1,           # Number of enemies in boss waves
-        }
+        # Load configuration from centralized config
+        self.config = get_wave_config()
+        self.spawn_config = self.config['spawn_config']
+        self.round_progression = self.config['round_progression']
+        self.money_config = self.config['money_config']
         
-        # Per-round adjustment configuration - INCREASED DIFFICULTY!
-        self.round_progression = {
-            # How many enemies to add each round - INCREASED
-            'enemy_increase_per_round': {
-                'default': 3,                    # Default increase per round (+1 from 2)
-                'wave_ranges': {
-                    (1, 5): 2,                   # Waves 1-5: +2 enemy per round (+1 from 1)
-                    (6, 10): 3,                  # Waves 6-10: +3 enemies per round (+1 from 2)
-                    (11, 15): 4,                 # Waves 11-15: +4 enemies per round (+1 from 3)
-                    (16, 20): 6,                 # Waves 16-20: +6 enemies per round (+2 from 4)
-                    (21, 30): 8,                 # Waves 21-30: +8 enemies per round (+3 from 5)
-                    (31, 99): 10,                # Waves 31+: +10 enemies per round (+4 from 6)
-                }
-            },
-            
-            # How much to reduce spawn delay each round (making spawning faster) - MASSIVELY INCREASED
-            'spawn_delay_reduction_per_round': {
-                'default': 8,                    # Default reduction per round (doubled from 4)
-                'wave_ranges': {
-                    (1, 3): 6,                   # Waves 1-3: -6 frames per round (doubled from 3)
-                    (4, 8): 8,                   # Waves 4-8: -8 frames per round (doubled from 4)
-                    (9, 15): 10,                 # Waves 9-15: -10 frames per round (doubled from 5)
-                    (16, 25): 14,                # Waves 16-25: -14 frames per round (doubled from 7)
-                    (26, 99): 18,                # Waves 26+: -18 frames per round (doubled from 9)
-                }
-            },
-            
-            # Special round multipliers (for extra difficulty spikes) - KEEP ENEMY COUNT, INCREASE SPEED
-            'special_rounds': {
-                5: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.6},    # Wave 5: Same enemies, 40% faster
-                10: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.5},   # Wave 10: Same enemies, 50% faster
-                15: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.4},   # Wave 15: Same enemies, 60% faster
-                20: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.3},   # Wave 20: Same enemies, 70% faster
-                25: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.25},  # Wave 25: Same enemies, 75% faster
-                30: {'enemy_multiplier': 1.0, 'spawn_delay_multiplier': 0.2},   # Wave 30: Same enemies, 80% faster
-            }
-        }
+        # Initialize with starting values
+        self.enemies_per_wave = self.spawn_config['base_enemy_count']
+        self.spawn_delay = self.spawn_config['base_spawn_delay']
         
-        # Money bonus configuration
-        self.money_config = {
-            'normal_wave_bonus': 50,
-            'boss_wave_bonus': 100,
-        }
-        
-        # Wave configuration with boss waves
-        self.wave_configs = {
-            # Wave ranges and their enemy compositions
-            (1, 2): [(BasicEnemy, 1.0)],  # Waves 1-2: Only basic enemies
-            (3, 4): [(BasicEnemy, 0.7), (FastEnemy, 0.3)],  # Waves 3-4: Basic + Fast
-            (5, 6): [(BasicEnemy, 0.5), (FastEnemy, 0.3), (TankEnemy, 0.2)],  # Basic mix
-            (7, 8): [(BasicEnemy, 0.4), (FastEnemy, 0.2), (TankEnemy, 0.2), (InvisibleEnemy, 0.2)],  # Add invisible
-            (9, 10): [(BasicEnemy, 0.3), (FastEnemy, 0.2), (TankEnemy, 0.2), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15)],  # Add flying
-            (11, 12): [(BasicEnemy, 0.25), (FastEnemy, 0.15), (TankEnemy, 0.2), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1)],  # Add shielded
-            (13, 14): [(BasicEnemy, 0.2), (FastEnemy, 0.15), (TankEnemy, 0.15), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1)],  # Add regenerating
-            (15, 16): [(BasicEnemy, 0.15), (FastEnemy, 0.15), (TankEnemy, 0.15), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.05)],  # Add teleporting
-            (17, 19): [(BasicEnemy, 0.15), (FastEnemy, 0.15), (TankEnemy, 0.1), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.05), (SplittingEnemy, 0.05)],  # Add splitting
-            (20, 99): [(BasicEnemy, 0.1), (FastEnemy, 0.1), (TankEnemy, 0.1), (InvisibleEnemy, 0.15), (FlyingEnemy, 0.15), (ShieldedEnemy, 0.1), (RegeneratingEnemy, 0.1), (TeleportingEnemy, 0.1), (SplittingEnemy, 0.1)]  # All enemies
-        }
-        
-        # Special boss waves
-        self.boss_waves = {
-            10: SpeedBoss,
-            20: MegaBoss,
-            30: MegaBoss,  # Mega boss returns
-            40: SpeedBoss,  # Speed boss returns stronger
-            50: MegaBoss   # Final mega boss
+        # Create enemy class mapping from string names to classes
+        self.enemy_classes = {
+            'BasicEnemy': BasicEnemy,
+            'FastEnemy': FastEnemy,
+            'TankEnemy': TankEnemy,
+            'InvisibleEnemy': InvisibleEnemy,
+            'FlyingEnemy': FlyingEnemy,
+            'ShieldedEnemy': ShieldedEnemy,
+            'RegeneratingEnemy': RegeneratingEnemy,
+            'TeleportingEnemy': TeleportingEnemy,
+            'SplittingEnemy': SplittingEnemy,
+            'SpeedBoss': SpeedBoss,
+            'MegaBoss': MegaBoss
         }
     
     def get_value_for_wave(self, config_section: dict, wave_number: int) -> int:
@@ -127,7 +75,9 @@ class WaveManager:
     
     def calculate_enemies_per_wave(self) -> int:
         """Calculate number of enemies per wave using per-round configuration"""
-        if self.wave_number in self.boss_waves:
+        # Check for boss waves first
+        boss_waves = self.config['boss_waves']
+        if self.wave_number in boss_waves:
             return self.spawn_config['boss_enemy_count']
         
         base_count = self.spawn_config['base_enemy_count']
@@ -155,20 +105,23 @@ class WaveManager:
         import random
 
         # Check for boss waves first
-        if self.wave_number in self.boss_waves:
-            return self.boss_waves[self.wave_number]
+        boss_waves = self.config['boss_waves']
+        if self.wave_number in boss_waves:
+            boss_class_name = boss_waves[self.wave_number]
+            return self.enemy_classes[boss_class_name]
         
         # Find the appropriate wave configuration
-        for (min_wave, max_wave), enemy_types in self.wave_configs.items():
+        wave_compositions = self.config['wave_compositions']
+        for (min_wave, max_wave), enemy_types in wave_compositions.items():
             if min_wave <= self.wave_number <= max_wave:
                 # Use weighted random selection
                 rand = random.random()
                 cumulative_weight = 0
                 
-                for enemy_class, weight in enemy_types:
+                for enemy_class_name, weight in enemy_types:
                     cumulative_weight += weight
                     if rand <= cumulative_weight:
-                        return enemy_class
+                        return self.enemy_classes[enemy_class_name]
         
         # Fallback to basic enemy
         return BasicEnemy
@@ -202,27 +155,24 @@ class WaveManager:
         return enemy
     
     def apply_enemy_scaling(self, enemy):
-        """Apply progressive scaling to enemies based on wave number - INCREASED DIFFICULTY"""
+        """Apply progressive scaling to enemies based on wave number using config values"""
         if self.wave_number <= 1:
             return  # No scaling for wave 1
         
-        # Calculate scaling factors - MORE AGGRESSIVE
+        # Get scaling configuration
+        scaling_config = self.config['enemy_scaling']
         wave_factor = (self.wave_number - 1)
         
-        # Health scaling: +12% per wave (increased from 8%)
-        health_multiplier = 1.0 + (wave_factor * 0.12)
+        # Calculate scaling factors from config
+        health_multiplier = 1.0 + (wave_factor * scaling_config['health_per_wave'])
+        speed_multiplier = 1.0 + (wave_factor * scaling_config['speed_per_wave'])
+        reward_multiplier = 1.0 + (wave_factor * scaling_config['reward_per_wave'])
         
-        # Speed scaling: +4% per wave (increased from 2%)
-        speed_multiplier = 1.0 + (wave_factor * 0.04)
-        
-        # Reward scaling: +3% per wave (reduced from 5% to compensate for base reward reduction)
-        reward_multiplier = 1.0 + (wave_factor * 0.03)
-        
-        # Apply scaling with higher caps for more extreme late-game difficulty
-        enemy.max_health = int(enemy.max_health * min(health_multiplier, 5.0))  # Cap at 5x health (increased from 3x)
+        # Apply scaling with caps from config
+        enemy.max_health = int(enemy.max_health * min(health_multiplier, scaling_config['max_health_multiplier']))
         enemy.health = enemy.max_health
-        enemy.speed = enemy.speed * min(speed_multiplier, 3.0)  # Cap at 3x speed (increased from 2x)
-        enemy.reward = int(enemy.reward * min(reward_multiplier, 2.0))  # Cap at 2x reward (reduced from 2.5x)
+        enemy.speed = enemy.speed * min(speed_multiplier, scaling_config['max_speed_multiplier'])
+        enemy.reward = int(enemy.reward * min(reward_multiplier, scaling_config['max_reward_multiplier']))
     
     def is_wave_complete(self, active_enemies: List) -> bool:
         """Check if the current wave is complete"""
@@ -240,7 +190,8 @@ class WaveManager:
             self.spawn_delay = self.calculate_spawn_delay()
             
             # Money bonus based on configuration
-            money_bonus = (self.money_config['boss_wave_bonus'] if self.wave_number in self.boss_waves 
+            boss_waves = self.config['boss_waves']
+            money_bonus = (self.money_config['boss_wave_bonus'] if self.wave_number in boss_waves 
                           else self.money_config['normal_wave_bonus'])
             
             return {

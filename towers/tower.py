@@ -2,6 +2,7 @@ import pygame
 import math
 import uuid
 from typing import List, Optional, Dict
+from config.game_config import get_balance_config
 from game_systems.tower_upgrade_system import UpgradeType
 
 class Tower:
@@ -93,14 +94,13 @@ class Tower:
         self.terrain_effects_applied = True
     
     def track_damage_and_generate_currency(self, damage_dealt: int):
-        """Track damage and generate currency - centralized for all towers"""
+        """Track damage and generate currency - centralized for all towers using config values"""
         if damage_dealt > 0:
             self.add_damage_dealt(damage_dealt)
             
-            # Generate currency at 5/100 (0.05) of original rate
-            # Original: max(1, damage_dealt // 2)
-            # New: max(1, damage_dealt // 40) to get 5/100 rate
-            currency_amount = max(1, damage_dealt // 40)
+            # Generate currency using config value
+            config = get_balance_config()
+            currency_amount = max(1, damage_dealt // config['currency']['damage_divisor'])
             
             if self.upgrade_system_reference:
                 self.upgrade_system_reference.add_tower_currency(
@@ -108,10 +108,10 @@ class Tower:
                 )
     
     def track_utility_hit(self):
-        """Track utility hit for support towers - centralized"""
+        """Track utility hit for support towers - centralized using config values"""
         # Support towers get minimal currency for successful hits
-        # Reduced from 1 to 0.05 (5/100 rate)
-        currency_amount = 1  # Keep at 1 since it's already minimal for utility
+        config = get_balance_config()
+        currency_amount = config['currency']['utility_hit_reward']
         
         if self.upgrade_system_reference:
             self.upgrade_system_reference.add_tower_currency(

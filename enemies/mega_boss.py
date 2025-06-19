@@ -6,7 +6,7 @@ import random
 class MegaBoss(Enemy):
     """Massive boss enemy with multiple phases and abilities"""
     
-    def __init__(self, path):
+    def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
         self.health = 2000
         self.max_health = 2000

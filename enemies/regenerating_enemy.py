@@ -4,7 +4,7 @@ import pygame
 class RegeneratingEnemy(Enemy):
     """Enemy that regenerates health over time"""
     
-    def __init__(self, path):
+    def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
         self.health = 80
         self.max_health = 80

@@ -5,7 +5,7 @@ import math
 class FlyingEnemy(Enemy):
     """Enemy that flies and can only be hit by anti-air towers"""
     
-    def __init__(self, path):
+    def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
         self.health = 40
         self.max_health = 40
