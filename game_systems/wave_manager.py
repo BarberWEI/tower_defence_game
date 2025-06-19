@@ -2,7 +2,10 @@ from typing import List, Tuple
 from config.game_config import get_wave_config
 from enemies import (BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy,
                     InvisibleEnemy, FlyingEnemy, RegeneratingEnemy, 
-                    SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss)
+                    SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss,
+                    ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy, 
+                    FireElementalEnemy, ToxicEnemy, PhaseShiftEnemy, BlastProofEnemy)
+from .enemy_introduction import EnemyIntroduction
 
 class WaveManager:
     """Manages enemy waves and spawning"""
@@ -24,6 +27,9 @@ class WaveManager:
         self.enemies_per_wave = self.spawn_config['base_enemy_count']
         self.spawn_delay = self.spawn_config['base_spawn_delay']
         
+        # Enemy introduction system
+        self.enemy_introduction = EnemyIntroduction()
+        
         # Create enemy class mapping from string names to classes
         self.enemy_classes = {
             'BasicEnemy': BasicEnemy,
@@ -36,7 +42,15 @@ class WaveManager:
             'TeleportingEnemy': TeleportingEnemy,
             'SplittingEnemy': SplittingEnemy,
             'SpeedBoss': SpeedBoss,
-            'MegaBoss': MegaBoss
+            'MegaBoss': MegaBoss,
+            # Tower-immune enemies
+            'ArmoredEnemy': ArmoredEnemy,
+            'EnergyShieldEnemy': EnergyShieldEnemy,
+            'GroundedEnemy': GroundedEnemy,
+            'FireElementalEnemy': FireElementalEnemy,
+            'ToxicEnemy': ToxicEnemy,
+            'PhaseShiftEnemy': PhaseShiftEnemy,
+            'BlastProofEnemy': BlastProofEnemy
         }
     
     def get_value_for_wave(self, config_section: dict, wave_number: int) -> int:
@@ -147,6 +161,10 @@ class WaveManager:
         # Pass wave number to enemy for immunity system
         enemy = enemy_class(self.path, self.wave_number)
         
+        # Check if this enemy type needs introduction
+        enemy_type_name = enemy_class.__name__
+        self.enemy_introduction.check_new_enemy(enemy_type_name)
+        
         # Apply progressive scaling based on wave number
         self.apply_enemy_scaling(enemy)
         
@@ -251,8 +269,23 @@ class WaveManager:
     
     def update(self, active_enemies: List) -> dict:
         """Update wave manager and return any wave completion info"""
+        # Update enemy introduction system
+        self.enemy_introduction.update()
+        
         # Check if wave is complete
         if self.is_wave_complete(active_enemies):
             return self.start_next_wave()
         
-        return None 
+        return None
+    
+    def draw_introduction(self, screen):
+        """Draw enemy introduction overlay if active"""
+        self.enemy_introduction.draw(screen)
+    
+    def has_active_introduction(self) -> bool:
+        """Check if an enemy introduction is currently being displayed"""
+        return self.enemy_introduction.has_active_introduction()
+    
+    def reset_introductions(self):
+        """Reset all enemy introductions (for new game)"""
+        self.enemy_introduction.reset_introductions() 

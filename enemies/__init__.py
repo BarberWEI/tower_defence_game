@@ -11,8 +11,19 @@ from .teleporting_enemy import TeleportingEnemy
 from .mega_boss import MegaBoss
 from .speed_boss import SpeedBoss
 
+# New tower-immune enemies
+from .armored_enemy import ArmoredEnemy
+from .energy_shield_enemy import EnergyShieldEnemy
+from .grounded_enemy import GroundedEnemy
+from .fire_elemental_enemy import FireElementalEnemy
+from .toxic_enemy import ToxicEnemy
+from .phase_shift_enemy import PhaseShiftEnemy
+from .blast_proof_enemy import BlastProofEnemy
+
 __all__ = [
     'Enemy', 'BasicEnemy', 'FastEnemy', 'TankEnemy', 'ShieldedEnemy',
     'InvisibleEnemy', 'FlyingEnemy', 'RegeneratingEnemy', 'SplittingEnemy',
-    'TeleportingEnemy', 'MegaBoss', 'SpeedBoss'
+    'TeleportingEnemy', 'MegaBoss', 'SpeedBoss',
+    'ArmoredEnemy', 'EnergyShieldEnemy', 'GroundedEnemy', 'FireElementalEnemy',
+    'ToxicEnemy', 'PhaseShiftEnemy', 'BlastProofEnemy'
 ] 

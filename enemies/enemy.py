@@ -215,7 +215,7 @@ class Enemy:
             self.y = float(next_point[1])
             self.path_index += 1
     
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Apply damage to the enemy"""
         actual_damage = min(damage, self.health)  # Can't deal more damage than remaining health
         self.health -= damage

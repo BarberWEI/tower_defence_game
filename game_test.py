@@ -34,7 +34,7 @@ class Game:
         self.running = True
         self.paused = False
         self.game_over = False
-        self.money = 20
+        self.money = 999999  # TEST MODE: Unlimited money
         self.lives = 20
         
         # Game objects
@@ -417,7 +417,7 @@ class Game:
         """Restart the game"""
         self.game_over = False
         self.paused = False
-        self.money = 20
+        self.money = 999999  # TEST MODE: Unlimited money
         self.lives = 20
         
         # Clear game objects

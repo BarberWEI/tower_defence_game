@@ -40,13 +40,14 @@ class UpgradeUI:
         
         # Panel dimensions
         self.panel_width = 300
-        self.panel_height = 400
+        self.panel_height = 450  # Increased for remove button
         self.upgrade_slot_height = 80
         
         # State
         self.selected_tower = None
         self.mouse_pos = (0, 0)
         self.hovered_upgrade = None
+        self.hovered_remove_button = False
     
     def update_mouse_pos(self, pos: Tuple[int, int]):
         """Update mouse position for hover effects"""
@@ -57,6 +58,7 @@ class UpgradeUI:
         """Update which upgrade button is being hovered"""
         if not self.selected_tower:
             self.hovered_upgrade = None
+            self.hovered_remove_button = False
             return
         
         panel_x, panel_y = self._get_panel_position()
@@ -66,7 +68,18 @@ class UpgradeUI:
         if not (panel_x <= mouse_x <= panel_x + self.panel_width and 
                 panel_y <= mouse_y <= panel_y + self.panel_height):
             self.hovered_upgrade = None
+            self.hovered_remove_button = False
             return
+        
+        # Check remove button first (at bottom of panel)
+        remove_button_y = panel_y + self.panel_height - 50
+        if (panel_x + 10 <= mouse_x <= panel_x + self.panel_width - 10 and
+            remove_button_y <= mouse_y <= remove_button_y + 35):
+            self.hovered_remove_button = True
+            self.hovered_upgrade = None
+            return
+        
+        self.hovered_remove_button = False
         
         # Check which upgrade button is hovered
         upgrade_y_start = panel_y + 80  # After header
@@ -90,10 +103,18 @@ class UpgradeUI:
         
         return (panel_x, panel_y)
     
-    def handle_click(self, pos: Tuple[int, int], upgrade_system: TowerUpgradeSystem) -> bool:
-        """Handle clicks on upgrade buttons"""
-        if not self.selected_tower or not self.hovered_upgrade:
-            return False
+    def handle_click(self, pos: Tuple[int, int], upgrade_system: TowerUpgradeSystem) -> dict:
+        """Handle clicks on upgrade buttons and remove button"""
+        if not self.selected_tower:
+            return {'action': 'none'}
+        
+        # Handle remove button click
+        if self.hovered_remove_button:
+            return {'action': 'remove_tower', 'tower': self.selected_tower}
+        
+        # Handle upgrade button click
+        if not self.hovered_upgrade:
+            return {'action': 'none'}
         
         tower_type = self.selected_tower.tower_type
         tower_id = self.selected_tower.tower_id
@@ -111,9 +132,9 @@ class UpgradeUI:
                 self.selected_tower.reset_stats_to_base()
                 upgrade_system.apply_upgrades_to_tower(self.selected_tower, tower_id)
                 
-                return True
+                return {'action': 'upgrade', 'success': True}
         
-        return False
+        return {'action': 'upgrade', 'success': False}
     
     def set_selected_tower(self, tower):
         """Set the currently selected tower for upgrades"""
@@ -144,6 +165,9 @@ class UpgradeUI:
         for i, upgrade_type in enumerate(UpgradeType):
             upgrade_y = upgrade_y_start + i * self.upgrade_slot_height
             self._draw_upgrade_slot(screen, panel_x, upgrade_y, upgrade_type, upgrade_system)
+        
+        # Draw remove tower button
+        self._draw_remove_button(screen, panel_x, panel_y)
     
     def _draw_panel_header(self, screen: pygame.Surface, panel_x: int, panel_y: int, 
                           upgrade_system: TowerUpgradeSystem):
@@ -253,6 +277,34 @@ class UpgradeUI:
         
         # Border
         pygame.draw.rect(screen, self.WHITE, bg_rect, 1)
+    
+    def _draw_remove_button(self, screen: pygame.Surface, panel_x: int, panel_y: int):
+        """Draw the remove tower button"""
+        button_y = panel_y + self.panel_height - 50
+        button_rect = pygame.Rect(panel_x + 10, button_y, self.panel_width - 20, 35)
+        
+        # Button color based on hover state
+        if self.hovered_remove_button:
+            button_color = (180, 60, 60)  # Darker red when hovered
+        else:
+            button_color = (200, 80, 80)  # Light red
+        
+        # Draw button
+        pygame.draw.rect(screen, button_color, button_rect)
+        pygame.draw.rect(screen, self.WHITE, button_rect, 2)
+        
+        # Calculate refund amount (50% of current tower cost)
+        if hasattr(self.selected_tower, 'tower_type'):
+            # We'll calculate the refund in the game logic, but show estimate
+            tower_type = self.selected_tower.tower_type
+            button_text = "Remove Tower (50% Refund)"
+        else:
+            button_text = "Remove Tower"
+        
+        # Draw button text
+        text_surface = self.medium_font.render(button_text, True, self.WHITE)
+        text_rect = text_surface.get_rect(center=button_rect.center)
+        screen.blit(text_surface, text_rect)
     
     def _get_upgrade_type_color(self, upgrade_type: UpgradeType) -> Tuple[int, int, int]:
         """Get color for upgrade type icon"""

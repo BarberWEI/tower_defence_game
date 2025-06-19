@@ -10,9 +10,13 @@ class TowerManager:
         self.config = get_tower_config()
         self.base_tower_costs = self.config['base_costs']
         self.cost_progression = self.config['cost_progression']
+        self.dynamic_cost_config = self.config.get('dynamic_cost_increase', {})
         
         # Current wave number for cost calculation
         self.current_wave = 1
+        
+        # Track towers built for dynamic cost increases
+        self.towers_built_count = {tower_type: 0 for tower_type in self.base_tower_costs}
         
         # State
         self.selected_tower_type: Optional[str] = None
@@ -81,9 +85,37 @@ class TowerManager:
         
         return int(base_cost * multiplier)
     
+    def calculate_dynamic_cost_multiplier(self, tower_type: str) -> float:
+        """Calculate cost multiplier based on how many towers of this type have been built"""
+        if not self.dynamic_cost_config:
+            return 1.0
+        
+        towers_built = self.towers_built_count.get(tower_type, 0)
+        per_tower_multiplier = self.dynamic_cost_config.get('per_tower_built_multiplier', 0.15)
+        max_multiplier = self.dynamic_cost_config.get('max_per_tower_multiplier', 2.5)
+        
+        # Calculate multiplier: 1.0 + (towers_built * per_tower_multiplier)
+        multiplier = 1.0 + (towers_built * per_tower_multiplier)
+        
+        # Cap the multiplier
+        multiplier = min(multiplier, max_multiplier)
+        
+        return multiplier
+    
     def get_tower_cost(self, tower_type: str) -> int:
-        """Get the cost of a tower type"""
-        return self.calculate_progressive_cost(self.base_tower_costs.get(tower_type, 0), self.current_wave)
+        """Get the cost of a tower type with wave and usage-based progression"""
+        base_cost = self.base_tower_costs.get(tower_type, 0)
+        
+        # Calculate wave-based cost progression
+        wave_cost = self.calculate_progressive_cost(base_cost, self.current_wave)
+        
+        # Calculate dynamic cost increase based on towers built
+        dynamic_multiplier = self.calculate_dynamic_cost_multiplier(tower_type)
+        
+        # Apply dynamic cost increase
+        final_cost = int(wave_cost * dynamic_multiplier)
+        
+        return final_cost
     
     def can_afford_tower(self, tower_type: str, money: int) -> bool:
         """Check if player can afford a tower"""
@@ -156,6 +188,10 @@ class TowerManager:
                 
                 # Apply terrain effects to the tower (now handled by base Tower class)
                 tower.apply_terrain_effects()
+                
+                # Increment tower built counter for dynamic cost increases
+                self.towers_built_count[tower_type] = self.towers_built_count.get(tower_type, 0) + 1
+                
                 self.cancel_placement()  # Reset placement state
                 return True, tower, cost
         
@@ -178,4 +214,8 @@ class TowerManager:
             'placing_tower': self.placing_tower,
             'selected_tower_type': self.selected_tower_type,
             'selected_cost': self.get_tower_cost(self.selected_tower_type) if self.selected_tower_type else 0
-        } 
+        }
+    
+    def reset_tower_counts(self):
+        """Reset tower build counts (for game restart)"""
+        self.towers_built_count = {tower_type: 0 for tower_type in self.base_tower_costs} 
