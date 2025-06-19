@@ -37,9 +37,8 @@ class VoidEnemy(Enemy):
             self.create_absorption_effect()
             return 0
         
-        # Take normal damage from explosives and missiles
-        actual_damage = min(damage, self.health)
-        self.health -= actual_damage
+        # Use parent counter system for explosive/missile damage (gets 2.5x multiplier from config)
+        actual_damage = super().take_damage(damage, tower_type)
         
         # Create void disruption when damaged
         self.create_void_disruption()

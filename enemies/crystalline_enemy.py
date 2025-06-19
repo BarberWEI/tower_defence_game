@@ -33,9 +33,8 @@ class CrystallineEnemy(Enemy):
             self.create_reflection_particles()
             return 0
         
-        # Take normal damage from laser
-        actual_damage = min(damage, self.health)
-        self.health -= actual_damage
+        # Use parent counter system for laser damage (gets 3x multiplier from config)
+        actual_damage = super().take_damage(damage, tower_type)
         
         # Create shatter particles when damaged
         self.create_shatter_particles()

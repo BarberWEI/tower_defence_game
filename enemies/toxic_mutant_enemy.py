@@ -37,9 +37,8 @@ class ToxicMutantEnemy(Enemy):
             self.create_toxic_splash()
             return 0
         
-        # Take normal damage from poison and flame
-        actual_damage = min(damage, self.health)
-        self.health -= actual_damage
+        # Use parent counter system for poison/flame damage (gets 2x multiplier from config)
+        actual_damage = super().take_damage(damage, tower_type)
         
         # Create mutation particles when damaged
         self.create_mutation_particles()

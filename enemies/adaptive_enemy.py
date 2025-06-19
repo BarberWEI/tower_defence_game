@@ -36,10 +36,9 @@ class AdaptiveEnemy(Enemy):
         
     def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Only sniper and ice towers can damage adaptive enemies"""
-        # Always vulnerable to sniper and ice
+        # Always vulnerable to sniper and ice - use counter system
         if tower_type in self.vulnerable_to:
-            actual_damage = min(damage, self.health)
-            self.health -= actual_damage
+            actual_damage = super().take_damage(damage, tower_type)
             self.create_damage_particles()
             return actual_damage
         
@@ -50,9 +49,8 @@ class AdaptiveEnemy(Enemy):
             self.create_adaptation_reflection()
             return 0
         
-        # Not immune to this tower type in current adaptation
-        actual_damage = min(damage, self.health)
-        self.health -= actual_damage
+        # Not immune to this tower type in current adaptation - use counter system
+        actual_damage = super().take_damage(damage, tower_type)
         self.create_damage_particles()
         return actual_damage
     

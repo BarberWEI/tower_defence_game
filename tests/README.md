@@ -194,7 +194,7 @@ When adding new game features:
 
 **Import Errors**: Ensure you're running tests from the project root directory
 ```bash
-cd /path/to/tower_defence_game
+cd /path/to/tower_defense_game
 python tests/run_all_tests.py
 ```
 

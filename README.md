@@ -29,7 +29,7 @@ A comprehensive tower defense game built with Python and Pygame, featuring multi
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd tower_defence_game
+   cd tower_defense_game
    ```
 
 2. **Install dependencies**:
@@ -52,9 +52,9 @@ A comprehensive tower defense game built with Python and Pygame, featuring multi
 ## Project Structure
 
 ```
-tower_defence_game/
+tower_defense_game/
 ├── config/
-│   ├── tower_defence_game.json    # Main configuration file
+│   ├── tower_defense_game.json    # Main configuration file
 │   ├── game_config.py             # Configuration loader
 │   └── README.md                  # Configuration documentation
 ├── enemies/                       # Enemy classes and behaviors
@@ -69,7 +69,7 @@ tower_defence_game/
 
 ## Configuration
 
-The game uses a centralized JSON configuration system in `config/tower_defence_game.json`. This file contains:
+The game uses a centralized JSON configuration system in `config/tower_defense_game.json`. This file contains:
 
 - **Wave Configuration**: Enemy spawning, wave progression, boss encounters
 - **Map Configuration**: Terrain layouts and enemy paths  

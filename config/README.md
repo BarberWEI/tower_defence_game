@@ -4,7 +4,7 @@ This directory contains the configuration system for the Tower Defense Game.
 
 ## Configuration Files
 
-### `tower_defence_game.json`
+### `tower_defense_game.json`
 The main configuration file containing all game settings. This single file contains four main sections:
 
 #### Wave Configuration (`wave_config`)
@@ -87,7 +87,7 @@ basic_tower_cost = tower_config['base_costs']['BasicTower']
 
 To adjust game difficulty or behavior:
 
-1. Edit `tower_defence_game.json` with your desired values
+1. Edit `tower_defense_game.json` with your desired values
 2. Save the file
 3. Restart the game to apply changes
 
