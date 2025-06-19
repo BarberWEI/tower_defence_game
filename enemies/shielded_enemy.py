@@ -6,9 +6,9 @@ class ShieldedEnemy(Enemy):
     """Enemy with regenerating shields"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 2
+        self.max_health = 15
         self.health = self.max_health
-        self.max_shield = 2
+        self.max_shield = 15
         self.shield = self.max_shield
         self.shield_regen_timer = 0
         self.shield_regen_delay = 180  # 3 seconds at 60 FPS

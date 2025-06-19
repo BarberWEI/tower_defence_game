@@ -37,6 +37,11 @@ class Game:
         self.money = 20
         self.lives = 20
         
+        # Speed control
+        self.game_speed = 1  # 1 = normal speed, 2 = double speed
+        self.speed_options = [1, 2]  # Available speed options
+        self.current_speed_index = 0  # Index in speed_options
+        
         # Game objects
         self.enemies: List[Enemy] = []
         self.towers: List[Tower] = []
@@ -100,6 +105,9 @@ class Game:
         
         elif key == pygame.K_F1:
             self.toggle_fullscreen()
+        
+        elif key == pygame.K_TAB:
+            self.toggle_game_speed()
     
     def toggle_fullscreen(self):
         """Toggle between fullscreen and windowed mode"""
@@ -127,7 +135,10 @@ class Game:
         # Update wave manager with new path
         self.wave_manager = WaveManager(self.map.get_path())
     
-
+    def toggle_game_speed(self):
+        """Toggle between different game speeds"""
+        self.current_speed_index = (self.current_speed_index + 1) % len(self.speed_options)
+        self.game_speed = self.speed_options[self.current_speed_index]
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks"""
@@ -140,6 +151,11 @@ class Game:
             self.remove_tower(click_result['tower'])
             return
         elif click_result['action'] == 'upgrade':
+            return
+        
+        # Check for speed button click
+        if self.ui_manager.handle_speed_button_click(pos):
+            self.toggle_game_speed()
             return
         
         # Check for tower bar clicks
@@ -340,15 +356,17 @@ class Game:
                 self.show_wave_complete = False
     
     def update(self):
-        """Update all game systems"""
+        """Update all game systems with speed control"""
         if self.paused or self.game_over:
             return
         
-        self.update_enemies()
-        self.update_towers()
-        self.update_projectiles()
-        self.update_waves()
-        self.update_ui_state()
+        # Run updates multiple times based on game speed
+        for _ in range(self.game_speed):
+            self.update_enemies()
+            self.update_towers()
+            self.update_projectiles()
+            self.update_waves()
+            self.update_ui_state()
     
     def draw_game_objects(self):
         """Draw all game objects"""
@@ -380,7 +398,8 @@ class Game:
             'selected_tower': placement_state['selected_tower_type'],
             'show_wave_complete': self.show_wave_complete,
             'wave_bonus': self.wave_bonus,
-            'towers': self.towers
+            'towers': self.towers,
+            'game_speed': self.game_speed
         }
     
     def draw(self):
@@ -419,6 +438,10 @@ class Game:
         self.paused = False
         self.money = 20
         self.lives = 20
+        
+        # Reset game speed
+        self.game_speed = 1
+        self.current_speed_index = 0
         
         # Clear game objects
         self.enemies.clear()

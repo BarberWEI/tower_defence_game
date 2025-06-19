@@ -7,8 +7,8 @@ class FlyingEnemy(Enemy):
     
     def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
-        self.health = 40
-        self.max_health = 40
+        self.health = 10
+        self.max_health = 10
         self.speed = 2.0
         self.reward = 10
         self.color = (255, 165, 0)  # Orange

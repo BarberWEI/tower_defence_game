@@ -133,22 +133,16 @@ class TowerManager:
         self.selected_tower_type = None
         self.placing_tower = False
     
-    def create_tower(self, tower_type: str, x: int, y: int, grid_x: int = 0, grid_y: int = 0, cell_size: int = 40):
-        """Create a new tower of the specified type with multi-block support"""
+    def create_tower(self, tower_type, x, y):
+        """Create a new tower at the specified position"""
+        # Use the same tower classes as _get_tower_classes for consistency
         tower_classes = self._get_tower_classes()
+        
         if tower_type in tower_classes:
             tower_class = tower_classes[tower_type]
             tower = tower_class(x, y)
-            
-            # Set tower type and grid position
-            tower.tower_type = tower_type
-            tower.grid_x = grid_x
-            tower.grid_y = grid_y
-            
-            # Set visual size based on tower type and cell size
-            tower.size = get_tower_visual_size(tower_type, cell_size)
-            
             return tower
+        
         return None
     
     def attempt_tower_placement(self, pos: Tuple[int, int], money: int, 
@@ -179,8 +173,7 @@ class TowerManager:
             center_y = map_obj.map_offset_y + (grid_y + height/2) * map_obj.cell_size
             
             # Create tower at calculated center
-            tower = self.create_tower(tower_type, int(center_x), int(center_y), 
-                                    grid_x, grid_y, map_obj.cell_size)
+            tower = self.create_tower(tower_type, int(center_x), int(center_y))
             if tower:
                 # Set references for terrain effects and currency generation
                 tower.set_map_reference(map_obj)

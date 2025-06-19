@@ -75,6 +75,10 @@ class Tower:
     
     def finalize_initialization(self):
         """Call this after subclass sets its stats to update base values"""
+        # Prevent multiple initializations
+        if self._initialization_complete:
+            return
+            
         self.base_range = self.range
         self.base_damage = self.damage
         self.base_fire_rate = self.fire_rate
@@ -137,19 +141,16 @@ class Tower:
                 self.tower_id, self.tower_type, currency_amount
             )
 
-    def update(self, enemies: List, projectiles: List):
-        """Update tower state and shooting"""
-        # Update fire timer
-        if self.fire_timer > 0:
-            self.fire_timer -= 1
-        
-        # Find and acquire target
+    def update(self, enemies, projectiles):
+        """Update tower behavior - acquire targets and shoot if ready"""
         self.acquire_target(enemies)
         
-        # Shoot at target if ready
         if self.target and self.fire_timer <= 0:
             self.shoot(projectiles)
             self.fire_timer = self.fire_rate
+        
+        if self.fire_timer > 0:
+            self.fire_timer -= 1
     
     def acquire_target(self, enemies: List):
         """Find the best target based on tower's targeting strategy"""

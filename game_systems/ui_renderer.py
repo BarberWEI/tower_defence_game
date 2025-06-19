@@ -41,8 +41,14 @@ class UIRenderer:
         self.tower_slot_width = 80
         self.tower_slot_height = 80
         self.tower_slot_margin = 10
+        
+        # Speed button constants
+        self.speed_button_width = 80
+        self.speed_button_height = 40
+        self.speed_button_x = screen_width - 120
+        self.speed_button_y = 80
     
-    def draw_game_stats(self, screen: pygame.Surface, money: int, lives: int, wave_info: Dict):
+    def draw_game_stats(self, screen: pygame.Surface, money: int, lives: int, wave_info: Dict, game_speed: int = 1):
         """Draw the main game statistics in top area"""
         # Background for stats area
         stats_rect = pygame.Rect(0, 0, self.screen_width, 130)
@@ -70,6 +76,9 @@ class UIRenderer:
         
         # Wave progress bar
         self.draw_wave_progress_bar(screen, wave_info)
+        
+        # Speed button
+        self.draw_speed_button(screen, game_speed)
         
         # Terrain legend (moved to top right)
         self.draw_terrain_legend(screen)
@@ -131,6 +140,45 @@ class UIRenderer:
             pygame.draw.rect(screen, self.WHITE, (legend_x, y, 10, 10), 1)
             desc_text = self.tiny_font.render(name, True, self.WHITE)
             screen.blit(desc_text, (legend_x + 15, y - 1))
+    
+    def draw_speed_button(self, screen: pygame.Surface, game_speed: int):
+        """Draw the game speed control button"""
+        button_rect = pygame.Rect(self.speed_button_x, self.speed_button_y, 
+                                self.speed_button_width, self.speed_button_height)
+        
+        # Button background - different color based on speed
+        if game_speed == 1:
+            button_color = (60, 60, 100)  # Blue for normal speed
+            text_color = self.WHITE
+        else:
+            button_color = (100, 60, 60)  # Red for fast speed
+            text_color = self.YELLOW
+        
+        pygame.draw.rect(screen, button_color, button_rect)
+        pygame.draw.rect(screen, self.WHITE, button_rect, 2)
+        
+        # Button text
+        speed_text = self.small_font.render(f"Speed: {game_speed}x", True, text_color)
+        text_rect = speed_text.get_rect(center=button_rect.center)
+        screen.blit(speed_text, text_rect)
+        
+        # Add visual indicator for different speeds
+        if game_speed == 2:
+            # Add arrows for fast speed
+            arrow_y = self.speed_button_y - 8
+            for i in range(2):
+                arrow_x = self.speed_button_x + 20 + i * 20
+                pygame.draw.polygon(screen, self.YELLOW, [
+                    (arrow_x, arrow_y),
+                    (arrow_x + 8, arrow_y + 4),
+                    (arrow_x, arrow_y + 8)
+                ])
+    
+    def is_speed_button_clicked(self, pos: Tuple[int, int]) -> bool:
+        """Check if the speed button was clicked"""
+        mouse_x, mouse_y = pos
+        return (self.speed_button_x <= mouse_x <= self.speed_button_x + self.speed_button_width and
+                self.speed_button_y <= mouse_y <= self.speed_button_y + self.speed_button_height)
     
     def draw_tower_bar(self, screen: pygame.Surface, tower_data: List[dict], money: int, 
                       scroll_offset: int, max_scroll: int, selected_index: Optional[int], 
@@ -257,6 +305,10 @@ class UIRenderer:
         resume_text = self.medium_font.render("Press SPACE to resume", True, self.WHITE)
         resume_rect = resume_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
         screen.blit(resume_text, resume_rect)
+        
+        speed_text = self.small_font.render("Press TAB to change speed", True, self.LIGHT_GRAY)
+        speed_rect = speed_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 80))
+        screen.blit(speed_text, speed_rect)
     
     def draw_game_over_overlay(self, screen: pygame.Surface, final_wave: int):
         """Draw game over overlay"""

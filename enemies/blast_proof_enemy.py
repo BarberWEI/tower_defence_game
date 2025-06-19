@@ -7,7 +7,7 @@ class BlastProofEnemy(Enemy):
     """Heavily reinforced enemy immune to explosive damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 10
+        self.max_health = 25
         self.health = self.max_health
         self.speed = 0.7
         self.reward = 25

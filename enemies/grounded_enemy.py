@@ -7,7 +7,7 @@ class GroundedEnemy(Enemy):
     """Electrically grounded enemy immune to lightning damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 7
+        self.max_health = 20
         self.health = self.max_health
         self.speed = 0.9
         self.reward = 16

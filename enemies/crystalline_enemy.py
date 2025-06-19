@@ -8,7 +8,7 @@ class CrystallineEnemy(Enemy):
     """Crystal enemy that reflects all attacks except laser beams"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 35
+        self.max_health = 40
         self.health = self.max_health
         self.speed = 0.9
         self.reward = 40

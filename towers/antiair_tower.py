@@ -16,7 +16,20 @@ class AntiAirTower(Tower):
         
         # Anti-air properties
         self.prioritize_flying = True
+        self.can_target_flying = True
+        self.can_target_invisible = False
         
+        # Finalize initialization to update base stats
+        self.finalize_initialization()
+    
+    def can_target_enemy(self, enemy):
+        """Check if this tower can target a specific enemy"""
+        # Can target invisible enemies if they've been detected by a detector tower
+        if hasattr(enemy, 'invisible') and enemy.invisible and not self.can_target_invisible:
+            if not hasattr(enemy, 'detected_by_detector') or not enemy.detected_by_detector:
+                return False
+        return True
+    
     def acquire_target(self, enemies):
         """Find target, prioritizing flying enemies"""
         flying_targets = []
@@ -24,7 +37,7 @@ class AntiAirTower(Tower):
         
         for enemy in enemies:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
-            if distance <= self.range:
+            if distance <= self.range and self.can_target_enemy(enemy):
                 if hasattr(enemy, 'flying') and enemy.flying:
                     flying_targets.append((enemy, distance))
                 else:
@@ -48,22 +61,33 @@ class AntiAirTower(Tower):
             self.angle = math.atan2(dy, dx)
     
     def shoot(self, projectiles):
-        """Fire homing missile at flying targets"""
-        if self.target and hasattr(self.target, 'flying') and self.target.flying:
-            from projectiles import HomingProjectile
-            
-            missile = HomingProjectile(
-                self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage, self.tower_type
-            )
-            missile.target_enemy = self.target
-            
-            # Link projectile to tower for damage tracking
-            missile.source_tower_id = self.tower_id
-            projectiles.append(missile)
-            
-            # Generate currency immediately when firing
-            self.generate_firing_currency()
+        """Fire homing missile at targets"""
+        if self.target:
+            try:
+                from projectiles import HomingProjectile
+                
+                missile = HomingProjectile(
+                    self.x, self.y, self.target.x, self.target.y,
+                    self.projectile_speed, self.damage, self.tower_type
+                )
+                missile.target_enemy = self.target
+                
+                # Link projectile to tower for damage tracking
+                missile.source_tower_id = self.tower_id
+                projectiles.append(missile)
+                
+                # Generate currency immediately when firing
+                self.generate_firing_currency()
+            except Exception:
+                # Fallback to basic projectile
+                from projectiles import BasicProjectile
+                projectile = BasicProjectile(
+                    self.x, self.y, self.target.x, self.target.y,
+                    self.projectile_speed, self.damage, self.tower_type
+                )
+                projectile.source_tower_id = self.tower_id
+                projectiles.append(projectile)
+                self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw anti-air tower"""

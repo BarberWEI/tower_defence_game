@@ -8,7 +8,7 @@ class FireElementalEnemy(Enemy):
     """Fire elemental enemy immune to flame damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 5
+        self.max_health = 25
         self.health = self.max_health
         self.speed = 1.3
         self.reward = 20

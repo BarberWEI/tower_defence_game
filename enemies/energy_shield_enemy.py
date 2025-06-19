@@ -7,7 +7,7 @@ class EnergyShieldEnemy(Enemy):
     """Enemy with energy shields immune to laser damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 6
+        self.max_health = 15
         self.health = self.max_health
         self.speed = 1.2
         self.reward = 18

@@ -7,7 +7,7 @@ class ArmoredEnemy(Enemy):
     """Heavily armored enemy immune to basic tower damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 8
+        self.max_health = 18
         self.health = self.max_health
         self.speed = 0.8
         self.reward = 15

@@ -113,6 +113,10 @@ class UIManager:
         self.selected_placed_tower = None
         return False
     
+    def handle_speed_button_click(self, pos: Tuple[int, int]) -> bool:
+        """Handle clicks on the speed button, return True if clicked"""
+        return self.renderer.is_speed_button_clicked(pos)
+    
     def get_selected_tower_type(self) -> Optional[str]:
         """Get the currently selected tower type"""
         if self.selected_tower_index is not None:
@@ -125,9 +129,9 @@ class UIManager:
     
     def draw_complete_ui(self, screen: pygame.Surface, game_state: Dict):
         """Draw the complete user interface"""
-        # Main game stats (top area)
+        # Main game stats (top area) with speed button
         self.renderer.draw_game_stats(screen, game_state['money'], game_state['lives'], 
-                                    game_state['wave_info'])
+                                    game_state['wave_info'], game_state.get('game_speed', 1))
         
         # Bottom tower bar
         tower_data = self.tower_data_manager.get_all_tower_data()
