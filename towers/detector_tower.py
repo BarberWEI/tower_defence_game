@@ -1,9 +1,10 @@
 from .tower import Tower
+from config.game_config import get_balance_config
 import pygame
 import math
 
 class DetectorTower(Tower):
-    """Support tower that reveals invisible enemies to other towers - does not attack"""
+    """Support tower that reveals invisible enemies to other towers and generates currency from detection - does not attack"""
     
     def __init__(self, x, y):
         super().__init__(x, y, 'detector')
@@ -20,12 +21,16 @@ class DetectorTower(Tower):
         self.detection_pulse_timer = 0
         self.max_detections = 3  # Can only detect 3 invisible enemies at once
         
+        # Currency generation
+        self.currency_timer = 0
+        self.last_detected_count = 0
+        
         # No targeting - pure support
         self.can_target_flying = False
         self.can_target_invisible = False
         
     def update(self, enemies, projectiles):
-        """Update with detection capabilities only - no attacking"""
+        """Update with detection capabilities and currency generation"""
         # Update detection pulse
         self.detection_pulse_timer += 0.1
         
@@ -54,6 +59,34 @@ class DetectorTower(Tower):
                 # Clear detection flag for enemies beyond the limit
                 if hasattr(enemy, 'detected_by_detector'):
                     enemy.detected_by_detector = False
+        
+        # Generate currency based on detection
+        self.generate_detection_currency(detected_count)
+    
+    def generate_detection_currency(self, detected_count):
+        """Generate currency based on detected enemies"""
+        if detected_count == 0:
+            return 0
+        
+        config = get_balance_config()
+        currency_config = config['currency']
+        
+        # Generate currency based on detection interval
+        self.currency_timer += 1
+        if self.currency_timer >= currency_config['detector_reward_interval']:
+            self.currency_timer = 0
+            # Generate currency for each enemy being detected
+            currency_gained = detected_count * currency_config['detector_reward_per_enemy']
+            
+            # Use the upgrade system to add currency
+            if self.upgrade_system_reference:
+                self.upgrade_system_reference.add_tower_currency(
+                    self.tower_id, self.tower_type, currency_gained
+                )
+            
+            return currency_gained
+        
+        return 0
     
     def acquire_target(self, enemies):
         """Detector tower doesn't target enemies - pure support"""
@@ -97,4 +130,18 @@ class DetectorTower(Tower):
         sweep_angle = self.detection_pulse_timer * 2
         sweep_x = self.x + math.cos(sweep_angle) * 15
         sweep_y = self.y + math.sin(sweep_angle) * 15
-        pygame.draw.line(screen, (255, 255, 255), (int(self.x), int(self.y)), (int(sweep_x), int(sweep_y)), 2) 
+        pygame.draw.line(screen, (255, 255, 255), (int(self.x), int(self.y)), (int(sweep_x), int(sweep_y)), 2)
+        
+        # Draw currency generation indicator when detecting enemies
+        if len(self.detected_enemies) > 0:
+            # Draw a small coin symbol
+            coin_x = int(self.x - 15)
+            coin_y = int(self.y - 15)
+            pygame.draw.circle(screen, (255, 215, 0), (coin_x, coin_y), 6)  # Gold coin
+            pygame.draw.circle(screen, (0, 0, 0), (coin_x, coin_y), 6, 1)
+            
+            # Draw "$" symbol in coin
+            font = pygame.font.Font(None, 12)
+            text = font.render("$", True, (0, 0, 0))
+            text_rect = text.get_rect(center=(coin_x, coin_y))
+            screen.blit(text, text_rect) 

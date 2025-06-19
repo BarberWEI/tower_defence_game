@@ -30,9 +30,7 @@ class MegaBoss(Enemy):
         
     def update(self):
         """Update boss with special abilities"""
-        super().update()
-        
-        # Update phase based on health
+        # Update phase based on health BEFORE movement
         health_percentage = self.health / self.max_health
         if health_percentage > 0.66:
             self.phase = 1
@@ -41,13 +39,16 @@ class MegaBoss(Enemy):
         else:
             self.phase = 3
             
+        # Phase-based speed increase (calculate BEFORE movement)
+        self.speed = 0.5 + (self.phase - 1) * 0.2
+        
+        # Now call parent update with correct speed
+        super().update()
+        
         # Update ability timers
         self.ability_timer += 1
         self.minion_spawn_timer += 1
         self.pulse_timer += 0.1
-        
-        # Phase-based speed increase
-        self.speed = 0.5 + (self.phase - 1) * 0.2
         
     def take_damage(self, damage):
         """Take reduced damage"""

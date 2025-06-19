@@ -57,7 +57,7 @@ TERRAIN_PROPERTIES = {
         'color': (238, 203, 173),  # Peach puff
         'tower_placeable': True,
         'enemy_walkable': False,
-        'special_rules': None,
+        'special_rules': 'enemy_speed_boost',
         'allowed_towers': 'all'
     }
 }

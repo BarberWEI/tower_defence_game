@@ -28,6 +28,9 @@ class LaserTower(Tower):
         self.can_target_flying = True
         self.can_target_invisible = False
         
+        # Finalize initialization to update base stats
+        self.finalize_initialization()
+        
     def update(self, enemies, projectiles):
         """Update laser tower"""
         super().update(enemies, projectiles)

@@ -26,9 +26,7 @@ class SpeedBoss(Enemy):
         
     def update(self):
         """Update with speed mechanics"""
-        super().update()
-        
-        # Calculate speed multiplier based on health lost
+        # Calculate speed multiplier based on health lost BEFORE movement
         health_percentage = self.health / self.max_health
         self.speed_multiplier = 1.0 + (1.0 - health_percentage) * (self.max_speed_multiplier - 1.0)
         
@@ -46,6 +44,9 @@ class SpeedBoss(Enemy):
                 self.speed = self.base_speed * self.speed_multiplier
         else:
             self.speed = self.base_speed * self.speed_multiplier
+        
+        # Now call parent update with correct speed
+        super().update()
             
         # Update trail positions
         self.trail_positions.append((self.x, self.y))

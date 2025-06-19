@@ -15,6 +15,7 @@ class Enemy:
         # Base stats - to be overridden by subclasses
         self.max_health = 1
         self.health = self.max_health
+        self.base_speed = 1.0  # Store original speed for terrain effects
         self.speed = 1.0
         self.reward = 4
         self.size = 10
@@ -33,6 +34,9 @@ class Enemy:
         # State
         self.reached_end = False
         self.distance_traveled = 0
+        
+        # Map reference for terrain effects
+        self.map_reference = None
     
     def _generate_random_immunities(self) -> dict:
         """Generate random immunities based on wave progression using config values"""
@@ -83,22 +87,76 @@ class Enemy:
         """Check if enemy is immune to a specific effect"""
         return self.immunities.get(f"{effect_type}_immune", False)
     
+    def has_resistance_to(self, effect_type: str) -> bool:
+        """Check if enemy has resistance to a specific effect (same as immunity for now)"""
+        return self.immunities.get(f"{effect_type}_immune", False)
+    
+    def set_map_reference(self, map_obj):
+        """Set reference to map for terrain effects"""
+        self.map_reference = map_obj
+    
+    def set_base_speed(self, speed: float):
+        """Set base speed and current speed (for use by subclasses)"""
+        self.base_speed = speed
+        self.speed = speed
+    
+    def __setattr__(self, name, value):
+        """Override to automatically update base_speed when speed is set during initialization"""
+        super().__setattr__(name, value)
+        # If setting speed and we don't have terrain effects applied yet, also set base_speed
+        if name == 'speed' and hasattr(self, 'base_speed') and not hasattr(self, '_speed_initialized'):
+            self.base_speed = value
+            self._speed_initialized = True
+    
+    def apply_terrain_speed_effects(self):
+        """Apply terrain-based speed modifications"""
+        if not self.map_reference:
+            return
+        
+        from game_systems.terrain_types import get_terrain_property, SAND
+        
+        # Get terrain at current position
+        terrain_type = self.map_reference.get_terrain_at_pixel(int(self.x), int(self.y))
+        
+        # Reset speed to base (accounting for other effects like freeze)
+        if not self.frozen:
+            self.speed = self.base_speed
+        
+        # Apply terrain effects
+        if terrain_type == SAND:
+            # Sand increases enemy speed by 50%
+            speed_multiplier = 1.5
+            if self.frozen:
+                # If frozen, apply both freeze and sand effects
+                config = get_balance_config()
+                if self.has_resistance_to('freeze'):
+                    # Resistant enemies get less slow effect
+                    freeze_factor = config['freeze']['resistance_slow_factor']
+                else:
+                    # Normal enemies get full slow effect
+                    freeze_factor = config['freeze']['slow_factor']
+                self.speed = self.base_speed * speed_multiplier * freeze_factor
+            else:
+                self.speed = self.base_speed * speed_multiplier
+        else:
+            # Handle freeze on non-sand terrain
+            if self.frozen:
+                config = get_balance_config()
+                if self.has_resistance_to('freeze'):
+                    # Resistant enemies get less slow effect
+                    freeze_factor = config['freeze']['resistance_slow_factor']
+                else:
+                    # Normal enemies get full slow effect
+                    freeze_factor = config['freeze']['slow_factor']
+                self.speed = self.base_speed * freeze_factor
+    
     def update(self):
         """Update enemy position and state"""
-        # Handle freeze effect (if not immune) - NOW SLOWS INSTEAD OF STOPPING
-        if self.frozen and not self.is_immune_to('freeze'):
+        # Handle freeze effect - now with resistance instead of immunity
+        if self.frozen:
             self.freeze_timer -= 1
             if self.freeze_timer <= 0:
                 self.frozen = False
-                # Restore original speed when freeze ends
-                if hasattr(self, 'original_speed'):
-                    self.speed = self.original_speed
-        elif self.is_immune_to('freeze'):
-            # Immune enemies can't be frozen
-            self.frozen = False
-            self.freeze_timer = 0
-            if hasattr(self, 'original_speed'):
-                self.speed = self.original_speed
         
         # Handle wet effect (if not immune)
         if self.wet and not self.is_immune_to('wet'):
@@ -111,6 +169,9 @@ class Enemy:
             self.wet = False
             self.wet_timer = 0
             self.lightning_damage_multiplier = 1.0
+        
+        # Apply terrain-based speed effects (handles freeze interactions)
+        self.apply_terrain_speed_effects()
         
         # Always move (even when "frozen" - just slower)
         self.move_along_path()
@@ -143,8 +204,15 @@ class Enemy:
         self.y += dy
         self.distance_traveled += self.speed
         
-        # Check if we've reached the next waypoint
-        if math.sqrt((self.x - next_point[0])**2 + (self.y - next_point[1])**2) < 5:
+        # Check if we've reached or passed the next waypoint (adaptive threshold based on speed)
+        # Use larger threshold for fast enemies to prevent overshooting
+        detection_threshold = max(5, self.speed * 1.5)
+        distance_to_waypoint = math.sqrt((self.x - next_point[0])**2 + (self.y - next_point[1])**2)
+        
+        if distance_to_waypoint < detection_threshold:
+            # Snap to waypoint to ensure exact path following
+            self.x = float(next_point[0])
+            self.y = float(next_point[1])
             self.path_index += 1
     
     def take_damage(self, damage: int):
@@ -154,18 +222,19 @@ class Enemy:
         return actual_damage
     
     def apply_freeze(self, duration: int):
-        """Apply freeze effect to the enemy (if not immune) - NOW SLOWS USING CONFIG VALUE"""
-        if not self.is_immune_to('freeze'):
-            # Store original speed if not already stored
-            if not hasattr(self, 'original_speed'):
-                self.original_speed = self.speed
-            
-            # Apply freeze (heavy slow instead of complete stop)
+        """Apply freeze effect to the enemy with resistance reducing duration and effectiveness"""
+        config = get_balance_config()
+        
+        if self.has_resistance_to('freeze'):
+            # Resistant enemies get reduced duration
+            reduced_duration = int(duration * config['freeze']['resistance_duration_multiplier'])
+            self.frozen = True
+            self.freeze_timer = max(self.freeze_timer, reduced_duration)
+        else:
+            # Normal enemies get full duration
             self.frozen = True
             self.freeze_timer = max(self.freeze_timer, duration)
-            # Reduce speed using config value
-            config = get_balance_config()
-            self.speed = self.original_speed * config['freeze']['slow_factor']
+        # Speed will be updated by apply_terrain_speed_effects() which handles freeze
     
     def apply_wet_status(self, duration: int, lightning_multiplier: float):
         """Apply wet status to the enemy (if not immune)"""
@@ -217,18 +286,18 @@ class Enemy:
             pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
     
     def _draw_immunity_indicators(self, screen: pygame.Surface):
-        """Draw small indicators for immunities"""
-        immune_effects = [k.replace('_immune', '') for k, v in self.immunities.items() if v]
+        """Draw small indicators for resistances (formerly immunities)"""
+        resistant_effects = [k.replace('_immune', '') for k, v in self.immunities.items() if v]
         
-        if not immune_effects:
+        if not resistant_effects:
             return
         
-        # Draw immunity shield symbol
-        shield_color = (255, 215, 0)  # Gold
+        # Draw resistance shield symbol (different color to indicate partial protection)
+        shield_color = (255, 165, 0)  # Orange (instead of gold for immunity)
         shield_x = int(self.x + self.size - 3)
         shield_y = int(self.y - self.size + 3)
         
-        # Draw small shield
+        # Draw small shield with slightly different design
         shield_points = [
             (shield_x, shield_y),
             (shield_x + 4, shield_y),
@@ -237,4 +306,10 @@ class Enemy:
             (shield_x, shield_y + 6)
         ]
         pygame.draw.polygon(screen, shield_color, shield_points)
-        pygame.draw.polygon(screen, (0, 0, 0), shield_points, 1) 
+        pygame.draw.polygon(screen, (0, 0, 0), shield_points, 1)
+        
+        # Add small "R" inside shield to indicate resistance
+        font = pygame.font.Font(None, 8)
+        text = font.render("R", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(shield_x + 2, shield_y + 4))
+        screen.blit(text, text_rect) 

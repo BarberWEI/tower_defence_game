@@ -155,7 +155,7 @@ class WaveManager:
         return enemy
     
     def apply_enemy_scaling(self, enemy):
-        """Apply progressive scaling to enemies based on wave number using config values"""
+        """Apply comprehensive progressive scaling to ALL aspects of enemies based on wave number"""
         if self.wave_number <= 1:
             return  # No scaling for wave 1
         
@@ -163,16 +163,54 @@ class WaveManager:
         scaling_config = self.config['enemy_scaling']
         wave_factor = (self.wave_number - 1)
         
-        # Calculate scaling factors from config
+        # Calculate scaling factors from config for ALL aspects
         health_multiplier = 1.0 + (wave_factor * scaling_config['health_per_wave'])
         speed_multiplier = 1.0 + (wave_factor * scaling_config['speed_per_wave'])
         reward_multiplier = 1.0 + (wave_factor * scaling_config['reward_per_wave'])
+        size_multiplier = 1.0 + (wave_factor * scaling_config['size_per_wave'])
+        damage_multiplier = 1.0 + (wave_factor * scaling_config['damage_scaling_per_wave'])
         
-        # Apply scaling with caps from config
+        # Apply comprehensive scaling with caps from config
         enemy.max_health = int(enemy.max_health * min(health_multiplier, scaling_config['max_health_multiplier']))
         enemy.health = enemy.max_health
         enemy.speed = enemy.speed * min(speed_multiplier, scaling_config['max_speed_multiplier'])
+        
+        # Only update base_speed for regular enemies, not bosses that manage their own speed
+        if not hasattr(enemy, 'speed_multiplier') and not hasattr(enemy, 'phase'):
+            enemy.base_speed = enemy.speed  # Update base speed for terrain calculations
+        else:
+            # For bosses, scale their base_speed appropriately to maintain their speed mechanics
+            if hasattr(enemy, 'base_speed'):
+                enemy.base_speed = enemy.base_speed * min(speed_multiplier, scaling_config['max_speed_multiplier'])
+        
         enemy.reward = int(enemy.reward * min(reward_multiplier, scaling_config['max_reward_multiplier']))
+        enemy.size = int(enemy.size * min(size_multiplier, scaling_config['max_size_multiplier']))
+        
+        # Scale enemy damage (for enemies that deal damage when reaching the end or special abilities)
+        if hasattr(enemy, 'damage'):
+            enemy.damage = int(enemy.damage * min(damage_multiplier, scaling_config['max_damage_multiplier']))
+        
+        # Scale special abilities (regeneration rate, teleport frequency, etc.)
+        if hasattr(enemy, 'regeneration_rate'):
+            enemy.regeneration_rate = int(enemy.regeneration_rate * min(health_multiplier * 0.5, 2.0))
+        
+        if hasattr(enemy, 'teleport_cooldown') and enemy.teleport_cooldown > 0:
+            # Reduce cooldown (make teleporting more frequent) but not below 30 frames
+            enemy.teleport_cooldown = max(30, int(enemy.teleport_cooldown / min(speed_multiplier * 0.5, 1.5)))
+        
+        if hasattr(enemy, 'split_health_ratio'):
+            # Splitting enemies create stronger children
+            enemy.split_health_ratio = min(0.8, enemy.split_health_ratio + (wave_factor * 0.02))
+        
+        # Scale boss-specific abilities
+        if hasattr(enemy, 'minion_health'):
+            enemy.minion_health = int(enemy.minion_health * min(health_multiplier * 0.7, 3.0))
+        
+        if hasattr(enemy, 'minion_count_range'):
+            # Bosses spawn more minions
+            min_minions, max_minions = enemy.minion_count_range
+            scaling_factor = min(1.5, 1.0 + (wave_factor * 0.05))
+            enemy.minion_count_range = (int(min_minions * scaling_factor), int(max_minions * scaling_factor))
     
     def is_wave_complete(self, active_enemies: List) -> bool:
         """Check if the current wave is complete"""

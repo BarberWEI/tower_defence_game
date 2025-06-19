@@ -17,6 +17,9 @@ class FreezerTower(Tower):
         # Targeting restrictions - ground only
         self.can_target_flying = False
         self.can_target_invisible = False
+        
+        # Finalize initialization to update base stats
+        self.finalize_initialization()
     
     def can_target_enemy(self, enemy):
         """Check if this tower can target a specific enemy"""

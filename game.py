@@ -188,6 +188,18 @@ class Game:
                         enemy.take_damage(enemy.poison_damage)
                         enemy.poison_damage_timer = 0
             
+            # Handle boss minion spawning (while boss is alive)
+            if hasattr(enemy, 'should_spawn_minions') and enemy.should_spawn_minions():
+                minion_count = enemy.get_minion_count()
+                for i in range(minion_count):
+                    from enemies import BasicEnemy
+                    minion = BasicEnemy(self.map.get_path())
+                    minion.x = enemy.x + (i - minion_count/2) * 30
+                    minion.y = enemy.y
+                    # Set map reference for terrain effects
+                    minion.set_map_reference(self.map)
+                    enemies_to_add.append(minion)
+            
             if enemy.reached_end:
                 self.lives -= 1
                 self.enemies.remove(enemy)
@@ -198,21 +210,14 @@ class Game:
                 self.money += enemy.reward
                 self.enemies.remove(enemy)
                 
-                # Handle splitting enemies
+                # Handle splitting enemies when they die
                 if hasattr(enemy, 'on_death'):
                     spawned_enemies = enemy.on_death()
                     if spawned_enemies:
+                        # Set map reference for terrain effects on spawned enemies
+                        for spawned_enemy in spawned_enemies:
+                            spawned_enemy.set_map_reference(self.map)
                         enemies_to_add.extend(spawned_enemies)
-                        
-                # Handle boss minion spawning
-                if hasattr(enemy, 'should_spawn_minions') and enemy.should_spawn_minions():
-                    minion_count = enemy.get_minion_count()
-                    for i in range(minion_count):
-                        from enemies import BasicEnemy
-                        minion = BasicEnemy(self.map.get_path())
-                        minion.x = enemy.x + (i - minion_count/2) * 30
-                        minion.y = enemy.y
-                        enemies_to_add.append(minion)
         
         # Add any new enemies from splitting or boss abilities
         self.enemies.extend(enemies_to_add)
@@ -283,6 +288,8 @@ class Game:
         # Spawn new enemies
         new_enemy = self.wave_manager.spawn_enemy()
         if new_enemy:
+            # Set map reference for terrain effects
+            new_enemy.set_map_reference(self.map)
             self.enemies.append(new_enemy)
         
         # Check for wave completion

@@ -36,6 +36,9 @@ class Tower:
         self.terrain_effects_applied = False
         self.terrain_type = None
         
+        # Flag to track if subclass has finished initialization
+        self._initialization_complete = False
+        
         # Upgrade tracking
         self.upgrades: Dict[UpgradeType, int] = {
             UpgradeType.DAMAGE: 0,
@@ -59,13 +62,26 @@ class Tower:
         """Set the grid position and apply terrain effects"""
         self.grid_x = grid_x
         self.grid_y = grid_y
-        if self.map_reference and not self.terrain_effects_applied:
+        # Reset terrain effects and reapply for new position
+        if self.map_reference and self._initialization_complete:
+            self.terrain_effects_applied = False
             self.apply_terrain_effects()
     
     def set_map_reference(self, map_obj):
         """Set reference to map for terrain effects"""
         self.map_reference = map_obj
-        if not self.terrain_effects_applied:
+        if not self.terrain_effects_applied and self._initialization_complete:
+            self.apply_terrain_effects()
+    
+    def finalize_initialization(self):
+        """Call this after subclass sets its stats to update base values"""
+        self.base_range = self.range
+        self.base_damage = self.damage
+        self.base_fire_rate = self.fire_rate
+        self._initialization_complete = True
+        
+        # Apply terrain effects if map reference is already set
+        if self.map_reference and not self.terrain_effects_applied:
             self.apply_terrain_effects()
     
     def set_upgrade_system_reference(self, upgrade_system):
@@ -84,12 +100,15 @@ class Tower:
         special_rules = get_terrain_property(terrain_type, 'special_rules')
         
         if special_rules == 'reduced_range':
-            # Forest reduces tower range by 20%
+            # Forest reduces tower range by 20% but increases damage by 30%
             self.range = int(self.base_range * 0.8)
+            self.damage = int(self.base_damage * 1.3)
         elif special_rules == 'water_only':
-            # Water terrain might give special bonuses to certain towers
+            # Water terrain gives special bonuses to certain towers
             if hasattr(self, 'freeze_duration'):
                 self.freeze_duration = int(self.freeze_duration * 1.5)
+            # Water also increases range by 10% for water-compatible towers
+            self.range = int(self.base_range * 1.1)
         
         self.terrain_effects_applied = True
     
