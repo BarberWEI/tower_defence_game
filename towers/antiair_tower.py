@@ -48,19 +48,22 @@ class AntiAirTower(Tower):
             self.angle = math.atan2(dy, dx)
     
     def shoot(self, projectiles):
-        """Shoot homing missile at target"""
-        if self.target:
+        """Fire homing missile at flying targets"""
+        if self.target and hasattr(self.target, 'flying') and self.target.flying:
             from projectiles import HomingProjectile
-            # Create homing missile
+            
             missile = HomingProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage
+                self.projectile_speed, self.damage, self.tower_type
             )
-            missile.color = (0, 191, 255)  # Blue missile
-            missile.homing_strength = 0.1  # Strong homing
+            missile.target_enemy = self.target
+            
             # Link projectile to tower for damage tracking
             missile.source_tower_id = self.tower_id
             projectiles.append(missile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw anti-air tower"""

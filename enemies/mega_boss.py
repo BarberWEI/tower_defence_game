@@ -50,7 +50,7 @@ class MegaBoss(Enemy):
         self.minion_spawn_timer += 1
         self.pulse_timer += 0.1
         
-    def take_damage(self, damage):
+    def take_damage(self, damage, tower_type: str = 'basic'):
         """Take reduced damage"""
         reduced_damage = damage * (1 - self.damage_reduction)
         actual_damage = min(reduced_damage, self.health)  # Can't deal more than remaining health

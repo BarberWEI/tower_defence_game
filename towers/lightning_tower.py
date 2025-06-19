@@ -123,6 +123,10 @@ class LightningTower(Tower):
             damage_dealt = self.fire_lightning_chain([self.target], [])
             if damage_dealt > 0:
                 self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
             self.fire_timer = self.fire_rate
         
         # Update lightning timer

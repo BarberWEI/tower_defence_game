@@ -41,16 +41,12 @@ class FlyingEnemy(Enemy):
         pygame.draw.ellipse(screen, wing_color, 
                           (self.x + 4, hover_y - 15, 8, 4))
         
-        # Draw health bar
-        if self.health < self.max_health:
-            health_percentage = self.health / self.max_health
-            bar_width = 16
-            bar_height = 4
-            
-            pygame.draw.rect(screen, (255, 0, 0), 
-                           (self.x - 8, hover_y - 25, bar_width, bar_height))
-            pygame.draw.rect(screen, (0, 255, 0), 
-                           (self.x - 8, hover_y - 25, int(bar_width * health_percentage), bar_height))
+        # Draw health bar using centralized method with hover offset
+        # Temporarily adjust y position for health bar calculation
+        original_y = self.y
+        self.y = hover_y - 10  # Set to the actual drawn position
+        self.draw_health_bar(screen, y_offset=-7)  # Additional offset to clear wings
+        self.y = original_y  # Restore original position
     
     def can_be_hit_by_tower(self, tower_type):
         """Check if this flying enemy can be hit by a tower type"""

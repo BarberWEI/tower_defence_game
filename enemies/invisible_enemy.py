@@ -25,30 +25,8 @@ class InvisibleEnemy(Enemy):
         # Blit enemy body to screen
         screen.blit(enemy_surface, (self.x - 8, self.y - 8))
         
-        # Draw health bar directly on screen (like other enemies) if damaged
-        if self.health < self.max_health:
-            health_percentage = self.health / self.max_health
-            bar_width = 16
-            bar_height = 4
-            bar_x = int(self.x - bar_width // 2)
-            bar_y = int(self.y - 8 - 8)  # Above the enemy
-            
-            # Calculate health bar width, ensuring it's at least 1 pixel
-            health_bar_width = max(1, int(bar_width * health_percentage))
-            
-            # Create semi-transparent surfaces for health bar
-            health_bg_surface = pygame.Surface((bar_width, bar_height), pygame.SRCALPHA)
-            health_fg_surface = pygame.Surface((health_bar_width, bar_height), pygame.SRCALPHA)
-            
-            # Background (semi-transparent red)
-            pygame.draw.rect(health_bg_surface, (255, 0, 0, 150), (0, 0, bar_width, bar_height))
-            # Health (semi-transparent green)
-            pygame.draw.rect(health_fg_surface, (0, 255, 0, 200), 
-                           (0, 0, health_bar_width, bar_height))
-            
-            # Blit health bar to screen
-            screen.blit(health_bg_surface, (bar_x, bar_y))
-            screen.blit(health_fg_surface, (bar_x, bar_y))
+        # Draw health bar using centralized method
+        self.draw_health_bar(screen)
     
     def is_detectable_by_tower(self, tower_x, tower_y, tower_type=None):
         """Check if this enemy can be detected by a tower at given position"""

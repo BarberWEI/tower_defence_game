@@ -131,7 +131,7 @@ class LaserTower(Tower):
             hit_enemies.sort(key=lambda x: x[1])
             total_damage_dealt = 0
             for enemy, _ in hit_enemies:
-                actual_damage = enemy.take_damage(self.damage)
+                actual_damage = enemy.take_damage(self.damage, self.tower_type)
                 total_damage_dealt += actual_damage
                 
                 # Prevent teleporting enemies from teleporting when hit by laser
@@ -141,6 +141,9 @@ class LaserTower(Tower):
             # Track damage for currency generation
             if total_damage_dealt > 0:
                 self.add_damage_dealt(total_damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
             
             # Set laser visual effect
             self.laser_timer = self.laser_duration

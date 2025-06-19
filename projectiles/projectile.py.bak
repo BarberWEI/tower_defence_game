@@ -5,14 +5,13 @@ from typing import List
 class Projectile:
     """Base class for all projectiles"""
     def __init__(self, start_x: float, start_y: float, target_x: float, target_y: float, 
-                 speed: float, damage: int, tower_type: str = "basic"):
+                 speed: float, damage: int):
         self.x = float(start_x)
         self.y = float(start_y)
         self.target_x = float(target_x)
         self.target_y = float(target_y)
         self.speed = speed
         self.damage = damage
-        self.tower_type = tower_type
         
         # Tower tracking for currency generation
         self.source_tower_id = None

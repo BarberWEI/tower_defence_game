@@ -6,8 +6,8 @@ from .projectile import Projectile
 class FreezeProjectile(Projectile):
     """Projectile that applies freeze effect"""
     def __init__(self, start_x: float, start_y: float, target_x: float, target_y: float,
-                 speed: float, damage: int, freeze_duration: int):
-        super().__init__(start_x, start_y, target_x, target_y, speed, damage)
+                 speed: float, damage: int, tower_type: str, freeze_duration: int):
+        super().__init__(start_x, start_y, target_x, target_y, speed, damage, tower_type)
         self.freeze_duration = freeze_duration
         self.size = 4
         self.color = (100, 200, 255)  # Light blue
@@ -20,7 +20,7 @@ class FreezeProjectile(Projectile):
                 enemy.apply_freeze(self.freeze_duration)
                 actual_damage = 0
                 if self.damage > 0:
-                    actual_damage = enemy.take_damage(self.damage)
+                    actual_damage = enemy.take_damage(self.damage, self.tower_type)
                 self.should_remove = True
                 return {'hit': True, 'damage': actual_damage, 'tower_id': self.source_tower_id}
         return {'hit': False, 'damage': 0, 'tower_id': None}

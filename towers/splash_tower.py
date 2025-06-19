@@ -64,12 +64,15 @@ class SplashTower(Tower):
             from projectiles import WaterProjectile
             projectile = WaterProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage, self.wet_duration,
+                self.projectile_speed, self.damage, self.tower_type, self.wet_duration,
                 self.splash_radius, self.lightning_damage_multiplier
             )
             # Link projectile to tower for damage tracking
             projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw splash tower"""

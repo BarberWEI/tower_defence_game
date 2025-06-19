@@ -7,7 +7,7 @@ class SplashProjectile(Projectile):
     """Projectile that deals area damage on impact"""
     def __init__(self, start_x: float, start_y: float, target_x: float, target_y: float,
                  speed: float, damage: int, splash_radius: float):
-        super().__init__(start_x, start_y, target_x, target_y, speed, damage)
+        super().__init__(start_x, start_y, target_x, target_y, speed, damage, tower_type)
         self.splash_radius = splash_radius
         self.size = 5
         self.color = (255, 100, 0)  # Orange
@@ -41,7 +41,7 @@ class SplashProjectile(Projectile):
                 # Damage decreases with distance
                 damage_multiplier = 1.0 - (distance / self.splash_radius) * 0.5
                 actual_damage = max(1, int(self.damage * damage_multiplier))
-                damage_dealt = enemy.take_damage(actual_damage)
+                damage_dealt = enemy.take_damage(actual_damage, self.tower_type)
                 total_damage += damage_dealt
         
         self.should_remove = True

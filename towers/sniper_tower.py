@@ -58,8 +58,11 @@ class SniperTower(Tower):
             from projectiles import SniperProjectile
             projectile = SniperProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage
+                self.projectile_speed, self.damage, self.tower_type
             )
             # Link projectile to tower for damage tracking
             projectile.source_tower_id = self.tower_id
-            projectiles.append(projectile) 
+            projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency() 

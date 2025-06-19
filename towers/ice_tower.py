@@ -61,12 +61,15 @@ class IceTower(Tower):
             from projectiles import IceProjectile
             projectile = IceProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage, self.freeze_duration,
+                self.projectile_speed, self.damage, self.tower_type, self.freeze_duration,
                 self.area_effect_radius, self.slow_factor
             )
             # Link projectile to tower for damage tracking
             projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw ice tower"""

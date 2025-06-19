@@ -4,7 +4,8 @@ from enemies import (BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy,
                     InvisibleEnemy, FlyingEnemy, RegeneratingEnemy, 
                     SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss,
                     ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy, 
-                    FireElementalEnemy, ToxicEnemy, PhaseShiftEnemy, BlastProofEnemy)
+                    FireElementalEnemy, ToxicEnemy, PhaseShiftEnemy, BlastProofEnemy,
+                    SpectralEnemy, CrystallineEnemy, ToxicMutantEnemy, VoidEnemy, AdaptiveEnemy)
 from .enemy_introduction import EnemyIntroduction
 
 class WaveManager:
@@ -50,7 +51,12 @@ class WaveManager:
             'FireElementalEnemy': FireElementalEnemy,
             'ToxicEnemy': ToxicEnemy,
             'PhaseShiftEnemy': PhaseShiftEnemy,
-            'BlastProofEnemy': BlastProofEnemy
+            'BlastProofEnemy': BlastProofEnemy,
+            'SpectralEnemy': SpectralEnemy,
+            'CrystallineEnemy': CrystallineEnemy,
+            'ToxicMutantEnemy': ToxicMutantEnemy,
+            'VoidEnemy': VoidEnemy,
+            'AdaptiveEnemy': AdaptiveEnemy
         }
     
     def get_value_for_wave(self, config_section: dict, wave_number: int) -> int:

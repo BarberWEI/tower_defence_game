@@ -6,8 +6,8 @@ from .projectile import Projectile
 class IceProjectile(Projectile):
     """Projectile that applies freeze effect in an area"""
     def __init__(self, start_x: float, start_y: float, target_x: float, target_y: float,
-                 speed: float, damage: int, freeze_duration: int, area_radius: int, slow_factor: float):
-        super().__init__(start_x, start_y, target_x, target_y, speed, damage)
+                 speed: float, damage: int, tower_type: str, freeze_duration: int, area_radius: int, slow_factor: float):
+        super().__init__(start_x, start_y, target_x, target_y, speed, damage, tower_type)
         self.freeze_duration = freeze_duration
         self.area_radius = area_radius
         self.slow_factor = slow_factor
@@ -27,7 +27,7 @@ class IceProjectile(Projectile):
                 if distance <= self.area_radius:
                     enemy.apply_freeze(self.freeze_duration)
                     if self.damage > 0:
-                        actual_damage = enemy.take_damage(self.damage)
+                        actual_damage = enemy.take_damage(self.damage, self.tower_type)
                         total_damage += actual_damage
                     enemies_hit += 1
             
@@ -46,7 +46,7 @@ class IceProjectile(Projectile):
                     if area_distance <= self.area_radius:
                         other_enemy.apply_freeze(self.freeze_duration)
                         if self.damage > 0:
-                            actual_damage = other_enemy.take_damage(self.damage)
+                            actual_damage = other_enemy.take_damage(self.damage, self.tower_type)
                             total_damage += actual_damage
                 
                 self.should_remove = True

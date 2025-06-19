@@ -147,6 +147,10 @@ class FlameTower(Tower):
             damage_dealt = self.spray_flames(enemies)
             if damage_dealt > 0:
                 self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
             self.fire_timer = self.fire_rate
         
         # Update flame particles

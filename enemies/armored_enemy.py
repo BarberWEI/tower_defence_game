@@ -65,19 +65,8 @@ class ArmoredEnemy(Enemy):
                 drop_y = self.y + math.sin(rad) * (self.size + 3)
                 pygame.draw.circle(screen, (30, 144, 255), (int(drop_x), int(drop_y)), 2)
         
-        # Draw health bar
-        if self.health < self.max_health:
-            bar_width = self.size * 2
-            bar_height = 4
-            bar_x = int(self.x - bar_width // 2)
-            bar_y = int(self.y - self.size - 8)
-            
-            # Background (red)
-            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
-            
-            # Health (green)
-            health_width = int((self.health / self.max_health) * bar_width)
-            pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
+        # Draw health bar using the centralized method
+        self.draw_health_bar(screen)
         
         # Draw armor indicator
         font = pygame.font.Font(None, 12)

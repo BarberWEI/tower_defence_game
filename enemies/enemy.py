@@ -170,6 +170,13 @@ class Enemy:
             self.wet_timer = 0
             self.lightning_damage_multiplier = 1.0
         
+        # Update counter effects
+        if hasattr(self, 'counter_effects'):
+            for effect in self.counter_effects[:]:
+                effect['timer'] -= 1
+                if effect['timer'] <= 0:
+                    self.counter_effects.remove(effect)
+        
         # Apply terrain-based speed effects (handles freeze interactions)
         self.apply_terrain_speed_effects()
         
@@ -216,10 +223,69 @@ class Enemy:
             self.path_index += 1
     
     def take_damage(self, damage: int, tower_type: str = 'basic'):
-        """Apply damage to the enemy"""
-        actual_damage = min(damage, self.health)  # Can't deal more damage than remaining health
-        self.health -= damage
+        """Apply damage to the enemy with counter system multipliers"""
+        # Get counter system configuration
+        config = get_balance_config()
+        counter_config = config.get('counter_system', {})
+        multipliers = counter_config.get('tower_enemy_multipliers', {})
+        default_multiplier = counter_config.get('default_multiplier', 1.0)
+        max_multiplier = counter_config.get('max_multiplier', 3.0)
+        min_multiplier = counter_config.get('min_multiplier', 0.1)
+        
+        # Calculate damage multiplier
+        damage_multiplier = default_multiplier
+        
+        # Get enemy class name
+        enemy_class = self.__class__.__name__
+        
+        # Check for tower-specific multipliers
+        if tower_type in multipliers:
+            tower_multipliers = multipliers[tower_type]
+            
+            # Direct enemy type match
+            if enemy_class in tower_multipliers:
+                damage_multiplier = tower_multipliers[enemy_class]
+            
+            # Special case: Lightning towers do extra damage to wet enemies
+            elif tower_type == 'lightning' and self.wet and 'wet_enemies' in tower_multipliers:
+                damage_multiplier = tower_multipliers['wet_enemies']
+        
+        # Clamp multiplier to acceptable range
+        damage_multiplier = max(min_multiplier, min(max_multiplier, damage_multiplier))
+        
+        # Apply multiplier to damage
+        modified_damage = int(damage * damage_multiplier)
+        
+        # Calculate actual damage (can't deal more than remaining health)
+        actual_damage = min(modified_damage, self.health)
+        self.health -= modified_damage
+        
+        # Visual feedback for counter attacks (different colors)
+        if damage_multiplier > 1.5:
+            self._show_counter_effect('super_effective')
+        elif damage_multiplier > 1.0:
+            self._show_counter_effect('effective')
+        elif damage_multiplier < 0.8:
+            self._show_counter_effect('not_very_effective')
+        
         return actual_damage
+    
+    def _show_counter_effect(self, effectiveness_type: str):
+        """Show visual feedback for counter effectiveness"""
+        # This creates a temporary visual effect that can be displayed
+        # The actual visual implementation would be handled by the game's effect system
+        import time
+        
+        if not hasattr(self, 'counter_effects'):
+            self.counter_effects = []
+        
+        effect = {
+            'type': effectiveness_type,
+            'timer': 30,  # 0.5 seconds at 60 FPS
+            'created_at': time.time()
+        }
+        
+        self.counter_effects.append(effect)
     
     def apply_freeze(self, duration: int):
         """Apply freeze effect to the enemy with resistance reducing duration and effectiveness"""
@@ -247,6 +313,21 @@ class Enemy:
         """Get the total distance traveled along the path"""
         return self.distance_traveled
     
+    def draw_health_bar(self, screen: pygame.Surface, x_offset: int = 0, y_offset: int = 0):
+        """Draw health bar above the enemy - can be called by subclasses with custom positioning"""
+        if self.health < self.max_health:
+            bar_width = self.size * 2
+            bar_height = 4
+            bar_x = int(self.x - bar_width // 2) + x_offset
+            bar_y = int(self.y - self.size - 8) + y_offset
+            
+            # Background (red)
+            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
+            
+            # Health (green)
+            health_width = int((self.health / self.max_health) * bar_width)
+            pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
+    
     def draw(self, screen: pygame.Surface):
         """Draw the enemy on the screen"""
         # Draw main enemy circle with status effects
@@ -271,19 +352,11 @@ class Enemy:
                 drop_y = self.y + math.sin(rad) * (self.size + 3)
                 pygame.draw.circle(screen, (30, 144, 255), (int(drop_x), int(drop_y)), 2)
         
-        # Draw health bar
-        if self.health < self.max_health:
-            bar_width = self.size * 2
-            bar_height = 4
-            bar_x = int(self.x - bar_width // 2)
-            bar_y = int(self.y - self.size - 8)
-            
-            # Background (red)
-            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
-            
-            # Health (green)
-            health_width = int((self.health / self.max_health) * bar_width)
-            pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
+        # Draw counter effectiveness indicators
+        self._draw_counter_effects(screen)
+        
+        # Draw health bar using the new method
+        self.draw_health_bar(screen)
     
     def _draw_immunity_indicators(self, screen: pygame.Surface):
         """Draw small indicators for resistances (formerly immunities)"""
@@ -312,4 +385,45 @@ class Enemy:
         font = pygame.font.Font(None, 8)
         text = font.render("R", True, (0, 0, 0))
         text_rect = text.get_rect(center=(shield_x + 2, shield_y + 4))
-        screen.blit(text, text_rect) 
+        screen.blit(text, text_rect)
+    
+    def _draw_counter_effects(self, screen: pygame.Surface):
+        """Draw visual feedback for counter effectiveness"""
+        if not hasattr(self, 'counter_effects') or not self.counter_effects:
+            return
+        
+        font = pygame.font.Font(None, 16)
+        
+        for i, effect in enumerate(self.counter_effects):
+            # Calculate position (stack multiple effects)
+            effect_x = int(self.x)
+            effect_y = int(self.y - self.size - 20 - (i * 15))
+            
+            # Calculate alpha based on timer (fade out)
+            alpha = min(255, effect['timer'] * 8)
+            
+            # Choose color and text based on effect type
+            if effect['type'] == 'super_effective':
+                color = (255, 100, 100)  # Bright red
+                text = "SUPER!"
+            elif effect['type'] == 'effective':
+                color = (255, 255, 100)  # Yellow
+                text = "HIT!"
+            elif effect['type'] == 'not_very_effective':
+                color = (150, 150, 150)  # Gray
+                text = "WEAK"
+            else:
+                continue
+            
+            # Create text surface with alpha
+            text_surface = font.render(text, True, color)
+            
+            # Apply alpha (create a new surface for proper alpha blending)
+            if alpha < 255:
+                alpha_surface = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
+                alpha_surface.fill((255, 255, 255, alpha))
+                text_surface.blit(alpha_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            
+            # Center the text
+            text_rect = text_surface.get_rect(center=(effect_x, effect_y))
+            screen.blit(text_surface, text_rect) 

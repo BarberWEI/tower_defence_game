@@ -48,7 +48,7 @@ class TeleportingEnemy(Enemy):
             if particle['life'] <= 0:
                 self.particles.remove(particle)
                 
-    def take_damage(self, damage):
+    def take_damage(self, damage, tower_type: str = 'basic'):
         """Take damage with chance to teleport"""
         # Check if can teleport
         if (self.teleport_timer >= self.teleport_cooldown and 

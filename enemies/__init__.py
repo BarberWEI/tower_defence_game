@@ -20,10 +20,18 @@ from .toxic_enemy import ToxicEnemy
 from .phase_shift_enemy import PhaseShiftEnemy
 from .blast_proof_enemy import BlastProofEnemy
 
+# New specialized enemies
+from .spectral_enemy import SpectralEnemy
+from .crystalline_enemy import CrystallineEnemy
+from .toxic_mutant_enemy import ToxicMutantEnemy
+from .void_enemy import VoidEnemy
+from .adaptive_enemy import AdaptiveEnemy
+
 __all__ = [
     'Enemy', 'BasicEnemy', 'FastEnemy', 'TankEnemy', 'ShieldedEnemy',
     'InvisibleEnemy', 'FlyingEnemy', 'RegeneratingEnemy', 'SplittingEnemy',
     'TeleportingEnemy', 'MegaBoss', 'SpeedBoss',
     'ArmoredEnemy', 'EnergyShieldEnemy', 'GroundedEnemy', 'FireElementalEnemy',
-    'ToxicEnemy', 'PhaseShiftEnemy', 'BlastProofEnemy'
+    'ToxicEnemy', 'PhaseShiftEnemy', 'BlastProofEnemy',
+    'SpectralEnemy', 'CrystallineEnemy', 'ToxicMutantEnemy', 'VoidEnemy', 'AdaptiveEnemy'
 ] 

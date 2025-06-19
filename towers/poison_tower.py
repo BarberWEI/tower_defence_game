@@ -68,6 +68,9 @@ class PoisonTower(Tower):
             projectile.poison_duration = self.poison_duration
             projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw poison tower"""

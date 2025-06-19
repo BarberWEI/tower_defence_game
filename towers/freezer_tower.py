@@ -59,8 +59,11 @@ class FreezerTower(Tower):
             from projectiles import FreezeProjectile
             projectile = FreezeProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage, self.freeze_duration
+                self.projectile_speed, self.damage, self.tower_type, self.freeze_duration
             )
             # Link projectile to tower for damage tracking
             projectile.source_tower_id = self.tower_id
-            projectiles.append(projectile) 
+            projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency() 

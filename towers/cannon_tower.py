@@ -69,7 +69,7 @@ class CannonTower(Tower):
             self.target = None
     
     def shoot(self, projectiles):
-        """Shoot explosive cannonball"""
+        """Fire explosive cannonball"""
         if self.target:
             projectile = ExplosiveCannonball(
                 self.x, self.y, self.target.x, self.target.y,
@@ -77,6 +77,9 @@ class CannonTower(Tower):
             )
             projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw cannon tower"""

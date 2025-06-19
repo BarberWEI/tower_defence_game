@@ -12,7 +12,7 @@ class TankEnemy(Enemy):
         self.size = 12
         self.color = (100, 50, 50)  # Dark red
     
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Tank enemies have armor that reduces damage"""
         armor_reduction = 0.8 if damage > 1 else 1.0
         reduced_damage = max(1, int(damage * armor_reduction))

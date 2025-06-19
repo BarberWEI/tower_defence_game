@@ -28,7 +28,7 @@ class ShieldedEnemy(Enemy):
                 self.shield += 1
                 self.shield_regen_timer = 0
     
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Damage goes to shield first, then health"""
         original_total_hp = self.shield + self.health
         

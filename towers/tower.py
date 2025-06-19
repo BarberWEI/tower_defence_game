@@ -173,17 +173,30 @@ class Tower:
             dy = self.target.y - self.y
             self.angle = math.atan2(dy, dx)
     
+    def generate_firing_currency(self):
+        """Generate currency immediately when tower fires a projectile"""
+        config = get_balance_config()
+        currency_amount = config['currency']['firing_reward']
+        
+        if self.upgrade_system_reference:
+            self.upgrade_system_reference.add_tower_currency(
+                self.tower_id, self.tower_type, currency_amount
+            )
+
     def shoot(self, projectiles: List):
         """Create and fire a projectile at the target"""
         if self.target:
             from projectiles import BasicProjectile
             projectile = BasicProjectile(
                 self.x, self.y, self.target.x, self.target.y,
-                self.projectile_speed, self.damage
+                self.projectile_speed, self.damage, self.tower_type
             )
             # Link projectile to tower for damage tracking
             projectile.source_tower_id = self.tower_id
             projectiles.append(projectile)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
     
     def add_damage_dealt(self, damage: int):
         """Track damage dealt by this tower for currency generation"""

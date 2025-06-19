@@ -6,8 +6,8 @@ from .projectile import Projectile
 class WaterProjectile(Projectile):
     """Projectile that applies wet status to enemies in an area"""
     def __init__(self, start_x: float, start_y: float, target_x: float, target_y: float,
-                 speed: float, damage: int, wet_duration: int, splash_radius: int, lightning_multiplier: float):
-        super().__init__(start_x, start_y, target_x, target_y, speed, damage)
+                 speed: float, damage: int, tower_type: str, wet_duration: int, splash_radius: int, lightning_multiplier: float):
+        super().__init__(start_x, start_y, target_x, target_y, speed, damage, tower_type)
         self.wet_duration = wet_duration
         self.splash_radius = splash_radius
         self.lightning_multiplier = lightning_multiplier

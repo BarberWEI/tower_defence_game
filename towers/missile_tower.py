@@ -103,6 +103,9 @@ class MissileTower(Tower):
             )
             missile.source_tower_id = self.tower_id
             projectiles.append(missile)
+        
+        # Generate currency immediately when firing
+        self.generate_firing_currency()
     
     def draw(self, screen, selected: bool = False):
         """Draw missile tower"""
@@ -185,8 +188,21 @@ class HomingMissile:
         self.should_remove = False
         self.trail_positions = []  # For visual trail
         
+        # Explosion animation
+        self.exploding = False
+        self.explosion_timer = 0
+        self.explosion_duration = 15
+        self.explosion_particles = []
+        
     def update(self, enemies):
         """Update missile position with homing"""
+        if self.exploding:
+            # Update explosion animation
+            self.explosion_timer += 1
+            if self.explosion_timer >= self.explosion_duration:
+                self.should_remove = True
+            return
+            
         if not self.active:
             return
             
@@ -246,15 +262,23 @@ class HomingMissile:
             if distance <= self.explosion_radius:
                 # Direct hit gets full damage, splash gets reduced damage
                 if distance < 15:  # Direct hit
-                    enemy.take_damage(self.damage)
+                    enemy.take_damage(self.damage, 'missile')
                 else:  # Splash damage
-                    enemy.take_damage(self.explosion_damage)
+                    enemy.take_damage(self.explosion_damage, 'missile')
         
+        # Start explosion animation
         self.active = False
-        self.should_remove = True
+        self.exploding = True
+        self.explosion_timer = 0
+        self.create_explosion_particles()
     
     def draw(self, screen):
-        """Draw missile with trail"""
+        """Draw missile with trail or explosion"""
+        if self.exploding:
+            # Draw explosion animation
+            self.draw_explosion(screen)
+            return
+            
         if not self.active:
             return
             
@@ -275,6 +299,42 @@ class HomingMissile:
             flame_y = prev_y - self.dy * 0.5
             pygame.draw.circle(screen, (255, 0, 0), (int(flame_x), int(flame_y)), 2)
     
+    def draw_explosion(self, screen):
+        """Draw explosion animation with particles"""
+        # Update and draw explosion particles
+        for particle in self.explosion_particles[:]:
+            # Update particle position
+            particle['x'] += particle['dx']
+            particle['y'] += particle['dy']
+            particle['life'] -= 1
+            
+            # Apply gravity and friction
+            particle['dy'] += 0.2
+            particle['dx'] *= 0.98
+            
+            if particle['life'] <= 0:
+                self.explosion_particles.remove(particle)
+                continue
+            
+            # Calculate alpha based on life remaining
+            alpha = particle['life'] / particle['max_life']
+            size = int(particle['size'] * alpha)
+            
+            if size > 0:
+                # Draw particle with fading effect
+                color = particle['color']
+                faded_color = (int(color[0] * alpha), int(color[1] * alpha), int(color[2] * alpha))
+                pygame.draw.circle(screen, faded_color, (int(particle['x']), int(particle['y'])), size)
+        
+        # Draw explosion shockwave
+        progress = self.explosion_timer / self.explosion_duration
+        shockwave_radius = int(self.explosion_radius * progress)
+        shockwave_alpha = int(255 * (1 - progress))
+        
+        if shockwave_alpha > 0 and shockwave_radius > 0:
+            shockwave_color = (255, 100, 0, shockwave_alpha)
+            pygame.draw.circle(screen, shockwave_color[:3], (int(self.x), int(self.y)), shockwave_radius, 3)
+    
     def check_collision(self, enemies):
         """Check collision with enemies"""
         if not self.active:
@@ -289,13 +349,35 @@ class HomingMissile:
                     explosion_distance = math.sqrt((enemy_in_range.x - self.x)**2 + (enemy_in_range.y - self.y)**2)
                     if explosion_distance <= self.explosion_radius:
                         if explosion_distance < 15:  # Direct hit
-                            damage_dealt = enemy_in_range.take_damage(self.damage)
+                            damage_dealt = enemy_in_range.take_damage(self.damage, 'missile')
                         else:  # Splash damage
-                            damage_dealt = enemy_in_range.take_damage(self.explosion_damage)
+                            damage_dealt = enemy_in_range.take_damage(self.explosion_damage, 'missile')
                         total_damage += damage_dealt
                 
+                # Start explosion animation instead of immediate removal
                 self.active = False
-                self.should_remove = True
+                self.exploding = True
+                self.explosion_timer = 0
+                self.create_explosion_particles()
+                
                 return {'hit': True, 'damage': total_damage, 'tower_id': getattr(self, 'source_tower_id', None)}
         
-        return {'hit': False, 'damage': 0, 'tower_id': None} 
+        return {'hit': False, 'damage': 0, 'tower_id': None}
+
+    def create_explosion_particles(self):
+        """Create explosion particle effects"""
+        import random
+        for _ in range(20):  # Create 20 explosion particles
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 8)
+            particle = {
+                'x': self.x,
+                'y': self.y,
+                'dx': math.cos(angle) * speed,
+                'dy': math.sin(angle) * speed,
+                'life': random.randint(8, 15),
+                'max_life': 15,
+                'size': random.randint(2, 6),
+                'color': random.choice([(255, 100, 0), (255, 150, 0), (255, 200, 0), (255, 255, 0)])
+            }
+            self.explosion_particles.append(particle) 

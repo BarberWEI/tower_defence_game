@@ -32,7 +32,7 @@ class RegeneratingEnemy(Enemy):
             self.health = min(self.max_health, self.health + self.regen_rate)
             self.regen_timer = 0
     
-    def take_damage(self, damage):
+    def take_damage(self, damage, tower_type: str = 'basic'):
         """Take damage and reset regeneration timer"""
         actual_damage = super().take_damage(damage)
         self.last_damage_time = 0  # Reset damage timer

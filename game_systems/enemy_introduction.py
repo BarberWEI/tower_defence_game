@@ -63,6 +63,41 @@ class EnemyIntroduction:
                 'counters': 'Use precision towers like Sniper or Laser',
                 'color': (255, 255, 255),  # White
                 'icon': 'BLAST'
+            },
+            'SpectralEnemy': {
+                'name': 'Spectral Ghost',
+                'description': 'Ethereal being that phases through all physical attacks! Must be detected first, then only Lightning can harm it!',
+                'counters': 'CRITICAL: Build Detector Towers to reveal, then use Lightning Towers exclusively',
+                'color': (150, 150, 255),  # Spectral blue
+                'icon': 'GHOST'
+            },
+            'CrystallineEnemy': {
+                'name': 'Crystal Guardian',
+                'description': 'Living crystal that reflects all attacks except focused light beams! Only Laser Towers can shatter its structure!',
+                'counters': 'ONLY Laser Towers can damage - all other attacks are reflected harmlessly',
+                'color': (200, 255, 255),  # Crystal blue
+                'icon': 'CRYST'
+            },
+            'ToxicMutantEnemy': {
+                'name': 'Toxic Mutant',
+                'description': 'Evolved creature immune to all physical and energy attacks! Only chemical and thermal damage works!',
+                'counters': 'ONLY Poison and Flame Towers can damage - everything else is absorbed',
+                'color': (100, 255, 50),  # Toxic green
+                'icon': 'MUTNT'
+            },
+            'VoidEnemy': {
+                'name': 'Void Wraith',
+                'description': 'Interdimensional entity that absorbs most forms of energy! Only massive explosive force can disrupt it!',
+                'counters': 'ONLY Explosive and Missile Towers can damage - other attacks feed its power',
+                'color': (150, 0, 200),  # Void purple
+                'icon': 'VOID'
+            },
+            'AdaptiveEnemy': {
+                'name': 'Adaptive Shapeshifter',
+                'description': 'Master of adaptation that changes immunities every 3 seconds! Only precision and cold can bypass all forms!',
+                'counters': 'ONLY Sniper and Ice Towers always work - adapts immunity to everything else',
+                'color': (255, 100, 255),  # Shifting magenta
+                'icon': 'ADAPT'
             }
         }
     
