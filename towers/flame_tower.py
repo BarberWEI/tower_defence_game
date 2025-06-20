@@ -94,8 +94,8 @@ class FlameTower(Tower):
                 angle_diff = 2 * math.pi - angle_diff
             
             if angle_diff <= cone_angle_rad:
-                # Apply immediate damage
-                actual_damage = enemy.take_damage(self.damage)
+                # Apply immediate damage with tower type
+                actual_damage = enemy.take_damage(self.damage, 'flame')
                 total_damage += actual_damage
                 
                 # Apply burn effect
@@ -165,7 +165,7 @@ class FlameTower(Tower):
             if hasattr(enemy, 'burn_timer') and enemy.burn_timer > 0:
                 enemy.burn_timer -= 1
                 if enemy.burn_timer % 20 == 0:  # Every 1/3 second
-                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage, 'flame')
                     burn_damage_dealt += actual_burn_damage
         
         # Track burn damage
@@ -206,7 +206,7 @@ class FlameTower(Tower):
                 # Apply burn damage based on speed - ensure consistent damage rate
                 burn_ticks = int(speed_multiplier)
                 if enemy.burn_timer % 20 <= burn_ticks:  # Every 1/3 second
-                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage, 'flame')
                     burn_damage_dealt += actual_burn_damage
         
         # Track burn damage
@@ -247,7 +247,7 @@ class FlameTower(Tower):
                 # Apply burn damage based on speed - ensure consistent damage rate
                 burn_ticks = int(speed_multiplier)
                 if enemy.burn_timer % 20 <= burn_ticks:  # Every 1/3 second
-                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage, 'flame')
                     burn_damage_dealt += actual_burn_damage
         
         # Track burn damage
@@ -331,3 +331,6 @@ class FlameTower(Tower):
             
             pygame.draw.line(screen, (100, 100, 100), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 4)
             pygame.draw.circle(screen, (255, 0, 0), (int(end_x), int(end_y)), 2)
+        
+        # Draw upgrade indicator if available
+        self.draw_upgrade_indicator(screen)

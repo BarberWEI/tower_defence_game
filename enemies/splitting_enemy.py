@@ -11,7 +11,7 @@ class SplittingEnemy(Enemy):
         self.split_count = split_count
         
         # Scale stats based on generation
-        base_health = 100
+        base_health = 30
         base_speed = 0.8
         base_reward = 20
         
@@ -49,20 +49,53 @@ class SplittingEnemy(Enemy):
                             int(bar_width * health_percentage), bar_height))
     
     def on_death(self):
-        """Return list of enemies to spawn when this enemy dies"""
-        if self.generation < 3:  # Don't split beyond 3rd generation
-            spawned_enemies = []
-            for i in range(self.split_count):
-                # Create smaller version at current position
-                new_enemy = SplittingEnemy(self.path, self.split_count, self.generation + 1)
-                new_enemy.path_index = self.path_index
+        """Return list of random enemies to spawn when this enemy dies"""
+        # Always spawn 2 random enemies (regardless of generation)
+        spawned_enemies = []
+        
+        # Import available enemy types
+        from . import BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy
+        from . import ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy, FireElementalEnemy, ToxicEnemy
+        
+        # Define enemies available at different wave ranges (no bosses!)
+        wave_based_enemies = {
+            1: [BasicEnemy, FastEnemy],
+            5: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy],
+            10: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy],
+            15: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy, ArmoredEnemy],
+            20: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy, ArmoredEnemy, EnergyShieldEnemy],
+            25: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy, ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy],
+            30: [BasicEnemy, FastEnemy, TankEnemy, InvisibleEnemy, FlyingEnemy, ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy, FireElementalEnemy, ToxicEnemy]
+        }
+        
+        # Find appropriate enemy pool based on current wave
+        available_enemies = [BasicEnemy, FastEnemy]  # Default
+        for wave_threshold in sorted(wave_based_enemies.keys(), reverse=True):
+            if self.wave_number >= wave_threshold:
+                available_enemies = wave_based_enemies[wave_threshold]
+                break
+        
+        # Spawn 2 random enemies from the available pool
+        import random
+        for i in range(2):
+            enemy_class = random.choice(available_enemies)
+            new_enemy = enemy_class(self.path, self.wave_number)
+            
+            # Set position and path progress
+            new_enemy.path_index = self.path_index
+            if hasattr(new_enemy, 'distance_traveled'):
                 new_enemy.distance_traveled = self.distance_traveled
-                
-                # Position them slightly offset from the current position
-                offset_x = (i - self.split_count/2) * 15  # Small offset
-                offset_y = (i - self.split_count/2) * 10  # Small vertical offset
-                new_enemy.x = self.x + offset_x
-                new_enemy.y = self.y + offset_y
-                spawned_enemies.append(new_enemy)
-            return spawned_enemies
-        return [] 
+            
+            # Position them slightly offset from the current position
+            offset_x = (i - 0.5) * 20  # Small offset
+            offset_y = random.uniform(-15, 15)  # Random vertical offset
+            new_enemy.x = self.x + offset_x
+            new_enemy.y = self.y + offset_y
+            
+            # Make spawned enemies slightly weaker (75% health)
+            new_enemy.health = int(new_enemy.health * 0.75)
+            new_enemy.max_health = new_enemy.health
+            
+            spawned_enemies.append(new_enemy)
+        
+        return spawned_enemies 

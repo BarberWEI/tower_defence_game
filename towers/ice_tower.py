@@ -89,6 +89,9 @@ class IceTower(Tower):
                 (crystal_x + 2, crystal_y + 2)
             ]
             pygame.draw.polygon(screen, (255, 255, 255), points)
+        
+        # Draw upgrade indicator if available
+        self.draw_upgrade_indicator(screen)
 
 
     def acquire_target_optimized(self, enemies):

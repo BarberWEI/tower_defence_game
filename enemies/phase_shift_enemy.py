@@ -7,7 +7,7 @@ class PhaseShiftEnemy(Enemy):
     """Phasing enemy immune to sniper tower precision shots"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 4
+        self.max_health = 20
         self.health = self.max_health
         self.speed = 1.4
         self.reward = 22

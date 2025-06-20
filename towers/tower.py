@@ -274,7 +274,9 @@ class Tower:
     
     def add_damage_dealt(self, damage: int):
         """Track damage dealt by this tower for currency generation"""
-        self.total_damage_dealt += damage
+        # Only count positive damage (actual damage), ignore healing (negative values)
+        if damage > 0:
+            self.total_damage_dealt += damage
     
     def reset_stats_to_base(self):
         """Reset stats to base values before applying upgrades and terrain effects"""
@@ -294,6 +296,38 @@ class Tower:
         """Set the upgrade level for a specific upgrade type"""
         self.upgrades[upgrade_type] = level
     
+    def has_upgrade_available(self) -> bool:
+        """Check if this tower has any upgrades available"""
+        if not self.upgrade_system_reference:
+            return False
+        
+        from game_systems.tower_upgrade_system import UpgradeType
+        
+        # Check if any upgrade type is available
+        for upgrade_type in UpgradeType:
+            current_level = self.get_upgrade_level(upgrade_type)
+            if self.upgrade_system_reference.can_upgrade(self.tower_id, self.tower_type, upgrade_type, current_level):
+                return True
+        
+        return False
+    
+    def draw_upgrade_indicator(self, screen):
+        """Draw upgrade available indicator - can be called by custom draw methods"""
+        if self.has_upgrade_available():
+            # Draw a small upgrade icon in the top-right corner
+            upgrade_x = int(self.x + self.size + 2)
+            upgrade_y = int(self.y - self.size - 2)
+            
+            # Draw gold coin background
+            pygame.draw.circle(screen, (255, 215, 0), (upgrade_x, upgrade_y), 6)  # Gold coin
+            pygame.draw.circle(screen, (0, 0, 0), (upgrade_x, upgrade_y), 6, 1)   # Black border
+            
+            # Draw "↑" symbol for upgrade
+            font = pygame.font.Font(None, 14)
+            text = font.render("↑", True, (0, 0, 0))
+            text_rect = text.get_rect(center=(upgrade_x, upgrade_y))
+            screen.blit(text, text_rect)
+    
     def draw(self, screen: pygame.Surface, selected: bool = False):
         """Draw the tower on the screen"""
         # Draw range circle only when selected
@@ -309,4 +343,7 @@ class Tower:
             barrel_length = self.size + 5
             end_x = self.x + math.cos(self.angle) * barrel_length
             end_y = self.y + math.sin(self.angle) * barrel_length
-            pygame.draw.line(screen, (0, 0, 0), (self.x, self.y), (end_x, end_y), 3) 
+            pygame.draw.line(screen, (0, 0, 0), (self.x, self.y), (end_x, end_y), 3)
+        
+        # Draw upgrade available indicator
+        self.draw_upgrade_indicator(screen)

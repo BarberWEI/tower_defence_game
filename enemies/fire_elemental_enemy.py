@@ -26,9 +26,13 @@ class FireElementalEnemy(Enemy):
     def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Override damage handling to implement flame immunity"""
         if tower_type == 'flame':
-            # Completely immune to flame damage - actually heals slightly
-            self.health = min(self.max_health, self.health + 1)
-            return 0
+            # Completely immune to flame damage - actually heals from fire energy
+            # Heal by 50% of the damage that would have been dealt
+            heal_amount = max(1, damage // 2)
+            self.health = min(self.max_health, self.health + heal_amount)
+            
+            # Return negative damage to indicate healing
+            return -heal_amount
         
         # Take normal damage from other tower types
         actual_damage = min(damage, self.health)

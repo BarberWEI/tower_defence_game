@@ -238,16 +238,5 @@ class DetectorTower(Tower):
         sweep_y = self.y + math.sin(sweep_angle) * 15
         pygame.draw.line(screen, (255, 255, 255), (int(self.x), int(self.y)), (int(sweep_x), int(sweep_y)), 2)
         
-        # Draw currency generation indicator when detecting enemies
-        if len(self.detected_enemies) > 0:
-            # Draw a small coin symbol
-            coin_x = int(self.x - 15)
-            coin_y = int(self.y - 15)
-            pygame.draw.circle(screen, (255, 215, 0), (coin_x, coin_y), 6)  # Gold coin
-            pygame.draw.circle(screen, (0, 0, 0), (coin_x, coin_y), 6, 1)
-            
-            # Draw "$" symbol in coin
-            font = pygame.font.Font(None, 12)
-            text = font.render("$", True, (0, 0, 0))
-            text_rect = text.get_rect(center=(coin_x, coin_y))
-            screen.blit(text, text_rect) 
+        # Draw upgrade available indicator
+        self.draw_upgrade_indicator(screen)

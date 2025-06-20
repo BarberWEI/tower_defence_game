@@ -99,7 +99,10 @@ class SplashTower(Tower):
             rad = math.radians(angle + pygame.time.get_ticks() * 0.1)
             drop_x = self.x + math.cos(rad) * 10
             drop_y = self.y + math.sin(rad) * 10
-            pygame.draw.circle(screen, (135, 206, 235), (int(drop_x), int(drop_y)), 2) 
+            pygame.draw.circle(screen, (135, 206, 235), (int(drop_x), int(drop_y)), 2)
+        
+        # Draw upgrade indicator if available
+        self.draw_upgrade_indicator(screen) 
 
     def acquire_target_optimized(self, enemies):
         """Optimized targeting with restrictions"""

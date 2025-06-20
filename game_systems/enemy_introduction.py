@@ -38,7 +38,7 @@ class EnemyIntroduction:
             },
             'FireElementalEnemy': {
                 'name': 'Fire Elemental',
-                'description': 'Made of pure fire - immune to Flame Towers and actually heals from fire!',
+                'description': 'Made of pure fire - heals for 50% of fire damage dealt! Flame Towers make it stronger!',
                 'counters': 'Use Ice, Lightning, or Basic Towers to extinguish',
                 'color': (255, 100, 0),  # Orange-red
                 'icon': 'FIRE'
@@ -102,6 +102,9 @@ class EnemyIntroduction:
             'MegaBoss': {
                 'name': 'Mega Boss',
                 'description': 'A massive boss with multiple phases and damage reduction. Spawns minions periodically. Takes 50% less damage and gets faster in later phases.',
+                'counters': 'Focus all towers for maximum damage - survives longer than regular enemies',
+                'color': (255, 0, 0),  # Red for danger
+                'icon': 'MEGA',
                 'immunities': ['None - but high damage reduction'],
                 'special_abilities': ['Multi-phase system', 'Minion spawning', '50% damage reduction'],
                 'threat_level': 'EXTREME'
@@ -109,6 +112,9 @@ class EnemyIntroduction:
             'SpeedBoss': {
                 'name': 'Speed Boss',
                 'description': 'A boss that becomes faster as it takes damage. Can perform lightning-fast dashes. Speed increases dramatically at low health.',
+                'counters': 'Use high-damage towers to eliminate quickly before it becomes too fast',
+                'color': (255, 255, 0),  # Yellow for speed
+                'icon': 'SPEED',
                 'immunities': ['None'],
                 'special_abilities': ['Speed increases with damage', 'Dash ability', 'Speed trail effects'],
                 'threat_level': 'HIGH'
@@ -116,6 +122,9 @@ class EnemyIntroduction:
             'TimeLordBoss': {
                 'name': 'TimeLord Boss',
                 'description': 'Master of time manipulation! Can slow down projectiles and towers, rewind damage taken, and create temporal rifts that spawn echo enemies.',
+                'counters': 'Coordinate attacks to overwhelm time manipulation - focus fire recommended',
+                'color': (100, 100, 255),  # Blue for time
+                'icon': 'TIME',
                 'immunities': ['Lightning/Ice towers (50% of time in phase 3+)'],
                 'special_abilities': ['Time distortion field', 'Damage rewind', 'Temporal rift creation', '60% damage reduction'],
                 'threat_level': 'ULTIMATE'
@@ -123,6 +132,9 @@ class EnemyIntroduction:
             'NecromancerBoss': {
                 'name': 'Necromancer Boss',
                 'description': 'Dark sorcerer of death and undeath! Drains life from nearby towers, summons undead minions, and creates death auras that weaken everything.',
+                'counters': 'Use non-poison towers and maintain distance - focus on minion control',
+                'color': (50, 255, 50),  # Sickly green
+                'icon': 'NECRO',
                 'immunities': ['Poison towers (complete immunity)'],
                 'special_abilities': ['Life drain aura', 'Undead summoning', 'Death aura', 'Life steal (20%)', '55% damage reduction'],
                 'threat_level': 'ULTIMATE'
@@ -130,6 +142,9 @@ class EnemyIntroduction:
             'ShadowKing': {
                 'name': 'Shadow King',
                 'description': 'Ruler of shadows and dimensions! Can phase between dimensions to dodge attacks, create shadow duplicates, and manipulate darkness.',
+                'counters': 'Use area-effect towers to hit through dimensional phasing - lightning recommended',
+                'color': (150, 0, 150),  # Dark purple
+                'icon': 'KING',
                 'immunities': ['None - but 30% dodge chance (70% when phased)'],
                 'special_abilities': ['Dimension phasing', 'Shadow duplicates', 'Darkness manipulation', '65% damage reduction'],
                 'threat_level': 'ULTIMATE'
@@ -137,6 +152,9 @@ class EnemyIntroduction:
             'CrystalOverlord': {
                 'name': 'Crystal Overlord',
                 'description': 'Crystalline titan of immense power! Reflects projectiles back at towers, creates crystal barriers, and is completely immune to laser attacks.',
+                'counters': 'Use non-laser towers and be prepared for reflected projectiles',
+                'color': (0, 255, 255),  # Cyan crystal
+                'icon': 'CRYST',
                 'immunities': ['Laser towers (complete immunity)'],
                 'special_abilities': ['40% projectile reflection', 'Crystal barrier creation', 'Crystal shard orbiting', '70% damage reduction'],
                 'threat_level': 'ULTIMATE'

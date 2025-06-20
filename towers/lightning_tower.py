@@ -10,7 +10,7 @@ class LightningTower(Tower):
         super().__init__(x, y, 'lightning')
         self.damage = 7   # Reduced damage for balance
         self.range = 120  # Medium range
-        self.fire_rate = 40  # Slightly slower firing
+        self.fire_rate = 120  # Much slower firing (2 seconds at 60 FPS)
         self.projectile_speed = 8  # Instant hit
         self.size = 12
         self.color = (255, 255, 0)  # Yellow
@@ -22,7 +22,7 @@ class LightningTower(Tower):
         self.lightning_duration = 15  # Longer duration for better visibility
         self.chain_sequence = []  # Store the full chain sequence for visuals
         self.charging_timer = 0  # Pre-fire charging effect
-        self.charging_duration = 8  # Frames to charge before firing
+        self.charging_duration = 30  # Longer charge time for more dramatic effect
         
         # Visual effects
         self.spark_effects = []
@@ -241,10 +241,6 @@ class LightningTower(Tower):
         if self.fire_timer > 0:
             self.fire_timer -= speed_multiplier
         
-        # Update charging timer with speed multiplier
-        if self.charging_timer > 0:
-            self.charging_timer -= speed_multiplier
-        
         # Find and acquire target
         self.acquire_target(enemies)
         
@@ -253,7 +249,7 @@ class LightningTower(Tower):
             self.charging_timer = self.charging_duration
         
         # Fire lightning when charging is complete
-        if self.charging_timer <= 1 and self.target:  # Fire when charging is nearly complete
+        if self.charging_timer > 0 and self.charging_timer <= speed_multiplier and self.target:  # Fire when charging completes this frame
             damage_dealt = self.fire_lightning_chain(enemies)
             if damage_dealt > 0:
                 self.add_damage_dealt(damage_dealt)
@@ -263,6 +259,10 @@ class LightningTower(Tower):
             
             self.fire_timer = self.fire_rate
             self.charging_timer = 0  # Reset charging
+        
+        # Update charging timer with speed multiplier (after firing check)
+        if self.charging_timer > 0:
+            self.charging_timer -= speed_multiplier
         
         # Update visual effect timers with speed multiplier
         if self.lightning_timer > 0:
@@ -281,10 +281,6 @@ class LightningTower(Tower):
         if self.fire_timer > 0:
             self.fire_timer -= speed_multiplier
         
-        # Update charging timer with speed multiplier
-        if self.charging_timer > 0:
-            self.charging_timer -= speed_multiplier
-        
         # Find and acquire target with optimizations
         self.acquire_target_optimized(enemies)
         
@@ -293,7 +289,7 @@ class LightningTower(Tower):
             self.charging_timer = self.charging_duration
         
         # Fire lightning when charging is complete
-        if self.charging_timer <= 1 and self.target:  # Fire when charging is nearly complete
+        if self.charging_timer > 0 and self.charging_timer <= speed_multiplier and self.target:  # Fire when charging completes this frame
             damage_dealt = self.fire_lightning_chain(enemies)
             if damage_dealt > 0:
                 self.add_damage_dealt(damage_dealt)
@@ -303,6 +299,10 @@ class LightningTower(Tower):
             
             self.fire_timer = self.fire_rate
             self.charging_timer = 0  # Reset charging
+        
+        # Update charging timer with speed multiplier (after firing check)
+        if self.charging_timer > 0:
+            self.charging_timer -= speed_multiplier
         
         # Update visual effect timers with speed multiplier
         if self.lightning_timer > 0:
@@ -421,6 +421,9 @@ class LightningTower(Tower):
                 spark_x = self.x + random.randint(-10, 10)
                 spark_y = self.y + random.randint(-10, 10)
                 pygame.draw.circle(screen, (255, 255, 255), (int(spark_x), int(spark_y)), 1)
+        
+        # Draw upgrade indicator if available
+        self.draw_upgrade_indicator(screen)
     
     def draw_charging_effect(self, screen, intensity):
         """Draw charging up effect before firing"""

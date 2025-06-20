@@ -1,7 +1,7 @@
 {
     "game_config": {
-      "starting_money": 20,
-      "starting_lives": 20
+      "starting_money": 100000,
+      "starting_lives": 200
     },
     "wave_config": {
       "spawn_config": {
@@ -83,12 +83,8 @@
       "wave_compositions": {
         "1-5": [
           [
-            "BasicEnemy",
-            0.5
-          ],
-          [
-            "InvisibleEnemy",
-            0.5
+            "SplittingEnemy",
+            1
           ]
         ]
       },

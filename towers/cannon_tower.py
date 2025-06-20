@@ -108,6 +108,9 @@ class CannonTower(Tower):
         wheel_y = self.y + self.size - 3
         pygame.draw.circle(screen, (100, 50, 0), (int(self.x - 8), int(wheel_y)), 4)
         pygame.draw.circle(screen, (100, 50, 0), (int(self.x + 8), int(wheel_y)), 4)
+        
+        # Draw upgrade available indicator
+        self.draw_upgrade_indicator(screen)
     
     def acquire_target_optimized(self, enemies):
         """Optimized targeting with restrictions"""

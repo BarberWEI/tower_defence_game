@@ -6,7 +6,7 @@ class RegeneratingEnemy(Enemy):
     
     def __init__(self, path, wave_number=1):
         super().__init__(path, wave_number)
-        self.health = 80
+        self.health = 30
         self.max_health = 80
         self.speed = 1.0
         self.reward = 16

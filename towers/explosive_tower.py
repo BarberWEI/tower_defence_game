@@ -83,6 +83,9 @@ class ExplosiveTower(Tower):
             missile_x = self.x - 3 + i * 6
             missile_y = self.y - 8
             pygame.draw.circle(screen, (255, 0, 0), (int(missile_x), int(missile_y)), 2)
+        
+        # Draw upgrade indicator if available
+        self.draw_upgrade_indicator(screen)
 
 
 

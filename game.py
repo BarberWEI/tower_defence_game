@@ -338,6 +338,15 @@ class Game:
                 if not enemy.reached_end:
                     # Enemy was killed - award money
                     self.money += enemy.reward
+                    
+                    # Handle splitting enemies or other on_death mechanics
+                    if hasattr(enemy, 'on_death'):
+                        spawned_enemies = enemy.on_death()
+                        if spawned_enemies:
+                            for spawned_enemy in spawned_enemies:
+                                # Set map reference for terrain effects
+                                spawned_enemy.set_map_reference(self.map)
+                                enemies_to_add.append(spawned_enemy)
                 else:
                     # Enemy reached end - lose lives
                     self.lives -= 1

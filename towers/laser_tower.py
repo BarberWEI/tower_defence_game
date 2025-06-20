@@ -278,4 +278,7 @@ class LaserTower(Tower):
             barrel_length = self.size + 5
             end_x = self.x + math.cos(self.angle) * barrel_length
             end_y = self.y + math.sin(self.angle) * barrel_length
-            pygame.draw.line(screen, (0, 0, 0), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 3) 
+            pygame.draw.line(screen, (0, 0, 0), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 3)
+        
+        # Draw upgrade available indicator
+        self.draw_upgrade_indicator(screen)

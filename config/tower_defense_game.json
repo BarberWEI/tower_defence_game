@@ -787,7 +787,7 @@
       "80": "TimeLordBoss"
     },
     "enemy_scaling": {
-      "health_per_wave": 0.25,
+      "health_per_wave": 0.3,
       "speed_per_wave": 0.05,
       "reward_per_wave": 0.12,
       "size_per_wave": 0.02,

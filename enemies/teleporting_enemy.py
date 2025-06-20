@@ -15,9 +15,9 @@ class TeleportingEnemy(Enemy):
         self.color = (138, 43, 226)  # Blue violet
         
         # Teleport mechanics
-        self.teleport_chance = 0.3  # 30% chance to teleport when taking damage
+        self.teleport_chance = 0.5  # 50% chance to teleport when taking damage
         self.teleport_distance = 60
-        self.teleport_cooldown = 120  # 2 seconds
+        self.teleport_cooldown = 90  # 1.5 seconds (reduced from 2 seconds)
         self.teleport_timer = 0
         self.is_teleporting = False
         self.teleport_animation_timer = 0
@@ -54,29 +54,37 @@ class TeleportingEnemy(Enemy):
         if (self.teleport_timer >= self.teleport_cooldown and 
             random.random() < self.teleport_chance):
             self.attempt_teleport()
+            # Show "TELEPORT!" message briefly
+            print(f"Teleporting Enemy avoided {damage} damage by teleporting!")  # Debug message
             return 0  # Avoid damage by teleporting
         
-        return super().take_damage(damage)
+        return super().take_damage(damage, tower_type)
         
     def attempt_teleport(self):
         """Attempt to teleport along the path"""
         if len(self.path) <= 1:
             return
             
-        # Calculate teleport position
-        current_progress = self.path_index / len(self.path)
-        teleport_progress = min(1.0, current_progress + 0.2)  # Teleport forward
+        # Calculate teleport position - jump forward along path
+        current_index = self.path_index
+        max_jump = min(len(self.path) - 1, current_index + 5)  # Jump up to 5 path segments
         
-        new_index = int(teleport_progress * len(self.path))
-        new_index = min(new_index, len(self.path) - 1)
+        # Ensure we actually move forward
+        new_index = min(max_jump, len(self.path) - 1)
         
-        if new_index > self.path_index:
+        if new_index > current_index:
             # Create teleport particles at old position
             self.create_teleport_particles(self.x, self.y)
             
-            # Update position
+            # Update position and path progress
             self.path_index = new_index
             self.x, self.y = self.path[self.path_index]
+            
+            # Update distance traveled appropriately
+            if hasattr(self, 'distance_traveled'):
+                # Approximate distance jump
+                segments_jumped = new_index - current_index
+                self.distance_traveled += segments_jumped * 20  # Rough estimate
             
             # Create teleport particles at new position
             self.create_teleport_particles(self.x, self.y)
@@ -84,17 +92,30 @@ class TeleportingEnemy(Enemy):
             # Reset teleport timer
             self.teleport_timer = 0
             self.is_teleporting = True
+            self.teleport_animation_timer = 0
             
     def create_teleport_particles(self, x, y):
         """Create particle effects for teleportation"""
-        for _ in range(8):
+        for _ in range(12):  # More particles for better visibility
             particle = {
-                'x': x + random.randint(-10, 10),
-                'y': y + random.randint(-10, 10),
-                'vx': random.uniform(-2, 2),
-                'vy': random.uniform(-2, 2),
-                'life': 30,
+                'x': x + random.randint(-15, 15),
+                'y': y + random.randint(-15, 15),
+                'vx': random.uniform(-3, 3),
+                'vy': random.uniform(-3, 3),
+                'life': 40,  # Longer lasting
                 'color': (138, 43, 226)
+            }
+            self.particles.append(particle)
+        
+        # Add some bright flash particles
+        for _ in range(6):
+            particle = {
+                'x': x + random.randint(-8, 8),
+                'y': y + random.randint(-8, 8),
+                'vx': random.uniform(-1, 1),
+                'vy': random.uniform(-1, 1),
+                'life': 20,
+                'color': (255, 255, 255)  # Bright white flash
             }
             self.particles.append(particle)
             
@@ -126,10 +147,19 @@ class TeleportingEnemy(Enemy):
         
         # Draw teleport indicator
         if self.teleport_timer >= self.teleport_cooldown:
-            # Draw glowing outline when teleport is ready
-            for i in range(3):
-                pygame.draw.circle(screen, (255, 255, 255, 50), 
-                                 (int(self.x), int(self.y)), 8 + i * 2, 1)
+            # Draw pulsing glow when teleport is ready
+            pulse = math.sin(pygame.time.get_ticks() * 0.01) * 0.3 + 0.7
+            glow_radius = int(12 * pulse)
+            
+            # Bright pulsing outline
+            pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(self.y)), glow_radius, 2)
+            pygame.draw.circle(screen, (138, 43, 226), (int(self.x), int(self.y)), glow_radius + 2, 1)
+            
+            # Draw "T" indicator above enemy
+            font = pygame.font.Font(None, 16)
+            teleport_text = font.render("T", True, (255, 255, 255))
+            text_rect = teleport_text.get_rect(center=(int(self.x), int(self.y - 20)))
+            screen.blit(teleport_text, text_rect)
         
         # Draw health bar
         if self.health < self.max_health:
