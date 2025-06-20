@@ -5,8 +5,8 @@
     },
     "wave_config": {
       "spawn_config": {
-        "base_enemy_count": 5,
-        "base_spawn_delay": 120,
+        "base_enemy_count": 100,
+        "base_spawn_delay": 0.1,
         "min_spawn_delay": 0.1,
         "boss_enemy_count": 1
       },

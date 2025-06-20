@@ -17,7 +17,7 @@ def _load_config() -> Dict[str, Any]:
     global _config_cache
     
     if _config_cache is None:
-        config_path = os.path.join(os.path.dirname(__file__), 'tower_defense_game.json')
+        config_path = os.path.join(os.path.dirname(__file__), 'test_config.json')
         
         try:
             with open(config_path, 'r') as f:
