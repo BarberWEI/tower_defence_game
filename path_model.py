@@ -12,8 +12,8 @@ class PathGeneratorModel(nn.Module):
     """
     
     def __init__(self, 
-                 map_width=20, 
-                 map_height=15, 
+                 map_width=40, 
+                 map_height=26, 
                  terrain_channels=6,  # Different terrain types (grass, water, forest, etc.)
                  hidden_dim=64):
         """

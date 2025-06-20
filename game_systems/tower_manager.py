@@ -211,4 +211,9 @@ class TowerManager:
     
     def reset_tower_counts(self):
         """Reset tower build counts (for game restart)"""
-        self.towers_built_count = {tower_type: 0 for tower_type in self.base_tower_costs} 
+        self.towers_built_count = {tower_type: 0 for tower_type in self.base_tower_costs}
+    
+    def reset_ui_state(self):
+        """Reset all tower manager UI state to initial conditions"""
+        self.selected_tower_type = None
+        self.placing_tower = False 

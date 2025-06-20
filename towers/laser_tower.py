@@ -66,8 +66,16 @@ class LaserTower(Tower):
     
     def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
         """Update laser tower with speed multiplier and optimizations"""
-        # Use base tower optimized update with speed multiplier
-        super().update_with_speed_optimized(enemies, projectiles, speed_multiplier)
+        # Use our own optimized targeting instead of base class
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        # Decrease fire timer based on speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
         
         # Update laser timer with speed multiplier
         if self.laser_timer > 0:
@@ -116,6 +124,39 @@ class LaserTower(Tower):
         else:
             self.target = None
     
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting for laser with restrictions"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        targets_in_range = []
+        
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                actual_distance = math.sqrt(distance_squared)
+                targets_in_range.append((enemy, actual_distance))
+                if len(targets_in_range) >= 10:
+                    break
+        
+        if targets_in_range:
+            # Target enemy with most health
+            targets_in_range.sort(key=lambda x: x[0].health, reverse=True)
+            self.target = targets_in_range[0][0]
+            
+            # Calculate angle to target
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                self.angle = math.atan2(dy, dx)
+        else:
+            self.target = None
+    
     def shoot(self, projectiles):
         """Start charging laser"""
         if self.target and not self.charging:
@@ -126,6 +167,11 @@ class LaserTower(Tower):
     def fire_laser(self, enemies):
         """Fire laser beam"""
         if not self.laser_target:
+            return
+        
+        # Re-check if the laser target is still valid before firing
+        if not self.can_target_enemy(self.laser_target):
+            self.laser_target = None
             return
             
         # Calculate laser direction

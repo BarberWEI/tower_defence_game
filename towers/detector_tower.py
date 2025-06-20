@@ -34,6 +34,48 @@ class DetectorTower(Tower):
         # Update detection pulse
         self.detection_pulse_timer += 0.1
         
+        # Clear all previously detected enemies first
+        for enemy in self.detected_enemies:
+            if hasattr(enemy, 'detected_by_detector'):
+                enemy.detected_by_detector = False
+        
+        # Detect invisible enemies and make them targetable by other towers (max 3)
+        self.detected_enemies.clear()
+        invisible_in_range = []
+        
+        # Find all invisible enemies in range
+        invisible_count = 0
+        for enemy in enemies:
+            if hasattr(enemy, 'invisible') and enemy.invisible:
+                invisible_count += 1
+                distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
+                if distance <= self.detection_range:
+                    invisible_in_range.append((enemy, distance))
+        
+        # Sort by distance and take only the closest 3
+        invisible_in_range.sort(key=lambda x: x[1])
+        detected_count = 0
+        
+        for enemy, distance in invisible_in_range:
+            if detected_count < self.max_detections:
+                self.detected_enemies.add(enemy)
+                # Mark enemy as detected so other towers can target it
+                enemy.detected_by_detector = True
+                detected_count += 1
+        
+        # Generate currency based on detection
+        self.generate_detection_currency(detected_count)
+    
+    def update_with_speed(self, enemies, projectiles, speed_multiplier):
+        """Update with speed multiplier support"""
+        # Update detection pulse with speed
+        self.detection_pulse_timer += 0.1 * speed_multiplier
+        
+        # Clear all previously detected enemies first
+        for enemy in self.detected_enemies:
+            if hasattr(enemy, 'detected_by_detector'):
+                enemy.detected_by_detector = False
+        
         # Detect invisible enemies and make them targetable by other towers (max 3)
         self.detected_enemies.clear()
         invisible_in_range = []
@@ -55,13 +97,77 @@ class DetectorTower(Tower):
                 # Mark enemy as detected so other towers can target it
                 enemy.detected_by_detector = True
                 detected_count += 1
-            else:
-                # Clear detection flag for enemies beyond the limit
-                if hasattr(enemy, 'detected_by_detector'):
-                    enemy.detected_by_detector = False
         
-        # Generate currency based on detection
-        self.generate_detection_currency(detected_count)
+        # Generate currency based on detection (adjusted for speed)
+        self.generate_detection_currency_with_speed(detected_count, speed_multiplier)
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update with speed multiplier and performance optimizations"""
+        # Update detection pulse with speed
+        self.detection_pulse_timer += 0.1 * speed_multiplier
+        
+        # Clear all previously detected enemies first
+        for enemy in self.detected_enemies:
+            if hasattr(enemy, 'detected_by_detector'):
+                enemy.detected_by_detector = False
+        
+        # Detect invisible enemies and make them targetable by other towers (max 3)
+        self.detected_enemies.clear()
+        invisible_in_range = []
+        
+        # Find all invisible enemies in range (optimized)
+        range_squared = self.detection_range * self.detection_range
+        invisible_count = 0
+        
+        for enemy in enemies:
+            if hasattr(enemy, 'invisible') and enemy.invisible:
+                invisible_count += 1
+                dx = enemy.x - self.x
+                dy = enemy.y - self.y
+                distance_squared = dx * dx + dy * dy
+                
+                if distance_squared <= range_squared:
+                    actual_distance = math.sqrt(distance_squared)
+                    invisible_in_range.append((enemy, actual_distance))
+        
+        # Sort by distance and take only the closest 3
+        invisible_in_range.sort(key=lambda x: x[1])
+        detected_count = 0
+        
+        for enemy, distance in invisible_in_range:
+            if detected_count < self.max_detections:
+                self.detected_enemies.add(enemy)
+                # Mark enemy as detected so other towers can target it
+                enemy.detected_by_detector = True
+                detected_count += 1
+        
+        # Generate currency based on detection (adjusted for speed)
+        self.generate_detection_currency_with_speed(detected_count, speed_multiplier)
+    
+    def generate_detection_currency_with_speed(self, detected_count, speed_multiplier):
+        """Generate currency based on detected enemies with speed multiplier"""
+        if detected_count == 0:
+            return 0
+        
+        config = get_balance_config()
+        currency_config = config['currency']
+        
+        # Generate currency based on detection interval (adjusted for speed)
+        self.currency_timer += speed_multiplier
+        if self.currency_timer >= currency_config['detector_reward_interval']:
+            self.currency_timer = 0
+            # Generate currency for each enemy being detected
+            currency_gained = detected_count * currency_config['detector_reward_per_enemy']
+            
+            # Use the upgrade system to add currency
+            if self.upgrade_system_reference:
+                self.upgrade_system_reference.add_tower_currency(
+                    self.tower_id, self.tower_type, currency_gained
+                )
+            
+            return currency_gained
+        
+        return 0
     
     def generate_detection_currency(self, detected_count):
         """Generate currency based on detected enemies"""

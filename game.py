@@ -1,6 +1,7 @@
 import pygame
 import sys
 from typing import List
+import random
 
 from enemies import Enemy
 from towers import Tower
@@ -15,6 +16,10 @@ class Game:
     def __init__(self):
         pygame.init()
         
+        # Load game configuration
+        from config.game_config import get_game_config
+        self.game_config = get_game_config()
+
         # Screen setup with fullscreen support
         self.fullscreen = False
         self.SCREEN_WIDTH = 1200
@@ -30,17 +35,26 @@ class Game:
         self.clock = pygame.time.Clock()
         self.FPS = 60
         
-        # Game state
+        # Game state using config values
         self.running = True
         self.paused = False
         self.game_over = False
-        self.money = 20
-        self.lives = 20
+        self.victory = False
+        self.money = self.game_config.get('starting_money', 20)
+        self.lives = self.game_config.get('starting_lives', 20)
         
         # Speed control
         self.game_speed = 1  # 1 = normal speed, 2 = double speed
         self.speed_options = [1, 2]  # Available speed options
         self.current_speed_index = 0  # Index in speed_options
+        
+        # Victory/Game Over state
+        self.show_victory_screen = False
+        self.show_game_over_screen = False
+        self.restart_requested = False
+        
+        # Wave completion tracking
+        self.completed_wave_number = 0  # Track which wave was just completed
         
         # Performance monitoring
         self.fps_counter = 0
@@ -101,14 +115,14 @@ class Game:
             self.paused = not self.paused
         
         elif key == pygame.K_ESCAPE:
-            if self.game_over:
+            if self.game_over or self.victory:
                 self.running = False
             else:
                 self.tower_manager.cancel_placement()
         
         elif key == pygame.K_r:
-            if self.game_over:
-                self.restart_game()
+            if self.game_over or self.victory:
+                self.restart_requested = True
         
         elif key == pygame.K_F1:
             self.toggle_fullscreen()
@@ -149,7 +163,14 @@ class Game:
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks"""
-        if self.paused or self.game_over:
+        # Handle restart button clicks for victory/game over screens
+        if self.game_over or self.victory:
+            restart_clicked = self.handle_restart_button_click(pos)
+            if restart_clicked:
+                self.restart_requested = True
+            return
+        
+        if self.paused:
             return
         
         # Check for upgrade UI clicks first (highest priority)
@@ -186,6 +207,33 @@ class Game:
         # Handle tower placement
         if self.tower_manager.placing_tower:
             self.attempt_tower_placement(pos)
+    
+    def handle_restart_button_click(self, mouse_pos) -> bool:
+        """Check if restart button was clicked"""
+        # Victory/Game Over screen restart button (center of screen)
+        if self.show_victory_screen or self.show_game_over_screen or self.game_over or self.victory:
+            # These coordinates MUST match the UI renderer exactly
+            button_width = 200
+            button_height = 50
+            
+            if self.victory or self.show_victory_screen:
+                # Victory screen button position
+                panel_height = 300
+                panel_y = (self.SCREEN_HEIGHT - panel_height) // 2
+                button_x = (self.SCREEN_WIDTH - button_width) // 2
+                button_y = panel_y + 200
+            else:
+                # Game over screen button position
+                panel_height = 250
+                panel_y = (self.SCREEN_HEIGHT - panel_height) // 2
+                button_x = (self.SCREEN_WIDTH - button_width) // 2
+                button_y = panel_y + 170
+            
+            if (button_x <= mouse_pos[0] <= button_x + button_width and
+                button_y <= mouse_pos[1] <= button_y + button_height):
+                return True
+        
+        return False
     
     def attempt_tower_placement(self, pos):
         """Try to place a tower at the given position"""
@@ -255,31 +303,93 @@ class Game:
                     minion.set_map_reference(self.map)
                     enemies_to_add.append(minion)
             
-            if enemy.reached_end:
-                self.lives -= 1
+            # Handle TimeLord Boss echo spawning
+            if hasattr(enemy, 'should_spawn_echoes'):
+                spawnable_rifts = enemy.should_spawn_echoes()
+                for rift in spawnable_rifts:
+                    from enemies import BasicEnemy
+                    echo = BasicEnemy(self.map.get_path())
+                    echo.x = rift['x']
+                    echo.y = rift['y']
+                    echo.health = echo.health * 0.5  # Echo enemies are weaker
+                    echo.color = (150, 0, 255)  # Purple tint for echoes
+                    echo.set_map_reference(self.map)
+                    enemies_to_add.append(echo)
+            
+            # Handle Necromancer Boss undead summoning
+            if hasattr(enemy, 'should_summon_undead') and enemy.should_summon_undead():
+                from enemies import BasicEnemy
+                undead = BasicEnemy(self.map.get_path())
+                undead.x = enemy.x + random.uniform(-60, 60)
+                undead.y = enemy.y + random.uniform(-60, 60)
+                undead.color = (100, 100, 50)  # Sickly green for undead
+                undead.health = undead.health * 0.7  # Undead are somewhat weaker
+                undead.set_map_reference(self.map)
+                enemies_to_add.append(undead)
+            
+            # Handle enemy death and removal
+            if enemy.health <= 0:
+                # Register dead enemy with Necromancer bosses for resurrection
+                for boss in self.enemies:
+                    if hasattr(boss, 'register_dead_enemy'):
+                        boss.register_dead_enemy(type(enemy).__name__, enemy.x, enemy.y)
+                
+                # Check if enemy reached end or was killed
+                if not enemy.reached_end:
+                    # Enemy was killed - award money
+                    self.money += enemy.reward
+                else:
+                    # Enemy reached end - lose lives
+                    self.lives -= 1
+                    if self.lives <= 0:
+                        self.game_over = True
+                        self.show_game_over_screen = True
+                
                 self.enemies.remove(enemy)
+            elif enemy.reached_end:
+                # Enemy reached the end
+                self.lives -= 1
                 if self.lives <= 0:
                     self.game_over = True
-            
-            elif enemy.health <= 0:
-                self.money += enemy.reward
+                    self.show_game_over_screen = True
                 self.enemies.remove(enemy)
-                
-                # Handle splitting enemies when they die
-                if hasattr(enemy, 'on_death'):
-                    spawned_enemies = enemy.on_death()
-                    if spawned_enemies:
-                        # Set map reference for terrain effects on spawned enemies
-                        for spawned_enemy in spawned_enemies:
-                            spawned_enemy.set_map_reference(self.map)
-                        enemies_to_add.extend(spawned_enemies)
         
-        # Add any new enemies from splitting or boss abilities
+        # Add any spawned enemies
         self.enemies.extend(enemies_to_add)
     
     def update_towers(self):
         """Update all towers"""
-        for tower in self.towers:
+        # First, clear all detection flags before detector towers update them
+        for enemy in self.enemies:
+            if hasattr(enemy, 'detected_by_detector'):
+                enemy.detected_by_detector = False
+        
+        # Separate towers by type to ensure detector towers update first
+        detector_towers = [tower for tower in self.towers if tower.tower_type == 'detector']
+        other_towers = [tower for tower in self.towers if tower.tower_type != 'detector']
+        
+
+        # Update detector towers first
+        for tower in detector_towers:
+            # Track damage before update
+            previous_damage = tower.total_damage_dealt
+            
+            # Pass game speed to tower update for faster firing with optimizations
+            if hasattr(tower, 'update_with_speed_optimized'):
+                tower.update_with_speed_optimized(self.enemies, self.projectiles, self.game_speed)
+            elif hasattr(tower, 'update_with_speed'):
+                tower.update_with_speed(self.enemies, self.projectiles, self.game_speed)
+            else:
+                tower.update(self.enemies, self.projectiles)
+            
+            # Check if tower dealt damage directly (not through projectiles)
+            damage_this_frame = tower.total_damage_dealt - previous_damage
+            if damage_this_frame > 0:
+                # Use centralized currency generation (already includes 5/100 nerf)
+                tower.track_damage_and_generate_currency(damage_this_frame)
+        
+        # Then update other towers (they can now see detected enemies)
+        for tower in other_towers:
             # Track damage before update
             previous_damage = tower.total_damage_dealt
             
@@ -365,14 +475,25 @@ class Game:
         # Check for wave completion
         wave_info = self.wave_manager.update(self.enemies)
         if wave_info:
-            self.money += wave_info['money_bonus']
-            self.wave_bonus = wave_info['money_bonus']
-            self.show_wave_complete = True
-            self.wave_complete_timer = 180  # Show for 3 seconds
-            
-            # Update tower costs for the new wave
-            current_wave = wave_info.get('wave_number', 1)
-            self.tower_manager.set_current_wave(current_wave)
+            if wave_info.get('game_completed', False):
+                # Player has beaten the final wave!
+                self.victory = True
+                self.show_victory_screen = True
+            elif wave_info.get('wave_completed', False):
+                # Normal wave completion - store the completed wave number BEFORE incrementing
+                self.completed_wave_number = wave_info['wave_number']
+                self.money += wave_info['money_bonus']
+                self.wave_bonus = wave_info['money_bonus']
+                self.show_wave_complete = True
+                self.wave_complete_timer = 180  # Show for 3 seconds
+                
+                # Start next wave after a delay
+                if not wave_info.get('is_final_wave', False):
+                    next_wave_info = self.wave_manager.start_next_wave()
+                    if next_wave_info:
+                        # Update tower costs for the new wave
+                        current_wave = next_wave_info.get('wave_number', 1)
+                        self.tower_manager.set_current_wave(current_wave)
     
     def update_ui_state(self):
         """Update UI-related timers and state"""
@@ -383,7 +504,13 @@ class Game:
     
     def update(self):
         """Update all game systems - FIXED: No longer runs multiple times per frame"""
-        if self.paused or self.game_over:
+        # Handle restart request
+        if self.restart_requested:
+            self.restart_game()
+            return
+        
+        # Don't update if game is over or won
+        if self.paused or self.game_over or self.victory:
             return
         
         # Single update pass - entities handle speed internally
@@ -420,8 +547,12 @@ class Game:
             'wave_info': wave_info,
             'paused': self.paused,
             'game_over': self.game_over,
+            'victory': self.victory,
+            'show_victory_screen': self.show_victory_screen,
+            'show_game_over_screen': self.show_game_over_screen,
             'selected_tower': placement_state['selected_tower_type'],
             'show_wave_complete': self.show_wave_complete,
+            'completed_wave_number': self.completed_wave_number,
             'wave_bonus': self.wave_bonus,
             'towers': self.towers,
             'game_speed': self.game_speed,
@@ -501,36 +632,53 @@ class Game:
         pygame.display.flip()
     
     def restart_game(self):
-        """Restart the game"""
-        self.game_over = False
-        self.paused = False
-        self.money = 20
-        self.lives = 20
+        """Restart the game to initial state - COMPLETE RESET"""
         
-        # Reset game speed
+        # Reset core game state
+        self.game_over = False
+        self.victory = False
+        self.paused = False
+        self.money = self.game_config.get('starting_money', 20)  # Reset to config amount
+        self.lives = self.game_config.get('starting_lives', 20)  # Reset to config amount
+        
+        # Reset game speed to normal
         self.game_speed = 1
         self.current_speed_index = 0
         
-        # Clear game objects
+        # Reset UI state completely
+        self.show_victory_screen = False
+        self.show_game_over_screen = False
+        self.show_wave_complete = False
+        self.restart_requested = False
+        self.completed_wave_number = 0
+        self.wave_bonus = 0
+        self.wave_complete_timer = 0
+        
+        # Clear all game objects
         self.enemies.clear()
         self.towers.clear()
         self.projectiles.clear()
         
-        # Reset systems
+        # Reset all managers to initial state
         self.wave_manager = WaveManager(self.map.get_path())
+        self.wave_manager.reset_introductions()  # Reset enemy introductions
+        
         self.tower_manager = TowerManager()
-        # Reset tower costs to wave 1 and reset tower counts
-        self.tower_manager.set_current_wave(1)
-        self.tower_manager.reset_tower_counts()
+        self.tower_manager.set_current_wave(1)  # Reset to wave 1 costs
+        self.tower_manager.reset_ui_state()     # Reset tower placement UI state
+        
+        # Reset upgrade system
         self.upgrade_system = TowerUpgradeSystem()
         
-        # Reset UI state
-        self.show_wave_complete = False
-        self.wave_complete_timer = 0
-        self.wave_bonus = 0
-        self.ui_manager.clear_tower_selection()
-        self.ui_manager.selected_placed_tower = None
-        self.upgrade_ui.clear_selection()
+        # Recreate UI manager with new tower manager reference
+        self.ui_manager = UIManager(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.tower_manager)
+        self.upgrade_ui.reset_ui_state()        # Reset upgrade panel completely
+        
+        # Reset performance tracking
+        self.fps_counter = 0
+        self.fps_timer = 0
+        self.current_fps = 60
+        self.frame_time_samples.clear()
     
     def run(self):
         """Main game loop"""

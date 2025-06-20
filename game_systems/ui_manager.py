@@ -127,6 +127,22 @@ class UIManager:
         """Clear tower selection"""
         self.selected_tower_index = None
     
+    def reset_ui_state(self):
+        """Reset all UI state to initial conditions"""
+        # Clear all selections
+        self.selected_tower_index = None
+        self.hovered_tower_index = None
+        self.selected_placed_tower = None
+        
+        # Reset scroll position
+        self.scroll_offset = 0
+        
+        # Reset mouse position
+        self.mouse_pos = (0, 0)
+        
+        # Recalculate max scroll for clean state
+        self.max_scroll = self._calculate_max_scroll()
+    
     def draw_complete_ui(self, screen: pygame.Surface, game_state: Dict):
         """Draw the complete user interface"""
         # Main game stats (top area) with speed button
@@ -136,6 +152,14 @@ class UIManager:
         # Performance info (top right)
         if 'performance' in game_state:
             self.renderer.draw_performance_info(screen, game_state['performance'])
+        
+        # Don't draw normal UI if game is over or won
+        if game_state.get('game_over', False):
+            self.renderer.draw_game_over_screen(screen)
+            return
+        elif game_state.get('victory', False) or game_state.get('show_victory_screen', False):
+            self.renderer.draw_victory_screen(screen, game_state['wave_info'])
+            return
         
         # Bottom tower bar
         tower_data = self.tower_data_manager.get_all_tower_data()
@@ -151,8 +175,12 @@ class UIManager:
             if tower_data:
                 self.renderer.draw_tower_tooltip(screen, tower_data, self.mouse_pos)
         
-        # Overlays
-        if game_state.get('paused'):
+        # Draw pause overlay if paused
+        if game_state['paused']:
             self.renderer.draw_pause_overlay(screen)
-        elif game_state.get('game_over'):
-            self.renderer.draw_game_over_overlay(screen, game_state['wave_info']['wave_number'])
+        
+        # Draw wave complete notification
+        if game_state.get('show_wave_complete', False):
+            wave_bonus = game_state.get('wave_bonus', 0)
+            completed_wave = game_state.get('completed_wave_number', 1)
+            self.renderer.draw_wave_complete(screen, completed_wave, wave_bonus)

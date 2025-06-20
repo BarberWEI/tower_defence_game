@@ -3,6 +3,7 @@ from config.game_config import get_wave_config
 from enemies import (BasicEnemy, FastEnemy, TankEnemy, ShieldedEnemy,
                     InvisibleEnemy, FlyingEnemy, RegeneratingEnemy, 
                     SplittingEnemy, TeleportingEnemy, MegaBoss, SpeedBoss,
+                    TimeLordBoss, NecromancerBoss, ShadowKing, CrystalOverlord,
                     ArmoredEnemy, EnergyShieldEnemy, GroundedEnemy, 
                     FireElementalEnemy, ToxicEnemy, PhaseShiftEnemy, BlastProofEnemy,
                     SpectralEnemy, CrystallineEnemy, ToxicMutantEnemy, VoidEnemy, AdaptiveEnemy)
@@ -44,6 +45,10 @@ class WaveManager:
             'SplittingEnemy': SplittingEnemy,
             'SpeedBoss': SpeedBoss,
             'MegaBoss': MegaBoss,
+            'TimeLordBoss': TimeLordBoss,
+            'NecromancerBoss': NecromancerBoss,
+            'ShadowKing': ShadowKing,
+            'CrystalOverlord': CrystalOverlord,
             # Tower-immune enemies
             'ArmoredEnemy': ArmoredEnemy,
             'EnergyShieldEnemy': EnergyShieldEnemy,
@@ -259,26 +264,33 @@ class WaveManager:
     
     def start_next_wave(self) -> dict:
         """Start the next wave and return wave info"""
-        if self.is_wave_complete([]):  # Empty list since we're just starting
-            self.wave_number += 1
-            self.enemies_spawned = 0
-            
-            # Calculate new wave parameters using configuration
-            self.enemies_per_wave = self.calculate_enemies_per_wave()
-            self.spawn_delay = self.calculate_spawn_delay()
-            
-            # Money bonus based on configuration
-            boss_waves = self.config['boss_waves']
-            money_bonus = (self.money_config['boss_wave_bonus'] if self.wave_number in boss_waves 
-                          else self.money_config['normal_wave_bonus'])
-            
+        # Check if we've completed the final wave (don't start a new wave beyond max)
+        max_wave = self.get_max_wave_number()
+        if self.wave_number >= max_wave:
+            # We've completed the final wave - game should end
             return {
+                'wave_completed': True,
                 'wave_number': self.wave_number,
-                'money_bonus': money_bonus,
-                'enemies_per_wave': self.enemies_per_wave
+                'money_bonus': self.money_config['boss_wave_bonus'] if self.wave_number in self.config['boss_waves'] else self.money_config['normal_wave_bonus'],
+                'is_final_wave': True,
+                'game_completed': True
             }
         
-        return None
+        # Increment wave and reset counters
+        self.wave_number += 1
+        self.enemies_spawned = 0
+        self.spawn_timer = 0
+        self.wave_complete = False
+        
+        # Update wave parameters using proper calculation methods
+        self.enemies_per_wave = self.calculate_enemies_per_wave()
+        self.spawn_delay = self.calculate_spawn_delay()
+        
+        return {
+            'wave_started': True,
+            'wave_number': self.wave_number,
+            'money_bonus': 0
+        }
     
     def get_wave_info(self) -> dict:
         """Get current wave information"""
@@ -290,15 +302,62 @@ class WaveManager:
         }
     
     def update(self, active_enemies: List) -> dict:
-        """Update wave manager and return any wave completion info"""
+        """Update wave state and return wave completion info"""
         # Update enemy introduction system
         self.enemy_introduction.update()
         
-        # Check if wave is complete
         if self.is_wave_complete(active_enemies):
-            return self.start_next_wave()
+            if not self.wave_complete:
+                self.wave_complete = True
+                
+                # Check if this is the final wave
+                max_wave = self.get_max_wave_number()
+                is_final_wave = self.wave_number >= max_wave
+                
+
+                
+                # Calculate wave completion bonus
+                wave_bonus = self.money_config['normal_wave_bonus']
+                
+                # Check if this was a boss wave
+                if self.wave_number in self.config['boss_waves']:
+                    wave_bonus = self.money_config['boss_wave_bonus']
+                
+                # If not final wave, prepare for next wave
+                if not is_final_wave:
+                    # Start next wave after a brief delay
+                    # This will be handled by the game loop
+                    pass
+                
+                return {
+                    'wave_completed': True,
+                    'wave_number': self.wave_number,
+                    'money_bonus': wave_bonus,
+                    'is_final_wave': is_final_wave,
+                    'game_completed': is_final_wave
+                }
         
         return None
+    
+    def get_max_wave_number(self) -> int:
+        """Get the maximum wave number from boss waves and wave compositions"""
+        max_boss_wave = 0
+        if self.config['boss_waves']:
+            max_boss_wave = max(int(wave) for wave in self.config['boss_waves'].keys())
+        
+        max_composition_wave = 0
+        if self.config['wave_compositions']:
+            for wave_range in self.config['wave_compositions'].keys():
+                # Parse range like "1-5" or handle tuple ranges
+                if isinstance(wave_range, tuple):
+                    end_wave = wave_range[1] 
+                elif isinstance(wave_range, str) and '-' in wave_range:
+                    end_wave = int(wave_range.split('-')[1])
+                else:
+                    end_wave = int(wave_range)
+                max_composition_wave = max(max_composition_wave, end_wave)
+        
+        return max(max_boss_wave, max_composition_wave)
     
     def draw_introduction(self, screen):
         """Draw enemy introduction overlay if active"""

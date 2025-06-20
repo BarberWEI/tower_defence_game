@@ -11,6 +11,12 @@ from .teleporting_enemy import TeleportingEnemy
 from .mega_boss import MegaBoss
 from .speed_boss import SpeedBoss
 
+# New powerful bosses
+from .timelord_boss import TimeLordBoss
+from .necromancer_boss import NecromancerBoss
+from .shadow_king import ShadowKing
+from .crystal_overlord import CrystalOverlord
+
 # New tower-immune enemies
 from .armored_enemy import ArmoredEnemy
 from .energy_shield_enemy import EnergyShieldEnemy
@@ -31,6 +37,7 @@ __all__ = [
     'Enemy', 'BasicEnemy', 'FastEnemy', 'TankEnemy', 'ShieldedEnemy',
     'InvisibleEnemy', 'FlyingEnemy', 'RegeneratingEnemy', 'SplittingEnemy',
     'TeleportingEnemy', 'MegaBoss', 'SpeedBoss',
+    'TimeLordBoss', 'NecromancerBoss', 'ShadowKing', 'CrystalOverlord',
     'ArmoredEnemy', 'EnergyShieldEnemy', 'GroundedEnemy', 'FireElementalEnemy',
     'ToxicEnemy', 'PhaseShiftEnemy', 'BlastProofEnemy',
     'SpectralEnemy', 'CrystallineEnemy', 'ToxicMutantEnemy', 'VoidEnemy', 'AdaptiveEnemy'

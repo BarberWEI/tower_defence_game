@@ -123,4 +123,53 @@ class AntiAirTower(Tower):
             barrel_length = self.size + 5
             end_x = self.x + math.cos(self.angle) * barrel_length
             end_y = self.y + math.sin(self.angle) * barrel_length
-            pygame.draw.line(screen, (0, 0, 0), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 3) 
+            pygame.draw.line(screen, (0, 0, 0), (int(self.x), int(self.y)), (int(end_x), int(end_y)), 3)
+    
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting with restrictions"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        flying_targets = []
+        ground_targets = []
+        
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                actual_distance = math.sqrt(distance_squared)
+                if hasattr(enemy, 'flying') and enemy.flying:
+                    flying_targets.append((enemy, actual_distance))
+                else:
+                    ground_targets.append((enemy, actual_distance))
+        
+        # Prioritize flying enemies
+        if flying_targets:
+            flying_targets.sort(key=lambda x: x[1])
+            self.target = flying_targets[0][0]
+        elif ground_targets:
+            ground_targets.sort(key=lambda x: x[1])
+            self.target = ground_targets[0][0]
+        else:
+            self.target = None
+        
+        # Calculate angle to target
+        if self.target:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.angle = math.atan2(dy, dx)
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update with speed multiplier and targeting restrictions"""
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier

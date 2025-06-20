@@ -137,11 +137,7 @@ class UpgradeUI:
                 self.selected_tower.reset_stats_to_base()
                 upgrade_system.apply_upgrades_to_tower(self.selected_tower, tower_id)
                 
-                # Debug output to verify upgrades are working
-                print(f"UPGRADE APPLIED: {tower_type} {upgrade_type.value} Level {current_level + 1}")
-                print(f"  Range: {original_range} -> {self.selected_tower.range}")
-                print(f"  Damage: {original_damage} -> {self.selected_tower.damage}")
-                print(f"  Fire Rate: {original_fire_rate} -> {self.selected_tower.fire_rate}")
+
                 
                 return {'action': 'upgrade', 'success': True}
         
@@ -155,6 +151,13 @@ class UpgradeUI:
         """Clear the selected tower"""
         self.selected_tower = None
         self.hovered_upgrade = None
+    
+    def reset_ui_state(self):
+        """Reset all upgrade UI state to initial conditions"""
+        self.selected_tower = None
+        self.mouse_pos = (0, 0)
+        self.hovered_upgrade = None
+        self.hovered_remove_button = False
     
     def draw_upgrade_panel(self, screen: pygame.Surface, upgrade_system: TowerUpgradeSystem):
         """Draw the upgrade panel for the selected tower"""

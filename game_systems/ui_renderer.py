@@ -327,38 +327,137 @@ class UIRenderer:
     
     def draw_pause_overlay(self, screen: pygame.Surface):
         """Draw pause overlay"""
+        # Semi-transparent overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height))
         overlay.set_alpha(128)
-        overlay.fill(self.BLACK)
+        overlay.fill((0, 0, 0))
         screen.blit(overlay, (0, 0))
         
+        # Pause text
         pause_text = self.large_font.render("PAUSED", True, self.WHITE)
-        text_rect = pause_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
-        screen.blit(pause_text, text_rect)
+        pause_rect = pause_text.get_rect(center=(self.screen_width//2, self.screen_height//2))
+        screen.blit(pause_text, pause_rect)
         
-        resume_text = self.medium_font.render("Press SPACE to resume", True, self.WHITE)
-        resume_rect = resume_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
-        screen.blit(resume_text, resume_rect)
-        
-        speed_text = self.small_font.render("Press TAB to change speed", True, self.LIGHT_GRAY)
-        speed_rect = speed_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 80))
-        screen.blit(speed_text, speed_rect)
+        # Instructions
+        instruction_text = self.medium_font.render("Press SPACE to continue", True, self.WHITE)
+        instruction_rect = instruction_text.get_rect(center=(self.screen_width//2, self.screen_height//2 + 50))
+        screen.blit(instruction_text, instruction_rect)
     
-    def draw_game_over_overlay(self, screen: pygame.Surface, final_wave: int):
-        """Draw game over overlay"""
+    def draw_victory_screen(self, screen: pygame.Surface, wave_info: dict):
+        """Draw victory screen when player beats the final wave"""
+        # Semi-transparent dark overlay
         overlay = pygame.Surface((self.screen_width, self.screen_height))
         overlay.set_alpha(180)
-        overlay.fill(self.RED)
+        overlay.fill((0, 0, 0))
         screen.blit(overlay, (0, 0))
         
-        game_over_text = self.large_font.render("GAME OVER", True, self.WHITE)
-        text_rect = game_over_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 50))
-        screen.blit(game_over_text, text_rect)
+        # Victory panel background
+        panel_width = 500
+        panel_height = 300
+        panel_x = (self.screen_width - panel_width) // 2
+        panel_y = (self.screen_height - panel_height) // 2
         
-        wave_text = self.medium_font.render(f"You reached wave {final_wave}!", True, self.WHITE)
-        wave_rect = wave_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
+        # Draw panel background with border
+        pygame.draw.rect(screen, (20, 20, 20), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (255, 215, 0), (panel_x, panel_y, panel_width, panel_height), 4)  # Gold border
+        
+        # Victory title
+        victory_text = self.large_font.render("VICTORY!", True, (255, 215, 0))  # Gold text
+        victory_rect = victory_text.get_rect(center=(self.screen_width//2, panel_y + 60))
+        screen.blit(victory_text, victory_rect)
+        
+        # Congratulations message
+        final_wave = wave_info.get('wave_number', 80)
+        congrats_text = self.medium_font.render(f"Congratulations! You survived {final_wave} waves!", True, self.WHITE)
+        congrats_rect = congrats_text.get_rect(center=(self.screen_width//2, panel_y + 120))
+        screen.blit(congrats_text, congrats_rect)
+        
+        # Restart instructions
+        restart_text = self.medium_font.render("Press R to restart or click the button below", True, self.WHITE)
+        restart_rect = restart_text.get_rect(center=(self.screen_width//2, panel_y + 160))
+        screen.blit(restart_text, restart_rect)
+        
+        # Restart button
+        button_width = 200
+        button_height = 50
+        button_x = (self.screen_width - button_width) // 2
+        button_y = panel_y + 200
+        
+        # Button background
+        pygame.draw.rect(screen, (50, 150, 50), (button_x, button_y, button_width, button_height))
+        pygame.draw.rect(screen, (100, 200, 100), (button_x, button_y, button_width, button_height), 3)
+        
+        # Button text
+        button_text = self.medium_font.render("RESTART GAME", True, self.WHITE)
+        button_rect = button_text.get_rect(center=(button_x + button_width//2, button_y + button_height//2))
+        screen.blit(button_text, button_rect)
+    
+    def draw_game_over_screen(self, screen: pygame.Surface):
+        """Draw game over screen when player loses all lives"""
+        # Semi-transparent dark overlay
+        overlay = pygame.Surface((self.screen_width, self.screen_height))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        screen.blit(overlay, (0, 0))
+        
+        # Game Over panel background
+        panel_width = 400
+        panel_height = 250
+        panel_x = (self.screen_width - panel_width) // 2
+        panel_y = (self.screen_height - panel_height) // 2
+        
+        # Draw panel background with border
+        pygame.draw.rect(screen, (20, 20, 20), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (200, 50, 50), (panel_x, panel_y, panel_width, panel_height), 4)  # Red border
+        
+        # Game Over title
+        game_over_text = self.large_font.render("GAME OVER", True, (200, 50, 50))  # Red text
+        game_over_rect = game_over_text.get_rect(center=(self.screen_width//2, panel_y + 60))
+        screen.blit(game_over_text, game_over_rect)
+        
+        # Try again message
+        try_again_text = self.medium_font.render("Better luck next time!", True, self.WHITE)
+        try_again_rect = try_again_text.get_rect(center=(self.screen_width//2, panel_y + 110))
+        screen.blit(try_again_text, try_again_rect)
+        
+        # Restart instructions
+        restart_text = self.medium_font.render("Press R to restart or click the button below", True, self.WHITE)
+        restart_rect = restart_text.get_rect(center=(self.screen_width//2, panel_y + 140))
+        screen.blit(restart_text, restart_rect)
+        
+        # Restart button
+        button_width = 200
+        button_height = 50
+        button_x = (self.screen_width - button_width) // 2
+        button_y = panel_y + 170
+        
+        # Button background
+        pygame.draw.rect(screen, (150, 50, 50), (button_x, button_y, button_width, button_height))
+        pygame.draw.rect(screen, (200, 100, 100), (button_x, button_y, button_width, button_height), 3)
+        
+        # Button text
+        button_text = self.medium_font.render("RESTART GAME", True, self.WHITE)
+        button_rect = button_text.get_rect(center=(button_x + button_width//2, button_y + button_height//2))
+        screen.blit(button_text, button_rect)
+    
+    def draw_wave_complete(self, screen: pygame.Surface, wave_number: int, wave_bonus: int):
+        """Draw wave completion notification"""
+        # Background panel
+        panel_width = 300
+        panel_height = 120
+        panel_x = (self.screen_width - panel_width) // 2
+        panel_y = 100  # Top of screen
+        
+        # Draw panel with border
+        pygame.draw.rect(screen, (20, 50, 20), (panel_x, panel_y, panel_width, panel_height))
+        pygame.draw.rect(screen, (100, 200, 100), (panel_x, panel_y, panel_width, panel_height), 3)
+        
+        # Wave complete text
+        wave_text = self.medium_font.render(f"Wave {wave_number} Complete!", True, (100, 255, 100))
+        wave_rect = wave_text.get_rect(center=(panel_x + panel_width//2, panel_y + 40))
         screen.blit(wave_text, wave_rect)
         
-        restart_text = self.medium_font.render("Press R to restart or ESC to quit", True, self.WHITE)
-        restart_rect = restart_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
-        screen.blit(restart_text, restart_rect) 
+        # Bonus money text
+        bonus_text = self.small_font.render(f"Bonus: +${wave_bonus}", True, self.WHITE)
+        bonus_rect = bonus_text.get_rect(center=(panel_x + panel_width//2, panel_y + 80))
+        screen.blit(bonus_text, bonus_rect) 

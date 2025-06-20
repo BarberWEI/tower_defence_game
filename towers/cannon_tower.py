@@ -108,6 +108,56 @@ class CannonTower(Tower):
         wheel_y = self.y + self.size - 3
         pygame.draw.circle(screen, (100, 50, 0), (int(self.x - 8), int(wheel_y)), 4)
         pygame.draw.circle(screen, (100, 50, 0), (int(self.x + 8), int(wheel_y)), 4)
+    
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting with restrictions"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                actual_distance = math.sqrt(distance_squared)
+                # Count nearby enemies for splash potential
+                nearby_count = 0
+                for other_enemy in enemies:
+                    if self.can_target_enemy(other_enemy):
+                        splash_distance = math.sqrt((enemy.x - other_enemy.x)**2 + (enemy.y - other_enemy.y)**2)
+                        if splash_distance <= self.splash_radius:
+                            nearby_count += 1
+                
+                valid_targets.append((enemy, actual_distance, nearby_count))
+        
+        if valid_targets:
+            # Target enemy with most nearby enemies (best splash potential)
+            valid_targets.sort(key=lambda x: x[2], reverse=True)
+            self.target = valid_targets[0][0]
+            
+            # Calculate angle to target
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                self.angle = math.atan2(dy, dx)
+        else:
+            self.target = None
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update with speed multiplier and targeting restrictions"""
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
 
 
 class ExplosiveCannonball:

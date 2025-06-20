@@ -98,6 +98,48 @@ class EnemyIntroduction:
                 'counters': 'ONLY Sniper and Ice Towers always work - adapts immunity to everything else',
                 'color': (255, 100, 255),  # Shifting magenta
                 'icon': 'ADAPT'
+            },
+            'MegaBoss': {
+                'name': 'Mega Boss',
+                'description': 'A massive boss with multiple phases and damage reduction. Spawns minions periodically. Takes 50% less damage and gets faster in later phases.',
+                'immunities': ['None - but high damage reduction'],
+                'special_abilities': ['Multi-phase system', 'Minion spawning', '50% damage reduction'],
+                'threat_level': 'EXTREME'
+            },
+            'SpeedBoss': {
+                'name': 'Speed Boss',
+                'description': 'A boss that becomes faster as it takes damage. Can perform lightning-fast dashes. Speed increases dramatically at low health.',
+                'immunities': ['None'],
+                'special_abilities': ['Speed increases with damage', 'Dash ability', 'Speed trail effects'],
+                'threat_level': 'HIGH'
+            },
+            'TimeLordBoss': {
+                'name': 'TimeLord Boss',
+                'description': 'Master of time manipulation! Can slow down projectiles and towers, rewind damage taken, and create temporal rifts that spawn echo enemies.',
+                'immunities': ['Lightning/Ice towers (50% of time in phase 3+)'],
+                'special_abilities': ['Time distortion field', 'Damage rewind', 'Temporal rift creation', '60% damage reduction'],
+                'threat_level': 'ULTIMATE'
+            },
+            'NecromancerBoss': {
+                'name': 'Necromancer Boss',
+                'description': 'Dark sorcerer of death and undeath! Drains life from nearby towers, summons undead minions, and creates death auras that weaken everything.',
+                'immunities': ['Poison towers (complete immunity)'],
+                'special_abilities': ['Life drain aura', 'Undead summoning', 'Death aura', 'Life steal (20%)', '55% damage reduction'],
+                'threat_level': 'ULTIMATE'
+            },
+            'ShadowKing': {
+                'name': 'Shadow King',
+                'description': 'Ruler of shadows and dimensions! Can phase between dimensions to dodge attacks, create shadow duplicates, and manipulate darkness.',
+                'immunities': ['None - but 30% dodge chance (70% when phased)'],
+                'special_abilities': ['Dimension phasing', 'Shadow duplicates', 'Darkness manipulation', '65% damage reduction'],
+                'threat_level': 'ULTIMATE'
+            },
+            'CrystalOverlord': {
+                'name': 'Crystal Overlord',
+                'description': 'Crystalline titan of immense power! Reflects projectiles back at towers, creates crystal barriers, and is completely immune to laser attacks.',
+                'immunities': ['Laser towers (complete immunity)'],
+                'special_abilities': ['40% projectile reflection', 'Crystal barrier creation', 'Crystal shard orbiting', '70% damage reduction'],
+                'threat_level': 'ULTIMATE'
             }
         }
     

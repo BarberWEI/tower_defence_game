@@ -17,7 +17,7 @@ def _load_config() -> Dict[str, Any]:
     global _config_cache
     
     if _config_cache is None:
-        config_path = os.path.join(os.path.dirname(__file__), 'tower_defense_game.json')
+        config_path = os.path.join(os.path.dirname(__file__), 'test_config.json')
         
         try:
             with open(config_path, 'r') as f:
@@ -98,6 +98,11 @@ def get_balance_config() -> Dict[str, Any]:
     """Get balance configuration settings"""
     config = _load_config()
     return config.get('balance_config', {})
+
+def get_game_config() -> Dict[str, Any]:
+    """Get game configuration settings"""
+    config = _load_config()
+    return config.get('game_config', {})
 
 def get_available_maps() -> List[str]:
     """Get list of available map names"""

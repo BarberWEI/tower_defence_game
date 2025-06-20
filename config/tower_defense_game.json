@@ -1,4 +1,8 @@
 {
+  "game_config": {
+    "starting_money": 20,
+    "starting_lives": 20
+  },
   "wave_config": {
     "spawn_config": {
       "base_enemy_count": 5,
@@ -18,7 +22,13 @@
           "31-35": 7,
           "36-40": 8,
           "41-45": 9,
-          "46-50": 10
+          "46-50": 10,
+          "51-55": 11,
+          "56-60": 12,
+          "61-65": 13,
+          "66-70": 14,
+          "71-75": 15,
+          "76-80": 16
         },
         "default": 1
       },
@@ -28,7 +38,10 @@
           "11-20": 8,
           "21-30": 10,
           "31-40": 12,
-          "41-50": 15
+          "41-50": 15,
+          "51-60": 18,
+          "61-70": 20,
+          "71-80": 22
         },
         "default": 5
       },
@@ -52,6 +65,18 @@
         "50": {
           "enemy_multiplier": 4.0,
           "spawn_delay_multiplier": 0.4
+        },
+        "60": {
+          "enemy_multiplier": 5.0,
+          "spawn_delay_multiplier": 0.3
+        },
+        "70": {
+          "enemy_multiplier": 6.0,
+          "spawn_delay_multiplier": 0.25
+        },
+        "80": {
+          "enemy_multiplier": 8.0,
+          "spawn_delay_multiplier": 0.2
         }
       }
     },
@@ -751,14 +776,15 @@
       "15": "SpeedBoss",
       "25": "SpeedBoss",
       "35": "MegaBoss",
+      "40": "NecromancerBoss",
       "45": "MegaBoss",
-      "50": "MegaBoss",
+      "50": "TimeLordBoss",
       "55": "SpeedBoss",
-      "60": "MegaBoss",
+      "60": "ShadowKing",
       "65": "SpeedBoss",
       "70": "MegaBoss",
-      "75": "MegaBoss",
-      "80": "MegaBoss"
+      "75": "CrystalOverlord",
+      "80": "TimeLordBoss"
     },
     "enemy_scaling": {
       "health_per_wave": 0.25,

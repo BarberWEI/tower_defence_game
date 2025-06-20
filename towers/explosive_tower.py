@@ -85,6 +85,49 @@ class ExplosiveTower(Tower):
             pygame.draw.circle(screen, (255, 0, 0), (int(missile_x), int(missile_y)), 2)
 
 
+
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting with restrictions"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                actual_distance = math.sqrt(distance_squared)
+                valid_targets.append((enemy, actual_distance))
+                if len(valid_targets) >= 10:
+                    break
+        
+        if not valid_targets:
+            self.target = None
+            return
+        
+        # Target closest to end of path (default strategy)
+        self.target = max(valid_targets, key=lambda x: x[0].get_distance_from_start())[0]
+        
+        if self.target:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.angle = math.atan2(dy, dx)
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update with speed multiplier and targeting restrictions"""
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
 class ExplosiveRocket:
     """Explosive rocket projectile with massive AOE damage"""
     
