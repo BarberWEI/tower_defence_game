@@ -8,7 +8,7 @@ class ToxicEnemy(Enemy):
     """Toxic enemy immune to poison damage"""
     def __init__(self, path: List[Tuple[int, int]], wave_number: int = 1):
         super().__init__(path, wave_number)
-        self.max_health = 6
+        self.max_health = 30
         self.health = self.max_health
         self.speed = 1.1
         self.reward = 17

@@ -15,149 +15,225 @@ class EnemyIntroduction:
         
         # Enemy information database
         self.enemy_info = {
-            'ArmoredEnemy': {
-                'name': 'Armored Enemy',
-                'description': 'Heavy armor plating makes this enemy immune to Basic Tower damage!',
-                'counters': 'Use Sniper, Laser, or Lightning Towers to penetrate armor',
-                'color': (255, 255, 0),  # Yellow warning
-                'icon': 'ARM'
+            # Basic Tier (Waves 1-10)
+            'BasicEnemy': {
+                'name': 'Basic Enemy',
+                'description': 'Standard enemy with no special abilities. Foundation of all enemy forces.',
+                'counters': 'Any tower works well. BasicTower with poison support is cost-effective.',
+                'color': (255, 100, 100),  # Light red
+                'icon': 'BASIC'
             },
-            'EnergyShieldEnemy': {
-                'name': 'Energy Shield Enemy',
-                'description': 'Energy shields deflect all Laser Tower attacks!',
-                'counters': 'Use Basic, Sniper, or Lightning Towers to bypass shields',
-                'color': (0, 255, 255),  # Cyan
+            'FastEnemy': {
+                'name': 'Fast Enemy',
+                'description': 'Double-speed enemy that moves at 2x normal rate. Hard to target with slow towers.',
+                'counters': 'Use FreezerTower (2.5x damage), IceTower (2.0x), or SniperTower (2.0x) for effective hits.',
+                'color': (255, 165, 0),  # Orange
+                'icon': 'FAST'
+            },
+            'TankEnemy': {
+                'name': 'Tank Enemy',
+                'description': 'Heavily armored slow enemy with 5x normal health. Extremely durable.',
+                'counters': 'Use CannonTower (1.8x damage) or focus fire with multiple towers.',
+                'color': (128, 128, 128),  # Gray
+                'icon': 'TANK'
+            },
+            
+            # Intermediate Tier (Waves 11-25)
+            'FlyingEnemy': {
+                'name': 'Flying Enemy',
+                'description': 'Airborne enemy that CANNOT be targeted by ground-only towers!',
+                'counters': 'REQUIRES AntiAirTower (2.5x damage), MissileTower (2.0x), or IceTower (1.5x).',
+                'color': (173, 216, 230),  # Light blue
+                'icon': 'FLY'
+            },
+            'ShieldedEnemy': {
+                'name': 'Shielded Enemy',
+                'description': 'Energy shield provides damage reduction against energy-based attacks.',
+                'counters': 'Use CannonTower (1.5x damage) for kinetic damage that bypasses shields.',
+                'color': (100, 149, 237),  # Cornflower blue
                 'icon': 'SHLD'
             },
-            'GroundedEnemy': {
-                'name': 'Grounded Enemy', 
-                'description': 'Electrical grounding makes this enemy immune to Lightning damage!',
-                'counters': 'Use Basic, Sniper, or Laser Towers for effective damage',
+            'InvisibleEnemy': {
+                'name': 'Invisible Enemy',
+                'description': 'CRITICAL: Cannot be targeted by ANY tower without DetectorTower!',
+                'counters': 'MANDATORY DetectorTower first, then AntiAirTower (1.8x) or SniperTower (1.8x).',
+                'color': (169, 169, 169),  # Dark gray (faded)
+                'icon': 'INVIS'
+            },
+            'ArmoredEnemy': {
+                'name': 'Armored Enemy',
+                'description': 'Heavy physical armor provides high resistance to basic attacks.',
+                'counters': 'Use CannonTower (2.0x), LaserTower (1.8x), or FlameTower (1.5x) for armor penetration.',
                 'color': (255, 215, 0),  # Gold
+                'icon': 'ARM'
+            },
+            
+            # Advanced Tier (Waves 26-40)
+            'RegeneratingEnemy': {
+                'name': 'Regenerating Enemy',
+                'description': 'Continuously heals over time. Must overwhelm regeneration rate.',
+                'counters': 'Use PoisonTower (2.5x damage) to stop healing or burst damage with SplashTower (1.5x).',
+                'color': (0, 255, 127),  # Spring green
+                'icon': 'REGEN'
+            },
+            'TeleportingEnemy': {
+                'name': 'Teleporting Enemy',
+                'description': 'Teleports forward when hit (50% chance)! Jumps 1/3 of remaining path distance.',
+                'counters': 'Use area damage: ExplosiveTower (1.5x), SplashTower (1.8x), or FreezerTower (1.8x).',
+                'color': (138, 43, 226),  # Blue violet
+                'icon': 'TELE'
+            },
+            'SplittingEnemy': {
+                'name': 'Splitting Enemy',
+                'description': 'Splits into 2 random enemies when destroyed! Spawned enemies have 75% health.',
+                'counters': 'Use AOE damage: MissileTower (1.8x), ExplosiveTower (2.0x), or SplashTower (2.2x).',
+                'color': (255, 20, 147),  # Deep pink
+                'icon': 'SPLIT'
+            },
+            
+            # Elite Tier (Waves 41-60)
+            'EnergyShieldEnemy': {
+                'name': 'Energy Shield Enemy',
+                'description': 'Energy shield absorbs laser attacks but vulnerable to lightning!',
+                'counters': 'Use LightningTower (2.0x damage) or kinetic weapons. AVOID LaserTower (0.5x damage).',
+                'color': (0, 255, 255),  # Cyan
+                'icon': 'ESHLD'
+            },
+            'GroundedEnemy': {
+                'name': 'Grounded Enemy',
+                'description': 'Electrical grounding provides immunity to lightning attacks!',
+                'counters': 'Use any non-electric towers. AVOID LightningTower (0.3x damage only).',
+                'color': (139, 69, 19),  # Saddle brown
                 'icon': 'GND'
             },
             'FireElementalEnemy': {
                 'name': 'Fire Elemental',
-                'description': 'Made of pure fire - heals for 50% of fire damage dealt! Flame Towers make it stronger!',
-                'counters': 'Use Ice, Lightning, or Basic Towers to extinguish',
-                'color': (255, 100, 0),  # Orange-red
+                'description': 'HEALS 50% of fire damage received! FlameTowers make it stronger!',
+                'counters': 'Use IceTower (3.0x damage) or FreezerTower (2.0x). NEVER use FlameTower!',
+                'color': (255, 69, 0),  # Red-orange
                 'icon': 'FIRE'
-            },
-            'ToxicEnemy': {
-                'name': 'Toxic Enemy',
-                'description': 'Already poisonous - completely immune to Poison Tower damage!',
-                'counters': 'Use Basic, Laser, or Lightning Towers to neutralize',
-                'color': (76, 175, 80),  # Toxic green
-                'icon': 'TOX'
             },
             'PhaseShiftEnemy': {
                 'name': 'Phase Shifter',
-                'description': 'Phases through dimensions - Sniper Tower shots pass right through!',
-                'counters': 'Use area-effect towers like Laser or Lightning',
+                'description': 'Phases through dimensions, avoiding many physical attacks.',
+                'counters': 'Use FlameTower (1.8x damage) to disrupt phasing mechanism.',
                 'color': (128, 0, 128),  # Purple
                 'icon': 'PHASE'
             },
             'BlastProofEnemy': {
                 'name': 'Blast-Proof Enemy',
-                'description': 'Reinforced armor resists all explosive damage! Immune to Cannon, Missile, and Explosive Towers!',
-                'counters': 'Use precision towers like Sniper or Laser',
-                'color': (255, 255, 255),  # White
+                'description': 'Reinforced armor highly resistant to ALL explosive damage!',
+                'counters': 'Use LaserTower (2.0x damage). AVOID Missile/Explosive Towers (0.3-0.5x damage).',
+                'color': (192, 192, 192),  # Silver
                 'icon': 'BLAST'
             },
+            
+            # Legendary Tier (Waves 61+)
             'SpectralEnemy': {
-                'name': 'Spectral Ghost',
-                'description': 'Ethereal being that phases through all physical attacks! Must be detected first, then only Lightning can harm it!',
-                'counters': 'CRITICAL: Build Detector Towers to reveal, then use Lightning Towers exclusively',
-                'color': (150, 150, 255),  # Spectral blue
+                'name': 'Spectral Enemy',
+                'description': 'Partially invisible, phases through physical attacks! Requires detection.',
+                'counters': 'CRITICAL: DetectorTower required, then ONLY LightningTower (3.0x damage) works!',
+                'color': (230, 230, 250),  # Lavender
                 'icon': 'GHOST'
             },
             'CrystallineEnemy': {
-                'name': 'Crystal Guardian',
-                'description': 'Living crystal that reflects all attacks except focused light beams! Only Laser Towers can shatter its structure!',
-                'counters': 'ONLY Laser Towers can damage - all other attacks are reflected harmlessly',
-                'color': (200, 255, 255),  # Crystal blue
+                'name': 'Crystalline Enemy',
+                'description': 'Living crystal structure reflects most attacks except focused light beams!',
+                'counters': 'ONLY LaserTower (3.0x damage) can shatter crystal - all others ineffective!',
+                'color': (224, 255, 255),  # Light cyan
                 'icon': 'CRYST'
+            },
+            'ToxicEnemy': {
+                'name': 'Toxic Enemy',
+                'description': 'Poisonous creature completely immune to poison damage! Toxic aura damages nearby towers.',
+                'counters': 'AVOID poison towers completely. Use basic, laser, or lightning towers instead.',
+                'color': (76, 175, 80),  # Toxic green
+                'icon': 'TOX'
             },
             'ToxicMutantEnemy': {
                 'name': 'Toxic Mutant',
-                'description': 'Evolved creature immune to all physical and energy attacks! Only chemical and thermal damage works!',
-                'counters': 'ONLY Poison and Flame Towers can damage - everything else is absorbed',
-                'color': (100, 255, 50),  # Toxic green
-                'icon': 'MUTNT'
+                'description': 'Evolved toxic creature immune to poison and most physical attacks! Only flame damage works.',
+                'counters': 'ONLY FlameTower (2.0x damage) works - immune to poison and all other tower types!',
+                'color': (127, 255, 0),  # Chartreuse
+                'icon': 'TOXIC'
             },
             'VoidEnemy': {
-                'name': 'Void Wraith',
-                'description': 'Interdimensional entity that absorbs most forms of energy! Only massive explosive force can disrupt it!',
-                'counters': 'ONLY Explosive and Missile Towers can damage - other attacks feed its power',
-                'color': (150, 0, 200),  # Void purple
+                'name': 'Void Enemy',
+                'description': 'CRITICAL: Absorbs ALL attack types except explosives! Most towers are useless!',
+                'counters': 'ONLY MissileTower (2.5x) and ExplosiveTower (2.5x) work - everything else feeds it!',
+                'color': (25, 25, 112),  # Midnight blue
                 'icon': 'VOID'
             },
             'AdaptiveEnemy': {
-                'name': 'Adaptive Shapeshifter',
-                'description': 'Master of adaptation that changes immunities every 3 seconds! Only precision and cold can bypass all forms!',
-                'counters': 'ONLY Sniper and Ice Towers always work - adapts immunity to everything else',
-                'color': (255, 100, 255),  # Shifting magenta
+                'name': 'Adaptive Enemy',
+                'description': 'Changes immunities every 3 seconds through 5 adaptation cycles!',
+                'counters': 'ONLY SniperTower (2.0x) and IceTower (2.0x) ALWAYS work regardless of adaptation!',
+                'color': (255, 105, 180),  # Hot pink
                 'icon': 'ADAPT'
             },
-            'MegaBoss': {
-                'name': 'Mega Boss',
-                'description': 'A massive boss with multiple phases and damage reduction. Spawns minions periodically. Takes 50% less damage and gets faster in later phases.',
-                'counters': 'Focus all towers for maximum damage - survives longer than regular enemies',
-                'color': (255, 0, 0),  # Red for danger
-                'icon': 'MEGA',
-                'immunities': ['None - but high damage reduction'],
-                'special_abilities': ['Multi-phase system', 'Minion spawning', '50% damage reduction'],
-                'threat_level': 'EXTREME'
-            },
-            'SpeedBoss': {
-                'name': 'Speed Boss',
-                'description': 'A boss that becomes faster as it takes damage. Can perform lightning-fast dashes. Speed increases dramatically at low health.',
-                'counters': 'Use high-damage towers to eliminate quickly before it becomes too fast',
-                'color': (255, 255, 0),  # Yellow for speed
-                'icon': 'SPEED',
-                'immunities': ['None'],
-                'special_abilities': ['Speed increases with damage', 'Dash ability', 'Speed trail effects'],
-                'threat_level': 'HIGH'
-            },
+            
+            # Ultimate Bosses
             'TimeLordBoss': {
                 'name': 'TimeLord Boss',
-                'description': 'Master of time manipulation! Can slow down projectiles and towers, rewind damage taken, and create temporal rifts that spawn echo enemies.',
-                'counters': 'Coordinate attacks to overwhelm time manipulation - focus fire recommended',
-                'color': (100, 100, 255),  # Blue for time
+                'description': 'Master of time manipulation! Slows projectiles, rewinds damage, creates temporal rifts.',
+                'counters': 'Focus fire during vulnerability windows - spread towers to minimize time effects.',
+                'color': (100, 149, 237),  # Cornflower blue
                 'icon': 'TIME',
-                'immunities': ['Lightning/Ice towers (50% of time in phase 3+)'],
-                'special_abilities': ['Time distortion field', 'Damage rewind', 'Temporal rift creation', '60% damage reduction'],
+                'immunities': ['Periodic invincibility phases'],
+                'special_abilities': ['Time slow field', 'Damage rewind', 'Temporal rifts', 'Chronos shield'],
                 'threat_level': 'ULTIMATE'
             },
             'NecromancerBoss': {
                 'name': 'Necromancer Boss',
-                'description': 'Dark sorcerer of death and undeath! Drains life from nearby towers, summons undead minions, and creates death auras that weaken everything.',
-                'counters': 'Use non-poison towers and maintain distance - focus on minion control',
-                'color': (50, 255, 50),  # Sickly green
+                'description': 'Dark sorcerer of death! Life drain, undead summoning, death auras.',
+                'counters': 'Eliminate minions quickly, use non-poison damage, maintain distance from auras.',
+                'color': (148, 0, 211),  # Dark violet
                 'icon': 'NECRO',
-                'immunities': ['Poison towers (complete immunity)'],
-                'special_abilities': ['Life drain aura', 'Undead summoning', 'Death aura', 'Life steal (20%)', '55% damage reduction'],
+                'immunities': ['Poison damage (complete immunity)'],
+                'special_abilities': ['Life drain aura', 'Undead summoning', 'Death aura', 'Soul shield'],
                 'threat_level': 'ULTIMATE'
             },
             'ShadowKing': {
                 'name': 'Shadow King',
-                'description': 'Ruler of shadows and dimensions! Can phase between dimensions to dodge attacks, create shadow duplicates, and manipulate darkness.',
-                'counters': 'Use area-effect towers to hit through dimensional phasing - lightning recommended',
-                'color': (150, 0, 150),  # Dark purple
+                'description': 'Ruler of shadows! 70% dodge chance, shadow duplicates, darkness manipulation.',
+                'counters': 'High rate of fire to overcome dodge - area effects for duplicates.',
+                'color': (72, 61, 139),  # Dark slate blue
                 'icon': 'KING',
-                'immunities': ['None - but 30% dodge chance (70% when phased)'],
-                'special_abilities': ['Dimension phasing', 'Shadow duplicates', 'Darkness manipulation', '65% damage reduction'],
+                'immunities': ['70% dodge chance when phased'],
+                'special_abilities': ['Dimension phasing', 'Shadow duplicates', 'Void step teleport'],
                 'threat_level': 'ULTIMATE'
             },
             'CrystalOverlord': {
                 'name': 'Crystal Overlord',
-                'description': 'Crystalline titan of immense power! Reflects projectiles back at towers, creates crystal barriers, and is completely immune to laser attacks.',
-                'counters': 'Use non-laser towers and be prepared for reflected projectiles',
-                'color': (0, 255, 255),  # Cyan crystal
+                'description': 'Crystalline titan! 40% projectile reflection, crystal barriers, immune to lasers.',
+                'counters': 'Use non-laser high-damage weapons - beware of reflected projectiles!',
+                'color': (0, 206, 209),  # Dark turquoise
                 'icon': 'CRYST',
-                'immunities': ['Laser towers (complete immunity)'],
-                'special_abilities': ['40% projectile reflection', 'Crystal barrier creation', 'Crystal shard orbiting', '70% damage reduction'],
+                'immunities': ['Laser damage (complete immunity)'],
+                'special_abilities': ['40% projectile reflection', 'Crystal barriers', 'Shard rain attacks'],
                 'threat_level': 'ULTIMATE'
+            },
+            
+            # Legacy bosses (for compatibility)
+            'MegaBoss': {
+                'name': 'Mega Boss',
+                'description': 'Massive boss with multiple phases and damage reduction. Spawns minions periodically.',
+                'counters': 'Focus all available firepower - prepare for extended engagement.',
+                'color': (255, 0, 0),  # Red
+                'icon': 'MEGA',
+                'immunities': ['50% damage reduction'],
+                'special_abilities': ['Multi-phase system', 'Minion spawning', 'Damage reduction'],
+                'threat_level': 'HIGH'
+            },
+            'SpeedBoss': {
+                'name': 'Speed Boss',
+                'description': 'Becomes faster as it takes damage. Lightning-fast dashes at low health.',
+                'counters': 'High burst damage to eliminate quickly before speed becomes overwhelming.',
+                'color': (255, 255, 0),  # Yellow
+                'icon': 'SPEED',
+                'immunities': ['None'],
+                'special_abilities': ['Speed increases with damage', 'Dash ability', 'Speed trails'],
+                'threat_level': 'HIGH'
             }
         }
     
