@@ -8,7 +8,7 @@ class MissileTower(Tower):
     def __init__(self, x, y):
         super().__init__(x, y, 'missile')
         self.damage = 40  # High damage
-        self.range = 250  # Very long range
+        self.range = 400  # Extremely long range - increased from 250
         self.fire_rate = 150  # Extremely slow firing (2.5 seconds at 60 FPS)
         self.projectile_speed = 3.0  # Slow missile speed
         self.size = 14

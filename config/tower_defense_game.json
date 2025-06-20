@@ -767,7 +767,7 @@
       "size_per_wave": 0.02,
       "max_health_multiplier": 60.0,
       "max_speed_multiplier": 5.0,
-      "max_reward_multiplier": 3.0,
+      "max_reward_multiplier": 20.0,
       "max_size_multiplier": 2.0,
       "damage_scaling_per_wave": 0.1,
       "max_damage_multiplier": 4.0
@@ -839,7 +839,7 @@
     },
     "dynamic_cost_increase": {
       "per_tower_built_multiplier": 0.15,
-      "max_per_tower_multiplier": 2.5
+      "max_per_tower_multiplier": 20
     }
   },
   "balance_config": {

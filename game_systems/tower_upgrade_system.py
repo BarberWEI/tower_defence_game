@@ -25,11 +25,11 @@ class TowerUpgradeSystem:
                     'max_level': 5,
                     'base_cost': 30,  # 3x increase from 10
                     'effects': [
-                        {'damage': 1},   # Level 1: +1 damage (unchanged, already small)
-                        {'damage': 1},   # Level 2: +1 damage (reduced from +2)
-                        {'damage': 2},   # Level 3: +2 damage (reduced from +3)
-                        {'damage': 2},   # Level 4: +2 damage (reduced from +4)
-                        {'damage': 3}    # Level 5: +3 damage (reduced from +6)
+                        {'damage': 1},   # Level 1: +1 damage
+                        {'damage': 1},   # Level 2: +1 more damage (total +2)
+                        {'damage': 1},   # Level 3: +1 more damage (total +3)
+                        {'damage': 1},   # Level 4: +1 more damage (total +4)
+                        {'damage': 1}    # Level 5: +1 more damage (total +5)
                     ]
                 },
                 UpgradeType.RANGE: {
@@ -38,11 +38,11 @@ class TowerUpgradeSystem:
                     'max_level': 5,
                     'base_cost': 25,  # 3x increase from 8
                     'effects': [
-                        {'range': 8},    # Level 1: +8 range (reduced from +15)
-                        {'range': 10},   # Level 2: +10 range (reduced from +20)
-                        {'range': 12},   # Level 3: +12 range (reduced from +25)
-                        {'range': 15},   # Level 4: +15 range (reduced from +30)
-                        {'range': 20}    # Level 5: +20 range (reduced from +40)
+                        {'range': 8},    # Level 1: +8 range
+                        {'range': 2},    # Level 2: +2 more range (total +10)
+                        {'range': 2},    # Level 3: +2 more range (total +12)
+                        {'range': 3},    # Level 4: +3 more range (total +15)
+                        {'range': 5}     # Level 5: +5 more range (total +20)
                     ]
                 },
                 UpgradeType.UTILITY: {
@@ -51,11 +51,11 @@ class TowerUpgradeSystem:
                     'max_level': 5,
                     'base_cost': 35,  # 3x increase from 12
                     'effects': [
-                        {'fire_rate': -2},  # Level 1: 2 frames faster (reduced from -3)
-                        {'fire_rate': -3},  # Level 2: 3 frames faster (reduced from -5)
-                        {'fire_rate': -4},  # Level 3: 4 frames faster (reduced from -7)
-                        {'fire_rate': -5},  # Level 4: 5 frames faster (reduced from -10)
-                        {'fire_rate': -8}   # Level 5: 8 frames faster (reduced from -15)
+                        {'fire_rate': -2},  # Level 1: 2 frames faster
+                        {'fire_rate': -1},  # Level 2: 1 more frame faster (total -3)
+                        {'fire_rate': -1},  # Level 3: 1 more frame faster (total -4)
+                        {'fire_rate': -1},  # Level 4: 1 more frame faster (total -5)
+                        {'fire_rate': -3}   # Level 5: 3 more frames faster (total -8)
                     ]
                 }
             },
@@ -168,7 +168,7 @@ class TowerUpgradeSystem:
     def _add_remaining_towers(self):
         """Add upgrade definitions for remaining tower types - ALL NERFED"""
         
-        # Anti-Air Tower - NERFED
+        # Anti-Air Tower - FIXED INCREMENTAL VALUES
         self.upgrade_definitions['antiair'] = {
             UpgradeType.DAMAGE: {
                 'name': 'Missiles',
@@ -176,7 +176,11 @@ class TowerUpgradeSystem:
                 'max_level': 5,
                 'base_cost': 54,  # 3x increase from 18
                 'effects': [
-                    {'damage': 3}, {'damage': 4}, {'damage': 6}, {'damage': 9}, {'damage': 12}  # ~50% reduction
+                    {'damage': 3},  # Level 1: +3 damage
+                    {'damage': 1},  # Level 2: +1 more damage (total +4)
+                    {'damage': 2},  # Level 3: +2 more damage (total +6)
+                    {'damage': 3},  # Level 4: +3 more damage (total +9)
+                    {'damage': 3}   # Level 5: +3 more damage (total +12)
                 ]
             },
             UpgradeType.RANGE: {
@@ -185,7 +189,11 @@ class TowerUpgradeSystem:
                 'max_level': 5,
                 'base_cost': 45,  # 3x increase from 15
                 'effects': [
-                    {'range': 12}, {'range': 17}, {'range': 22}, {'range': 27}, {'range': 35}  # ~50% reduction
+                    {'range': 12},  # Level 1: +12 range
+                    {'range': 5},   # Level 2: +5 more range (total +17)
+                    {'range': 5},   # Level 3: +5 more range (total +22)
+                    {'range': 5},   # Level 4: +5 more range (total +27)
+                    {'range': 8}    # Level 5: +8 more range (total +35)
                 ]
             },
             UpgradeType.UTILITY: {
@@ -194,8 +202,10 @@ class TowerUpgradeSystem:
                 'max_level': 4,
                 'base_cost': 60,  # 3x increase from 20
                 'effects': [
-                    {'can_target_invisible': True}, {'projectile_speed': 1}, 
-                    {'fire_rate': -4}, {'splash_damage': 5}  # ~50% reduction
+                    {'can_target_invisible': True}, # Level 1: can target invisible
+                    {'projectile_speed': 1},        # Level 2: +1 projectile speed
+                    {'fire_rate': -4},             # Level 3: -4 frames (faster firing)
+                    {'splash_damage': 5}           # Level 4: +5 splash damage
                 ]
             }
         }
@@ -237,7 +247,7 @@ class TowerUpgradeSystem:
             }
         }
         
-        # Lightning Tower - NERFED
+        # Lightning Tower - FIXED INCREMENTAL VALUES
         self.upgrade_definitions['lightning'] = {
             UpgradeType.DAMAGE: {
                 'name': 'Voltage',
@@ -245,7 +255,11 @@ class TowerUpgradeSystem:
                 'max_level': 5,
                 'base_cost': 54,  # 3x increase from 18
                 'effects': [
-                    {'damage': 1}, {'damage': 2}, {'damage': 3}, {'damage': 4}, {'damage': 6}  # ~50% reduction
+                    {'damage': 1},  # Level 1: +1 damage
+                    {'damage': 1},  # Level 2: +1 more damage (total +2)
+                    {'damage': 1},  # Level 3: +1 more damage (total +3)
+                    {'damage': 1},  # Level 4: +1 more damage (total +4)
+                    {'damage': 2}   # Level 5: +2 more damage (total +6)
                 ]
             },
             UpgradeType.RANGE: {
@@ -254,7 +268,11 @@ class TowerUpgradeSystem:
                 'max_level': 5,
                 'base_cost': 42,  # 3x increase from 14
                 'effects': [
-                    {'range': 8}, {'range': 12}, {'range': 16}, {'range': 20}, {'range': 25}  # ~50% reduction
+                    {'range': 8},   # Level 1: +8 range
+                    {'range': 4},   # Level 2: +4 more range (total +12)
+                    {'range': 4},   # Level 3: +4 more range (total +16)
+                    {'range': 4},   # Level 4: +4 more range (total +20)
+                    {'range': 5}    # Level 5: +5 more range (total +25)
                 ]
             },
             UpgradeType.UTILITY: {
@@ -263,7 +281,10 @@ class TowerUpgradeSystem:
                 'max_level': 4,
                 'base_cost': 66,  # 3x increase from 22
                 'effects': [
-                    {'chain_count': 1}, {'chain_range': 10}, {'fire_rate': -3}, {'wet_bonus': 0.2}  # ~50% reduction
+                    {'chain_count': 1},     # Level 1: +1 chain target
+                    {'chain_range': 10},    # Level 2: +10 chain range
+                    {'fire_rate': -3},      # Level 3: -3 frames (faster firing)
+                    {'wet_bonus': 0.2}      # Level 4: +0.2 wet damage multiplier
                 ]
             }
         }
@@ -412,7 +433,7 @@ class TowerUpgradeSystem:
         upgrade_def = self.upgrade_definitions[tower_type][upgrade_type]
         effects = upgrade_def.get('effects', [])
         
-        # Apply effects for each level
+        # Apply effects for each level up to the current level
         for i in range(min(level, len(effects))):
             effect = effects[i]
             for stat, value in effect.items():

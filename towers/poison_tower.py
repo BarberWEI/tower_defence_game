@@ -15,8 +15,8 @@ class PoisonTower(Tower):
         self.color = (50, 205, 50)  # Lime green
         
         # Poison properties
-        self.poison_damage = 3  # Damage per second
-        self.poison_duration = 300  # 5 seconds
+        self.poison_damage = 2  # Reduced from 3 to 2
+        self.poison_duration = 360  # Increased to 6 seconds
         self.splash_radius = 40
         
         # Targeting restrictions - ground only
@@ -113,8 +113,8 @@ class PoisonProjectile:
         self.speed = speed
         self.damage = damage
         self.color = (50, 205, 50)  # Green
-        self.poison_damage = 3
-        self.poison_duration = 300
+        self.poison_damage = 2  # Reduced tick damage
+        self.poison_duration = 360  # Increased duration to 6 seconds
         self.splash_radius = 40
         
         # Calculate direction
@@ -172,6 +172,7 @@ class PoisonProjectile:
                     
                 enemy.poison_timer = self.poison_duration
                 enemy.poison_damage = self.poison_damage
+                enemy.poison_damage_timer = 0  # Reset timer for fresh poison application
                 
                 # Stop regeneration for regenerating enemies
                 if hasattr(enemy, 'last_damage_time'):

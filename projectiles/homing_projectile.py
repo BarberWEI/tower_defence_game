@@ -32,6 +32,14 @@ class HomingProjectile(Projectile):
     def update_homing(self, enemies: List):
         """Update homing behavior towards nearest enemy"""
         if not enemies:
+            # Still move forward if no enemies
+            self.x += self.velocity_x
+            self.y += self.velocity_y
+            self.distance_traveled += self.speed
+            
+            # Check removal conditions
+            if self.distance_traveled >= self.max_distance:
+                self.should_remove = True
             return
         
         # Find nearest enemy
@@ -63,6 +71,18 @@ class HomingProjectile(Projectile):
                 if vel_magnitude > 0:
                     self.velocity_x = (self.velocity_x / vel_magnitude) * self.speed
                     self.velocity_y = (self.velocity_y / vel_magnitude) * self.speed
+        
+        # Move projectile
+        self.x += self.velocity_x
+        self.y += self.velocity_y
+        self.distance_traveled += self.speed
+        
+        # Check removal conditions
+        if self.distance_traveled >= self.max_distance:
+            self.should_remove = True
+        
+        if self.x < -50 or self.x > 1250 or self.y < -50 or self.y > 850:
+            self.should_remove = True
     
     def check_collision(self, enemies: List) -> dict:
         """Check collision and apply damage"""

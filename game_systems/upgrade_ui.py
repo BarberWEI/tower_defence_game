@@ -123,6 +123,11 @@ class UpgradeUI:
         
         # Check if upgrade is possible
         if upgrade_system.can_upgrade(tower_id, tower_type, upgrade_type, current_level):
+            # Store original stats for debugging
+            original_range = self.selected_tower.range
+            original_damage = self.selected_tower.damage
+            original_fire_rate = self.selected_tower.fire_rate
+            
             # Perform upgrade
             if upgrade_system.upgrade_tower(tower_id, tower_type, upgrade_type, current_level):
                 # Update tower upgrade level
@@ -131,6 +136,12 @@ class UpgradeUI:
                 # Reset tower stats and reapply all upgrades
                 self.selected_tower.reset_stats_to_base()
                 upgrade_system.apply_upgrades_to_tower(self.selected_tower, tower_id)
+                
+                # Debug output to verify upgrades are working
+                print(f"UPGRADE APPLIED: {tower_type} {upgrade_type.value} Level {current_level + 1}")
+                print(f"  Range: {original_range} -> {self.selected_tower.range}")
+                print(f"  Damage: {original_damage} -> {self.selected_tower.damage}")
+                print(f"  Fire Rate: {original_fire_rate} -> {self.selected_tower.fire_rate}")
                 
                 return {'action': 'upgrade', 'success': True}
         

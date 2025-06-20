@@ -337,8 +337,24 @@ class Enemy:
         elif self.wet:
             # Slightly darker and more saturated when wet
             color = tuple(max(0, min(255, int(c * 0.8))) for c in self.color)
+        elif hasattr(self, 'poison_timer') and self.poison_timer > 0:
+            # Green tint when poisoned
+            color = tuple(max(0, min(255, int(c * 0.7) + 40 if i == 1 else int(c * 0.7))) for i, c in enumerate(self.color))
         
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
+        
+        # Draw poison effect overlay
+        if hasattr(self, 'poison_timer') and self.poison_timer > 0:
+            # Draw poison bubbles around enemy
+            bubble_count = 4
+            for i in range(bubble_count):
+                angle = (360 // bubble_count) * i + (pygame.time.get_ticks() * 0.1)
+                rad = math.radians(angle)
+                bubble_x = self.x + math.cos(rad) * (self.size + 2)
+                bubble_y = self.y + math.sin(rad) * (self.size + 2)
+                bubble_size = 2 + int(math.sin(pygame.time.get_ticks() * 0.01 + i) * 1)
+                pygame.draw.circle(screen, (50, 205, 50), (int(bubble_x), int(bubble_y)), bubble_size)
+                pygame.draw.circle(screen, (0, 100, 0), (int(bubble_x), int(bubble_y)), bubble_size, 1)
         
         # Draw immunity indicators
         self._draw_immunity_indicators(screen)
