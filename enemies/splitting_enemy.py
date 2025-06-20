@@ -92,8 +92,8 @@ class SplittingEnemy(Enemy):
             new_enemy.x = self.x + offset_x
             new_enemy.y = self.y + offset_y
             
-            # Make spawned enemies slightly weaker (75% health)
-            new_enemy.health = int(new_enemy.health * 0.75)
+            # Make spawned enemies slightly weaker (75% health, minimum 1)
+            new_enemy.health = max(1, int(new_enemy.health * 0.75))
             new_enemy.max_health = new_enemy.health
             
             # Ensure they inherit any status effects appropriately

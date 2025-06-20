@@ -361,7 +361,7 @@ class Enemy:
     
     def draw_health_bar(self, screen: pygame.Surface, x_offset: int = 0, y_offset: int = 0):
         """Draw health bar above the enemy - can be called by subclasses with custom positioning"""
-        if self.health < self.max_health:
+        if self.health < self.max_health and self.max_health > 0:
             bar_width = self.size * 2
             bar_height = 4
             bar_x = int(self.x - bar_width // 2) + x_offset
@@ -370,7 +370,7 @@ class Enemy:
             # Background (red)
             pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
             
-            # Health (green)
+            # Health (green) - safeguard against division by zero
             health_width = int((self.health / self.max_health) * bar_width)
             pygame.draw.rect(screen, (0, 255, 0), (bar_x, bar_y, health_width, bar_height))
     
