@@ -235,38 +235,38 @@ class Enemy:
             self.reached_end = True
             return
         
-        # Get current and next waypoints
-        current_point = self.path[self.path_index]
+        # Get next waypoint
         next_point = self.path[self.path_index + 1]
         
-        # Calculate direction to next waypoint
-        dx = next_point[0] - current_point[0]
-        dy = next_point[1] - current_point[1]
-        distance = math.sqrt(dx**2 + dy**2)
+        # Calculate direction from current position to next waypoint
+        # This handles enemies that are offset from the path (like split enemies)
+        dx = next_point[0] - self.x
+        dy = next_point[1] - self.y
+        distance_to_next = math.sqrt(dx**2 + dy**2)
         
-        if distance == 0:
+        if distance_to_next == 0:
+            self.path_index += 1
+            return
+        
+        # Check if we've reached or passed the next waypoint (adaptive threshold based on speed)
+        # Use larger threshold for fast enemies to prevent overshooting
+        detection_threshold = max(5, self.speed * 1.5)
+        
+        if distance_to_next < detection_threshold:
+            # Snap to waypoint to ensure exact path following
+            self.x = float(next_point[0])
+            self.y = float(next_point[1])
             self.path_index += 1
             return
         
         # Normalize direction and apply speed
-        dx = (dx / distance) * self.speed
-        dy = (dy / distance) * self.speed
+        dx = (dx / distance_to_next) * self.speed
+        dy = (dy / distance_to_next) * self.speed
         
         # Move towards next waypoint
         self.x += dx
         self.y += dy
         self.distance_traveled += self.speed
-        
-        # Check if we've reached or passed the next waypoint (adaptive threshold based on speed)
-        # Use larger threshold for fast enemies to prevent overshooting
-        detection_threshold = max(5, self.speed * 1.5)
-        distance_to_waypoint = math.sqrt((self.x - next_point[0])**2 + (self.y - next_point[1])**2)
-        
-        if distance_to_waypoint < detection_threshold:
-            # Snap to waypoint to ensure exact path following
-            self.x = float(next_point[0])
-            self.y = float(next_point[1])
-            self.path_index += 1
     
     def take_damage(self, damage: int, tower_type: str = 'basic'):
         """Apply damage to the enemy with counter system multipliers"""

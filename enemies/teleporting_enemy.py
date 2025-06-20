@@ -47,6 +47,28 @@ class TeleportingEnemy(Enemy):
             particle['y'] += particle['vy']
             if particle['life'] <= 0:
                 self.particles.remove(particle)
+    
+    def update_with_speed(self, speed_multiplier: float):
+        """Update with speed multiplier and teleport mechanics"""
+        super().update_with_speed(speed_multiplier)
+        
+        # Update timers with speed multiplier
+        self.teleport_timer += speed_multiplier
+        
+        # Handle teleport animation with speed multiplier
+        if self.is_teleporting:
+            self.teleport_animation_timer += speed_multiplier
+            if self.teleport_animation_timer >= self.teleport_animation_duration:
+                self.is_teleporting = False
+                self.teleport_animation_timer = 0
+        
+        # Update particles with speed multiplier
+        for particle in self.particles[:]:
+            particle['life'] -= speed_multiplier
+            particle['x'] += particle['vx'] * speed_multiplier
+            particle['y'] += particle['vy'] * speed_multiplier
+            if particle['life'] <= 0:
+                self.particles.remove(particle)
                 
     def take_damage(self, damage, tower_type: str = 'basic'):
         """Take damage with chance to teleport"""
@@ -63,28 +85,35 @@ class TeleportingEnemy(Enemy):
     def attempt_teleport(self):
         """Attempt to teleport along the path"""
         if len(self.path) <= 1:
+            print("Cannot teleport: path too short")
             return
             
         # Calculate teleport position - jump forward along path
         current_index = self.path_index
-        max_jump = min(len(self.path) - 1, current_index + 5)  # Jump up to 5 path segments
+        # Jump forward by a percentage of remaining path (more dramatic)
+        remaining_path = len(self.path) - 1 - current_index
+        jump_amount = max(3, min(8, remaining_path // 3))  # Jump 1/3 of remaining path, but at least 3 steps
         
-        # Ensure we actually move forward
-        new_index = min(max_jump, len(self.path) - 1)
+        new_index = min(len(self.path) - 1, current_index + jump_amount)
+        
+        print(f"Teleport attempt: current_index={current_index}, new_index={new_index}, jump={jump_amount}")
         
         if new_index > current_index:
             # Create teleport particles at old position
-            self.create_teleport_particles(self.x, self.y)
+            old_x, old_y = self.x, self.y
+            self.create_teleport_particles(old_x, old_y)
             
             # Update position and path progress
             self.path_index = new_index
-            self.x, self.y = self.path[self.path_index]
+            self.x = float(self.path[self.path_index][0])
+            self.y = float(self.path[self.path_index][1])
             
             # Update distance traveled appropriately
             if hasattr(self, 'distance_traveled'):
-                # Approximate distance jump
+                # Calculate actual distance jumped
                 segments_jumped = new_index - current_index
-                self.distance_traveled += segments_jumped * 20  # Rough estimate
+                avg_segment_length = 25  # Rough estimate
+                self.distance_traveled += segments_jumped * avg_segment_length
             
             # Create teleport particles at new position
             self.create_teleport_particles(self.x, self.y)
@@ -93,6 +122,10 @@ class TeleportingEnemy(Enemy):
             self.teleport_timer = 0
             self.is_teleporting = True
             self.teleport_animation_timer = 0
+            
+            print(f"TELEPORTED from ({old_x:.1f}, {old_y:.1f}) to ({self.x:.1f}, {self.y:.1f})")
+        else:
+            print("Teleport failed: no forward progress possible")
             
     def create_teleport_particles(self, x, y):
         """Create particle effects for teleportation"""
@@ -123,11 +156,20 @@ class TeleportingEnemy(Enemy):
         """Draw teleporting enemy with effects"""
         # Draw particles
         for particle in self.particles:
-            alpha = int(255 * (particle['life'] / 30))
-            particle_surface = pygame.Surface((4, 4), pygame.SRCALPHA)
-            particle_color = (*particle['color'], alpha)
-            pygame.draw.circle(particle_surface, particle_color, (2, 2), 2)
-            screen.blit(particle_surface, (particle['x'] - 2, particle['y'] - 2))
+            if particle['life'] > 0:
+                alpha = max(0, min(255, int(255 * (particle['life'] / 40))))  # Use 40 as max life
+                if alpha > 0:
+                    particle_surface = pygame.Surface((6, 6), pygame.SRCALPHA)
+                    # Use RGB color only for pygame.draw.circle, then apply alpha to surface
+                    pygame.draw.circle(particle_surface, particle['color'], (3, 3), 2)
+                    
+                    # Apply alpha to the entire surface
+                    if alpha < 255:
+                        alpha_surface = pygame.Surface((6, 6), pygame.SRCALPHA)
+                        alpha_surface.fill((255, 255, 255, alpha))
+                        particle_surface.blit(alpha_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                    
+                    screen.blit(particle_surface, (int(particle['x'] - 3), int(particle['y'] - 3)))
         
         # Draw main enemy with teleport effect
         if self.is_teleporting:

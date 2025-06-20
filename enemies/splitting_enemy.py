@@ -81,20 +81,26 @@ class SplittingEnemy(Enemy):
             enemy_class = random.choice(available_enemies)
             new_enemy = enemy_class(self.path, self.wave_number)
             
-            # Set position and path progress
+            # CRITICAL: Properly inherit path position and state
             new_enemy.path_index = self.path_index
-            if hasattr(new_enemy, 'distance_traveled'):
-                new_enemy.distance_traveled = self.distance_traveled
+            new_enemy.distance_traveled = self.distance_traveled
             
-            # Position them slightly offset from the current position
-            offset_x = (i - 0.5) * 20  # Small offset
-            offset_y = random.uniform(-15, 15)  # Random vertical offset
+            # Position them at the actual death location with very small offsets
+            # This ensures they continue from where the splitting enemy died
+            offset_x = random.uniform(-8, 8)   # Very small random horizontal offset
+            offset_y = random.uniform(-8, 8)   # Very small random vertical offset
             new_enemy.x = self.x + offset_x
             new_enemy.y = self.y + offset_y
             
             # Make spawned enemies slightly weaker (75% health)
             new_enemy.health = int(new_enemy.health * 0.75)
             new_enemy.max_health = new_enemy.health
+            
+            # Ensure they inherit any status effects appropriately
+            new_enemy.reached_end = False
+            
+            # Debug info
+            print(f"Split enemy spawned: {enemy_class.__name__} at path_index {new_enemy.path_index}, pos ({new_enemy.x:.1f}, {new_enemy.y:.1f})")
             
             spawned_enemies.append(new_enemy)
         
