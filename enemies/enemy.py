@@ -183,6 +183,52 @@ class Enemy:
         # Always move (even when "frozen" - just slower)
         self.move_along_path()
     
+    def update_with_speed(self, speed_multiplier: float):
+        """Update enemy with speed multiplier for performance optimization"""
+        # Handle freeze effect - adjust timer based on speed
+        if self.frozen:
+            self.freeze_timer -= speed_multiplier
+            if self.freeze_timer <= 0:
+                self.frozen = False
+        
+        # Handle wet effect (if not immune) - adjust timer based on speed
+        if self.wet and not self.is_immune_to('wet'):
+            self.wet_timer -= speed_multiplier
+            if self.wet_timer <= 0:
+                self.wet = False
+                self.lightning_damage_multiplier = 1.0
+        elif self.is_immune_to('wet'):
+            # Immune enemies can't be wet
+            self.wet = False
+            self.wet_timer = 0
+            self.lightning_damage_multiplier = 1.0
+        
+        # Update counter effects with speed adjustment
+        if hasattr(self, 'counter_effects'):
+            for effect in self.counter_effects[:]:
+                effect['timer'] -= speed_multiplier
+                if effect['timer'] <= 0:
+                    self.counter_effects.remove(effect)
+        
+        # Apply terrain-based speed effects (handles freeze interactions)
+        self.apply_terrain_speed_effects()
+        
+        # Move multiple times based on speed multiplier for smooth fast movement
+        for _ in range(int(speed_multiplier)):
+            if not self.reached_end:
+                self.move_along_path()
+        
+        # Handle fractional speed
+        if speed_multiplier % 1 > 0:
+            # Store original speed
+            original_speed = self.speed
+            # Apply fractional multiplier to speed for this partial movement
+            self.speed *= (speed_multiplier % 1)
+            if not self.reached_end:
+                self.move_along_path()
+            # Restore original speed
+            self.speed = original_speed
+    
     def move_along_path(self):
         """Move the enemy along the predefined path"""
         if self.path_index >= len(self.path) - 1:

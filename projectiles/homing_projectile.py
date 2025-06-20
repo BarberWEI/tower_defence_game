@@ -84,6 +84,61 @@ class HomingProjectile(Projectile):
         if self.x < -50 or self.x > 1250 or self.y < -50 or self.y > 850:
             self.should_remove = True
     
+    def update_homing_with_speed(self, enemies: List, speed_multiplier: float):
+        """Update homing behavior with speed multiplier for performance optimization"""
+        if not enemies:
+            # Still move forward if no enemies
+            self.x += self.velocity_x * speed_multiplier
+            self.y += self.velocity_y * speed_multiplier
+            self.distance_traveled += self.speed * speed_multiplier
+            
+            # Check removal conditions
+            if self.distance_traveled >= self.max_distance:
+                self.should_remove = True
+            return
+        
+        # Find nearest enemy
+        nearest_enemy = None
+        min_distance = float('inf')
+        
+        for enemy in enemies:
+            distance = math.sqrt((self.x - enemy.x)**2 + (self.y - enemy.y)**2)
+            if distance < min_distance:
+                min_distance = distance
+                nearest_enemy = enemy
+        
+        if nearest_enemy:
+            # Calculate desired direction
+            dx = nearest_enemy.x - self.x
+            dy = nearest_enemy.y - self.y
+            distance = math.sqrt(dx**2 + dy**2)
+            
+            if distance > 0:
+                desired_vel_x = (dx / distance) * self.speed
+                desired_vel_y = (dy / distance) * self.speed
+                
+                # Gradually turn towards target
+                self.velocity_x += (desired_vel_x - self.velocity_x) * self.turning_speed
+                self.velocity_y += (desired_vel_y - self.velocity_y) * self.turning_speed
+                
+                # Normalize velocity to maintain speed
+                vel_magnitude = math.sqrt(self.velocity_x**2 + self.velocity_y**2)
+                if vel_magnitude > 0:
+                    self.velocity_x = (self.velocity_x / vel_magnitude) * self.speed
+                    self.velocity_y = (self.velocity_y / vel_magnitude) * self.speed
+        
+        # Move projectile faster
+        self.x += self.velocity_x * speed_multiplier
+        self.y += self.velocity_y * speed_multiplier
+        self.distance_traveled += self.speed * speed_multiplier
+        
+        # Check removal conditions
+        if self.distance_traveled >= self.max_distance:
+            self.should_remove = True
+        
+        if self.x < -50 or self.x > 1250 or self.y < -50 or self.y > 850:
+            self.should_remove = True
+    
     def check_collision(self, enemies: List) -> dict:
         """Check collision and apply damage"""
         for enemy in enemies:

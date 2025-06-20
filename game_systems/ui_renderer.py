@@ -141,6 +141,40 @@ class UIRenderer:
             desc_text = self.tiny_font.render(name, True, self.WHITE)
             screen.blit(desc_text, (legend_x + 15, y - 1))
     
+    def draw_performance_info(self, screen: pygame.Surface, performance_data: Dict):
+        """Draw performance information in top right corner"""
+        perf_x = self.screen_width - 200
+        perf_y = 140  # Below terrain legend
+        
+        # Background
+        perf_rect = pygame.Rect(perf_x - 10, perf_y - 10, 190, 90)
+        pygame.draw.rect(screen, (20, 20, 20), perf_rect)
+        pygame.draw.rect(screen, self.UI_BORDER, perf_rect, 1)
+        
+        # Title
+        perf_title = self.small_font.render("Performance:", True, self.WHITE)
+        screen.blit(perf_title, (perf_x, perf_y))
+        
+        # FPS
+        fps = performance_data.get('fps', 0)
+        fps_color = self.GREEN if fps >= 50 else self.YELLOW if fps >= 30 else self.RED
+        fps_text = self.tiny_font.render(f"FPS: {fps}", True, fps_color)
+        screen.blit(fps_text, (perf_x, perf_y + 20))
+        
+        # Frame time
+        frame_time = performance_data.get('avg_frame_time_ms', 0)
+        frame_color = self.GREEN if frame_time <= 20 else self.YELLOW if frame_time <= 33 else self.RED
+        frame_text = self.tiny_font.render(f"Frame: {frame_time:.1f}ms", True, frame_color)
+        screen.blit(frame_text, (perf_x, perf_y + 35))
+        
+        # Entity counts
+        entities = performance_data.get('entity_counts', {})
+        enemies_text = self.tiny_font.render(f"Enemies: {entities.get('enemies', 0)}", True, self.WHITE)
+        screen.blit(enemies_text, (perf_x, perf_y + 50))
+        
+        projectiles_text = self.tiny_font.render(f"Projectiles: {entities.get('projectiles', 0)}", True, self.WHITE)
+        screen.blit(projectiles_text, (perf_x, perf_y + 65))
+    
     def draw_speed_button(self, screen: pygame.Surface, game_speed: int):
         """Draw the game speed control button"""
         button_rect = pygame.Rect(self.speed_button_x, self.speed_button_y, 

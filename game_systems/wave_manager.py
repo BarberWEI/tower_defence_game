@@ -158,10 +158,26 @@ class WaveManager:
         
         return False
     
-    def spawn_enemy(self) -> object:
-        """Spawn and return a new enemy"""
-        if not self.should_spawn_enemy():
-            return None
+    def should_spawn_enemy_with_speed(self, speed_multiplier: float) -> bool:
+        """Check if it's time to spawn a new enemy with speed multiplier"""
+        if self.enemies_spawned >= self.enemies_per_wave:
+            return False
+        
+        self.spawn_timer += speed_multiplier
+        if self.spawn_timer >= self.spawn_delay:
+            self.spawn_timer = 0
+            return True
+        
+        return False
+    
+    def spawn_enemy(self, speed_multiplier: float = 1.0) -> object:
+        """Spawn and return a new enemy with optional speed multiplier"""
+        if speed_multiplier != 1.0:
+            if not self.should_spawn_enemy_with_speed(speed_multiplier):
+                return None
+        else:
+            if not self.should_spawn_enemy():
+                return None
         
         enemy_class = self.get_enemy_type_for_wave()
         # Pass wave number to enemy for immunity system

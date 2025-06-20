@@ -57,6 +57,25 @@ class Projectile:
         if self.has_reached_target():
             self.on_impact()
     
+    def update_with_speed(self, speed_multiplier: float):
+        """Update projectile with speed multiplier for performance optimization"""
+        # Move projectile faster
+        self.x += self.velocity_x * speed_multiplier
+        self.y += self.velocity_y * speed_multiplier
+        self.distance_traveled += self.speed * speed_multiplier
+        
+        # Check if projectile should be removed
+        if self.distance_traveled >= self.max_distance:
+            self.should_remove = True
+        
+        # Check if projectile is off-screen
+        if self.x < -50 or self.x > 1250 or self.y < -50 or self.y > 850:
+            self.should_remove = True
+        
+        # Check collision with target area
+        if self.has_reached_target():
+            self.on_impact()
+    
     def has_reached_target(self) -> bool:
         """Check if projectile has reached its target area"""
         distance_to_target = math.sqrt((self.x - self.target_x)**2 + (self.y - self.target_y)**2)

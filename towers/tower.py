@@ -152,6 +152,41 @@ class Tower:
         if self.fire_timer > 0:
             self.fire_timer -= 1
     
+    def update_with_speed(self, enemies, projectiles, speed_multiplier: float):
+        """Update tower with speed multiplier for performance optimization"""
+        self.acquire_target(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        # Decrease fire timer based on speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+    
+    def update_optimized(self, enemies, projectiles):
+        """Update tower behavior with performance optimizations"""
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        if self.fire_timer > 0:
+            self.fire_timer -= 1
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update tower with speed multiplier and performance optimizations"""
+        self.acquire_target_optimized(enemies)
+        
+        if self.target and self.fire_timer <= 0:
+            self.shoot(projectiles)
+            self.fire_timer = self.fire_rate
+        
+        # Decrease fire timer based on speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+    
     def acquire_target(self, enemies: List):
         """Find the best target based on tower's targeting strategy"""
         valid_targets = []
@@ -160,6 +195,44 @@ class Tower:
             distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
             if distance <= self.range:
                 valid_targets.append((enemy, distance))
+        
+        if not valid_targets:
+            self.target = None
+            return
+        
+        # Default targeting: closest to end of path
+        self.target = max(valid_targets, key=lambda x: x[0].get_distance_from_start())[0]
+        
+        # Calculate angle to target
+        if self.target:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            self.angle = math.atan2(dy, dx)
+    
+    def acquire_target_optimized(self, enemies: List):
+        """Optimized targeting using squared distance to avoid sqrt operations"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        # Use squared distance for initial filtering (avoids sqrt)
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared:
+                # Only calculate actual distance for valid targets
+                actual_distance = math.sqrt(distance_squared)
+                valid_targets.append((enemy, actual_distance))
+                
+                # Early termination: if we have enough targets, we can stop
+                # This helps when there are many enemies but we only need a few candidates
+                if len(valid_targets) >= 10:  # Reasonable limit for targeting
+                    break
         
         if not valid_targets:
             self.target = None

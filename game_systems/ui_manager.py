@@ -133,6 +133,10 @@ class UIManager:
         self.renderer.draw_game_stats(screen, game_state['money'], game_state['lives'], 
                                     game_state['wave_info'], game_state.get('game_speed', 1))
         
+        # Performance info (top right)
+        if 'performance' in game_state:
+            self.renderer.draw_performance_info(screen, game_state['performance'])
+        
         # Bottom tower bar
         tower_data = self.tower_data_manager.get_all_tower_data()
         self.renderer.draw_tower_bar(screen, tower_data, game_state['money'], 

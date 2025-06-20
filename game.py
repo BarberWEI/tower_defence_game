@@ -42,6 +42,13 @@ class Game:
         self.speed_options = [1, 2]  # Available speed options
         self.current_speed_index = 0  # Index in speed_options
         
+        # Performance monitoring
+        self.fps_counter = 0
+        self.fps_timer = 0
+        self.current_fps = 60
+        self.frame_time_samples = []
+        self.max_frame_time_samples = 60  # Track last 60 frames
+        
         # Game objects
         self.enemies: List[Enemy] = []
         self.towers: List[Tower] = []
@@ -221,13 +228,17 @@ class Game:
         enemies_to_add = []
         
         for enemy in self.enemies[:]:
-            enemy.update()
+            # Pass game speed to enemy update for faster movement
+            if hasattr(enemy, 'update_with_speed'):
+                enemy.update_with_speed(self.game_speed)
+            else:
+                enemy.update()
             
-            # Handle poison effects
+            # Handle poison effects (adjust timer based on speed)
             if hasattr(enemy, 'poison_timer') and enemy.poison_timer > 0:
-                enemy.poison_timer -= 1
+                enemy.poison_timer -= self.game_speed
                 if hasattr(enemy, 'poison_damage_timer'):
-                    enemy.poison_damage_timer += 1
+                    enemy.poison_damage_timer += self.game_speed
                     if enemy.poison_damage_timer >= 60:  # Every second
                         enemy.take_damage(enemy.poison_damage)
                         enemy.poison_damage_timer = 0
@@ -272,7 +283,13 @@ class Game:
             # Track damage before update
             previous_damage = tower.total_damage_dealt
             
-            tower.update(self.enemies, self.projectiles)
+            # Pass game speed to tower update for faster firing with optimizations
+            if hasattr(tower, 'update_with_speed_optimized'):
+                tower.update_with_speed_optimized(self.enemies, self.projectiles, self.game_speed)
+            elif hasattr(tower, 'update_with_speed'):
+                tower.update_with_speed(self.enemies, self.projectiles, self.game_speed)
+            else:
+                tower.update(self.enemies, self.projectiles)
             
             # Check if tower dealt damage directly (not through projectiles)
             damage_this_frame = tower.total_damage_dealt - previous_damage
@@ -283,15 +300,24 @@ class Game:
     def update_projectiles(self):
         """Update all projectiles"""
         for projectile in self.projectiles[:]:
-            # Handle different projectile update methods
+            # Handle different projectile update methods with speed
             if hasattr(projectile, 'update') and callable(getattr(projectile, 'update')):
                 if hasattr(projectile, 'update_homing'):
-                    projectile.update_homing(self.enemies)
+                    if hasattr(projectile, 'update_homing_with_speed'):
+                        projectile.update_homing_with_speed(self.enemies, self.game_speed)
+                    else:
+                        projectile.update_homing(self.enemies)
                 elif hasattr(projectile.__class__, 'update') and len(projectile.update.__code__.co_varnames) > 1:
                     # Missile projectiles need enemies parameter
-                    projectile.update(self.enemies)
+                    if hasattr(projectile, 'update_with_speed'):
+                        projectile.update_with_speed(self.enemies, self.game_speed)
+                    else:
+                        projectile.update(self.enemies)
                 else:
-                    projectile.update()
+                    if hasattr(projectile, 'update_with_speed'):
+                        projectile.update_with_speed(self.game_speed)
+                    else:
+                        projectile.update()
             
             # Check projectile collisions with enemies
             if hasattr(projectile, 'check_collision'):
@@ -329,8 +355,8 @@ class Game:
     
     def update_waves(self):
         """Update wave management"""
-        # Spawn new enemies
-        new_enemy = self.wave_manager.spawn_enemy()
+        # Spawn new enemies (adjusted for speed)
+        new_enemy = self.wave_manager.spawn_enemy(self.game_speed)
         if new_enemy:
             # Set map reference for terrain effects
             new_enemy.set_map_reference(self.map)
@@ -351,22 +377,21 @@ class Game:
     def update_ui_state(self):
         """Update UI-related timers and state"""
         if self.show_wave_complete:
-            self.wave_complete_timer -= 1
+            self.wave_complete_timer -= self.game_speed
             if self.wave_complete_timer <= 0:
                 self.show_wave_complete = False
     
     def update(self):
-        """Update all game systems with speed control"""
+        """Update all game systems - FIXED: No longer runs multiple times per frame"""
         if self.paused or self.game_over:
             return
         
-        # Run updates multiple times based on game speed
-        for _ in range(self.game_speed):
-            self.update_enemies()
-            self.update_towers()
-            self.update_projectiles()
-            self.update_waves()
-            self.update_ui_state()
+        # Single update pass - entities handle speed internally
+        self.update_enemies()
+        self.update_towers()
+        self.update_projectiles()
+        self.update_waves()
+        self.update_ui_state()
     
     def draw_game_objects(self):
         """Draw all game objects"""
@@ -399,7 +424,50 @@ class Game:
             'show_wave_complete': self.show_wave_complete,
             'wave_bonus': self.wave_bonus,
             'towers': self.towers,
-            'game_speed': self.game_speed
+            'game_speed': self.game_speed,
+            'performance': self.get_performance_info()
+        }
+    
+    def update_performance_metrics(self):
+        """Update performance tracking metrics"""
+        import time
+        current_time = time.time()
+        
+        # Calculate frame time
+        if hasattr(self, '_last_frame_time'):
+            frame_time = current_time - self._last_frame_time
+            self.frame_time_samples.append(frame_time)
+            
+            # Keep only recent samples
+            if len(self.frame_time_samples) > self.max_frame_time_samples:
+                self.frame_time_samples.pop(0)
+        
+        self._last_frame_time = current_time
+        
+        # Update FPS counter
+        self.fps_counter += 1
+        self.fps_timer += 1
+        
+        # Calculate FPS every second
+        if self.fps_timer >= 60:  # 60 frames at 60 FPS = 1 second
+            self.current_fps = self.fps_counter
+            self.fps_counter = 0
+            self.fps_timer = 0
+    
+    def get_performance_info(self) -> dict:
+        """Get performance information for display"""
+        avg_frame_time = 0
+        if self.frame_time_samples:
+            avg_frame_time = sum(self.frame_time_samples) / len(self.frame_time_samples)
+        
+        return {
+            'fps': self.current_fps,
+            'avg_frame_time_ms': avg_frame_time * 1000,  # Convert to milliseconds
+            'entity_counts': {
+                'enemies': len(self.enemies),
+                'towers': len(self.towers),
+                'projectiles': len(self.projectiles)
+            }
         }
     
     def draw(self):
@@ -470,6 +538,7 @@ class Game:
             self.handle_events()
             self.update()
             self.draw()
+            self.update_performance_metrics()
             self.clock.tick(self.FPS)
         
         pygame.quit()
