@@ -172,6 +172,125 @@ class FlameTower(Tower):
         if burn_damage_dealt > 0:
             self.add_damage_dealt(burn_damage_dealt)
     
+    def update_with_speed(self, enemies, projectiles, speed_multiplier: float):
+        """Update flame tower with speed multiplier for performance optimization"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Find and acquire target
+        self.acquire_target(enemies)
+        
+        # Spray flames if ready and have target
+        if self.target and self.fire_timer <= 0:
+            damage_dealt = self.spray_flames(enemies)
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
+            self.fire_timer = self.fire_rate
+        
+        # Update flame particles with speed multiplier
+        for particle in self.flame_particles[:]:
+            particle['life'] -= speed_multiplier
+            if particle['life'] <= 0:
+                self.flame_particles.remove(particle)
+        
+        # Update burn effects on enemies with speed multiplier
+        burn_damage_dealt = 0
+        for enemy in enemies:
+            if hasattr(enemy, 'burn_timer') and enemy.burn_timer > 0:
+                enemy.burn_timer -= speed_multiplier
+                # Apply burn damage based on speed - ensure consistent damage rate
+                burn_ticks = int(speed_multiplier)
+                if enemy.burn_timer % 20 <= burn_ticks:  # Every 1/3 second
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    burn_damage_dealt += actual_burn_damage
+        
+        # Track burn damage
+        if burn_damage_dealt > 0:
+            self.add_damage_dealt(burn_damage_dealt)
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update flame tower with speed multiplier and optimizations"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Find and acquire target with optimizations
+        self.acquire_target_optimized(enemies)
+        
+        # Spray flames if ready and have target
+        if self.target and self.fire_timer <= 0:
+            damage_dealt = self.spray_flames(enemies)
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
+            self.fire_timer = self.fire_rate
+        
+        # Update flame particles with speed multiplier
+        for particle in self.flame_particles[:]:
+            particle['life'] -= speed_multiplier
+            if particle['life'] <= 0:
+                self.flame_particles.remove(particle)
+        
+        # Update burn effects on enemies with speed multiplier
+        burn_damage_dealt = 0
+        for enemy in enemies:
+            if hasattr(enemy, 'burn_timer') and enemy.burn_timer > 0:
+                enemy.burn_timer -= speed_multiplier
+                # Apply burn damage based on speed - ensure consistent damage rate
+                burn_ticks = int(speed_multiplier)
+                if enemy.burn_timer % 20 <= burn_ticks:  # Every 1/3 second
+                    actual_burn_damage = enemy.take_damage(enemy.burn_damage)
+                    burn_damage_dealt += actual_burn_damage
+        
+        # Track burn damage
+        if burn_damage_dealt > 0:
+            self.add_damage_dealt(burn_damage_dealt)
+    
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting for flame tower using squared distance"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        # Use squared distance for initial filtering (avoids sqrt)
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                # Only calculate actual distance for valid targets
+                actual_distance = math.sqrt(distance_squared)
+                valid_targets.append((enemy, actual_distance))
+                
+                # Early termination for performance
+                if len(valid_targets) >= 5:  # Flame tower doesn't need many candidates
+                    break
+        
+        if valid_targets:
+            # Target closest enemy
+            valid_targets.sort(key=lambda x: x[1])
+            self.target = valid_targets[0][0]
+            
+            # Calculate angle to target
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                self.angle = math.atan2(dy, dx)
+        else:
+            self.target = None
+    
     def draw(self, screen, selected: bool = False):
         """Draw flame tower"""
         # Draw range circle only when selected

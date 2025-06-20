@@ -82,6 +82,91 @@ class MissileTower(Tower):
             self.charging = True
             self.charge_timer = 0
     
+    def update_with_speed(self, enemies, projectiles, speed_multiplier: float):
+        """Update missile tower with speed multiplier for performance optimization"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Update charging with speed multiplier
+        if self.charging:
+            self.charge_timer += speed_multiplier
+            if self.charge_timer >= self.charge_duration:
+                # Fire missiles
+                self.fire_missiles(projectiles)
+                self.charging = False
+                self.charge_timer = 0
+                self.fire_timer = self.fire_rate
+        
+        # Find and acquire target
+        self.acquire_target(enemies)
+        
+        # Start charging if ready and have target
+        if self.target and self.fire_timer <= 0 and not self.charging:
+            self.charging = True
+            self.charge_timer = 0
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update missile tower with speed multiplier and optimizations"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Update charging with speed multiplier
+        if self.charging:
+            self.charge_timer += speed_multiplier
+            if self.charge_timer >= self.charge_duration:
+                # Fire missiles
+                self.fire_missiles(projectiles)
+                self.charging = False
+                self.charge_timer = 0
+                self.fire_timer = self.fire_rate
+        
+        # Find and acquire target with optimizations
+        self.acquire_target_optimized(enemies)
+        
+        # Start charging if ready and have target
+        if self.target and self.fire_timer <= 0 and not self.charging:
+            self.charging = True
+            self.charge_timer = 0
+    
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting for missile tower using squared distance"""
+        if not enemies:
+            self.target = None
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        # Use squared distance for initial filtering (avoids sqrt)
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                # Only calculate actual distance for valid targets
+                actual_distance = math.sqrt(distance_squared)
+                valid_targets.append((enemy, actual_distance))
+                
+                # Early termination for performance
+                if len(valid_targets) >= 8:  # Missile tower can consider more targets
+                    break
+        
+        if valid_targets:
+            # Target enemy with most health for maximum impact
+            valid_targets.sort(key=lambda x: x[0].health, reverse=True)
+            self.target = valid_targets[0][0]
+            
+            # Calculate angle to target
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                self.angle = math.atan2(dy, dx)
+        else:
+            self.target = None
+    
     def shoot(self, projectiles):
         """This is called by the base class but we handle firing in update()"""
         pass
@@ -244,6 +329,66 @@ class HomingMissile:
         # Update position
         self.x += self.dx
         self.y += self.dy
+        
+        # Add to trail
+        self.trail_positions.append((self.x, self.y))
+        if len(self.trail_positions) > 8:
+            self.trail_positions.pop(0)
+        
+        # Check if reached target or off screen
+        if target_distance < 10 or self.x < 0 or self.x > 1200 or self.y < 0 or self.y > 800:
+            self.explode(enemies)
+    
+    def update_with_speed(self, enemies, speed_multiplier: float):
+        """Update missile position with homing and speed multiplier"""
+        if self.exploding:
+            # Update explosion animation with speed multiplier
+            self.explosion_timer += speed_multiplier
+            if self.explosion_timer >= self.explosion_duration:
+                self.should_remove = True
+            return
+            
+        if not self.active:
+            return
+            
+        # Find closest enemy to home towards
+        closest_enemy = None
+        closest_distance = float('inf')
+        
+        for enemy in enemies:
+            distance = math.sqrt((enemy.x - self.x)**2 + (enemy.y - self.y)**2)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_enemy = enemy
+        
+        # Update target if we found a closer enemy
+        if closest_enemy:
+            self.target_x = closest_enemy.x
+            self.target_y = closest_enemy.y
+        
+        # Calculate direction to target
+        target_dx = self.target_x - self.x
+        target_dy = self.target_y - self.y
+        target_distance = math.sqrt(target_dx**2 + target_dy**2)
+        
+        if target_distance > 0:
+            # Normalize target direction
+            target_dx /= target_distance
+            target_dy /= target_distance
+            
+            # Apply homing with speed multiplier
+            self.dx += target_dx * self.homing_strength * speed_multiplier
+            self.dy += target_dy * self.homing_strength * speed_multiplier
+            
+            # Normalize velocity to maintain speed
+            current_speed = math.sqrt(self.dx**2 + self.dy**2)
+            if current_speed > 0:
+                self.dx = (self.dx / current_speed) * self.speed
+                self.dy = (self.dy / current_speed) * self.speed
+        
+        # Update position with speed multiplier
+        self.x += self.dx * speed_multiplier
+        self.y += self.dy * speed_multiplier
         
         # Add to trail
         self.trail_positions.append((self.x, self.y))

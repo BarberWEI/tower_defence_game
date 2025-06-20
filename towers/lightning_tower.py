@@ -235,6 +235,140 @@ class LightningTower(Tower):
         # Update spark effects
         self.update_spark_effects()
     
+    def update_with_speed(self, enemies, projectiles, speed_multiplier: float):
+        """Update lightning tower with speed multiplier for performance optimization"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Update charging timer with speed multiplier
+        if self.charging_timer > 0:
+            self.charging_timer -= speed_multiplier
+        
+        # Find and acquire target
+        self.acquire_target(enemies)
+        
+        # Start charging if ready and have target
+        if self.target and self.fire_timer <= 0 and self.charging_timer <= 0:
+            self.charging_timer = self.charging_duration
+        
+        # Fire lightning when charging is complete
+        if self.charging_timer <= 1 and self.target:  # Fire when charging is nearly complete
+            damage_dealt = self.fire_lightning_chain(enemies)
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
+            self.fire_timer = self.fire_rate
+            self.charging_timer = 0  # Reset charging
+        
+        # Update visual effect timers with speed multiplier
+        if self.lightning_timer > 0:
+            self.lightning_timer -= speed_multiplier
+        
+        if self.screen_flash_timer > 0:
+            self.screen_flash_timer -= speed_multiplier
+        
+        # Update spark effects (faster at higher speeds)
+        for _ in range(int(speed_multiplier)):
+            self.update_spark_effects()
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update lightning tower with speed multiplier and optimizations"""
+        # Update fire timer with speed multiplier
+        if self.fire_timer > 0:
+            self.fire_timer -= speed_multiplier
+        
+        # Update charging timer with speed multiplier
+        if self.charging_timer > 0:
+            self.charging_timer -= speed_multiplier
+        
+        # Find and acquire target with optimizations
+        self.acquire_target_optimized(enemies)
+        
+        # Start charging if ready and have target
+        if self.target and self.fire_timer <= 0 and self.charging_timer <= 0:
+            self.charging_timer = self.charging_duration
+        
+        # Fire lightning when charging is complete
+        if self.charging_timer <= 1 and self.target:  # Fire when charging is nearly complete
+            damage_dealt = self.fire_lightning_chain(enemies)
+            if damage_dealt > 0:
+                self.add_damage_dealt(damage_dealt)
+            
+            # Generate currency immediately when firing
+            self.generate_firing_currency()
+            
+            self.fire_timer = self.fire_rate
+            self.charging_timer = 0  # Reset charging
+        
+        # Update visual effect timers with speed multiplier
+        if self.lightning_timer > 0:
+            self.lightning_timer -= speed_multiplier
+        
+        if self.screen_flash_timer > 0:
+            self.screen_flash_timer -= speed_multiplier
+        
+        # Update spark effects (faster at higher speeds)
+        for _ in range(int(speed_multiplier)):
+            self.update_spark_effects()
+    
+    def acquire_target_optimized(self, enemies):
+        """Optimized targeting for lightning tower using squared distance"""
+        if not enemies:
+            self.target = None
+            self.potential_chain = []
+            return
+        
+        range_squared = self.range * self.range
+        valid_targets = []
+        
+        # Use squared distance for initial filtering (avoids sqrt)
+        for enemy in enemies:
+            dx = enemy.x - self.x
+            dy = enemy.y - self.y
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_enemy(enemy):
+                # Only calculate actual distance for valid targets
+                actual_distance = math.sqrt(distance_squared)
+                
+                # Count nearby enemies for chain potential (using squared distance)
+                nearby_count = 0
+                chain_range_squared = self.chain_range * self.chain_range
+                for other_enemy in enemies:
+                    if self.can_target_enemy(other_enemy) and other_enemy != enemy:
+                        other_dx = enemy.x - other_enemy.x
+                        other_dy = enemy.y - other_enemy.y
+                        other_distance_squared = other_dx * other_dx + other_dy * other_dy
+                        if other_distance_squared <= chain_range_squared:
+                            nearby_count += 1
+                
+                valid_targets.append((enemy, actual_distance, nearby_count))
+                
+                # Early termination for performance
+                if len(valid_targets) >= 10:
+                    break
+        
+        if valid_targets:
+            # Target enemy with most chain potential
+            valid_targets.sort(key=lambda x: x[2], reverse=True)
+            self.target = valid_targets[0][0]
+            
+            # Build potential chain for preview
+            self.potential_chain = self.build_chain_sequence(enemies, self.target)
+            
+            # Calculate angle to target
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                self.angle = math.atan2(dy, dx)
+        else:
+            self.target = None
+            self.potential_chain = []
+    
     def draw(self, screen, selected: bool = False):
         """Draw lightning tower with enhanced effects"""
         # Draw range circle only when selected

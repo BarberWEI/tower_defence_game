@@ -47,6 +47,40 @@ class LaserTower(Tower):
                 self.charging = False
                 self.charge_timer = 0
     
+    def update_with_speed(self, enemies, projectiles, speed_multiplier: float):
+        """Update laser tower with speed multiplier for performance optimization"""
+        # Use base tower update with speed multiplier
+        super().update_with_speed(enemies, projectiles, speed_multiplier)
+        
+        # Update laser timer with speed multiplier
+        if self.laser_timer > 0:
+            self.laser_timer -= speed_multiplier
+            
+        # Update charge timer with speed multiplier
+        if self.charging:
+            self.charge_timer += speed_multiplier
+            if self.charge_timer >= self.charge_time:
+                self.fire_laser(enemies)
+                self.charging = False
+                self.charge_timer = 0
+    
+    def update_with_speed_optimized(self, enemies, projectiles, speed_multiplier: float):
+        """Update laser tower with speed multiplier and optimizations"""
+        # Use base tower optimized update with speed multiplier
+        super().update_with_speed_optimized(enemies, projectiles, speed_multiplier)
+        
+        # Update laser timer with speed multiplier
+        if self.laser_timer > 0:
+            self.laser_timer -= speed_multiplier
+            
+        # Update charge timer with speed multiplier
+        if self.charging:
+            self.charge_timer += speed_multiplier
+            if self.charge_timer >= self.charge_time:
+                self.fire_laser(enemies)
+                self.charging = False
+                self.charge_timer = 0
+    
     def can_target_enemy(self, enemy):
         """Check if this tower can target a specific enemy"""
         # Can target flying enemies
